@@ -70,9 +70,9 @@ The author has curated coral bleaching events at 3351 sites in 81 countries from
             <td> EMAIL </td>
         </tr>
         <tr>
-            <td> NAME </td>
-            <td> SID </td>
-            <td> EMAIL </td>
+            <td> Joshua Borgnolo </td>
+            <td> 500558159 </td>
+            <td> borgnolojosh@gmail.com </td>
         </tr>
         <tr>
             <td> NAME </td>
