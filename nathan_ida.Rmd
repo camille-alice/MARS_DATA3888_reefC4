@@ -24,6 +24,7 @@ storms_list = storms_list %>%
   mutate(STORM_SPEED = as.numeric(STORM_SPEED)) %>%
   mutate(STORM_DIR = as.numeric(STORM_DIR)) %>%
   drop_na()
+storms_list
 ```
 
 ## Benthic Map Data
@@ -42,5 +43,42 @@ benthic = benthic %>%
   mutate(ymin = as.numeric(ymin)) %>%
   mutate(xmax = as.numeric(xmax)) %>%
   mutate(ymax = as.numeric(ymax))
+benthic
+```
+
+## Geomorphic data
+
+```{r}
+geomorphic = st_read("Data/geomorphic.gpkg")
+geom = lapply(geomorphic$geom, st_bbox)
+bbox_vector = c()
+for (i in 1:length(geom)) {
+  bbox_vector = rbind(bbox_vector, t(matrix(unlist(geom[[i]]))))
+}
+geomorphic = as.data.frame(cbind(geomorphic$class, bbox_vector))
+colnames(geomorphic) = c("Class", "xmin", "ymin", "xmax", "ymax")
+geomorphic = geomorphic %>%
+  mutate(xmin = as.numeric(xmin)) %>%
+  mutate(ymin = as.numeric(ymin)) %>%
+  mutate(xmax = as.numeric(xmax)) %>%
+  mutate(ymax = as.numeric(ymax))
+geomorphic
+```
+
+## Reef data
+
+```{r}
+reef_df = read.csv("Data/Reef Check Data Raw.csv")
+reef_df = reef_df %>% 
+  drop_na(Longitude.Degrees) %>%
+  drop_na(Latitude.Degrees) 
+
+calculate_degrees = function(degrees, minutes, seconds) {
+  return (degrees + minutes/60 + seconds/3600)
+}
+
+reef_df$Longitude.Decimal = mapply(calculate_degrees, reef_df$Longitude.Degrees, reef_df$Longitude.Minutes, reef_df$Longitude.Seconds)
+reef_df$Latitude.Decimal = mapply(calculate_degrees, reef_df$Latitude.Degrees, reef_df$Latitude.Minutes, reef_df$Latitude.Seconds)
+reef_df$geom = reef_df %>% st_as_sf(coords = c("Longitude.Degrees", "Latitude.Degrees"),crs=4326)
 ```
 
