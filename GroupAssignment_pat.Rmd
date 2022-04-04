@@ -1,0 +1,47 @@
+---
+title: "Group Assignment"
+author: "Patrick Chang"
+date: "28/03/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(sf)
+library(tidyverse)
+reef_df <-  read.csv("/Users/patri/OneDrive/Desktop/DATA3888/Group assignment/Reef Check Data Raw.csv")
+
+file <- "/Users/patri/OneDrive/Desktop/DATA3888/Group assignment/geomorphic.gpkg"
+rugosity <- sf::st_read(file)
+
+str(rugosity$geom)
+row1 = rugosity[1,]
+row1_g = row1$geom
+
+calculate <- function(degree,minutes,seconds){
+  total = degree+minutes/60+(seconds/3600)
+  return(total)
+}
+
+reef_df = reef_df %>% drop_na(Longitude.Degrees) %>% drop_na(Latitude.Degrees) %>% drop_na(Latitude.Minutes) %>% drop_na(Latitude.Seconds) %>% drop_na(Longitude.Minutes) %>% drop_na(Longitude.Seconds)
+
+#Long decimal
+reef_df$Longitude.Decimal <- mapply(calculate, reef_df$Longitude.Degrees,reef_df$Longitude.Minutes,reef_df$Longitude.Seconds)
+
+#Lat decimal
+reef_df$Latitude.Decimal <- mapply(calculate,reef_df$Latitude.Degrees,reef_df$Latitude.Minutes,reef_df$Latitude.Seconds)
+
+#change to class sf
+rugosity$geom_sf <- st_as_sf(rugosity$geom)
+
+reef_df$geom <- reef_df %>% st_as_sf(coords = c("Longitude.Decimal", "Latitude.Decimal"),crs=4326)
+
+reef_join<-st_join(rugosity, left=FALSE, reef_df)
+class(reef_df$geom)
+class(rugosity$geom_sf)
+```
+
