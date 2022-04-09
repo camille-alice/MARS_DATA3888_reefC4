@@ -42,20 +42,23 @@ st_crs(reef_df)
 st_crs(rugosity_df)
 ```
 
-
+Plotting to see the differences on a map in points
 
 ```{r}
-ggplot() + 
-  geom_sf(data = reef_df,
-               colour = "grey", fill = "blue") +
+ggplot() +   
+  #geom_sf(data = reef_df,
+               #colour = "grey", fill = "blue") +
   geom_sf(data = rugosity_df,aes(group = class),
                  colour = "red", fill = "gray80") +
   theme_void()
 
 ```
 
+Looks like the bounding box is the issue - bounding box for:
 
+Reef data: xmin: -179.8594 ymin: -28.8645 xmax: 179.9453 ymax: 34.09806
 
+Rougosity: xmin: 151.9154 ymin: -31.56882 xmax: 159.1422 ymax: -24.20726
 
 
 
