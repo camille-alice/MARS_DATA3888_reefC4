@@ -1,0 +1,65 @@
+---
+title: "camille_ida"
+author: "Camille Karski"
+date: '2022-04-09'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = '/Users/camillekarski/Documents/Uni/DATA3888')
+
+library(tidyverse)
+library(tuneR)
+library(devtools)
+library(ggplot2)
+library(tsfeatures)
+library(sf)
+library(maps)
+library(reshape2)
+library(viridis)
+library(plotly)
+library(GGally)
+```
+
+## Joining Reef and Geomorphic 
+
+```{r}
+#reading in reef data set ! with variables 
+reef_df =st_read("./DATA3888_data/Reef_Check_with_cortad_variables_with_annual_rate_of_SST_change.csv",
+                   options=c("X_POSSIBLE_NAMES=Longitude.Degrees","Y_POSSIBLE_NAMES=Latitude.Degrees"))
+
+#reading in geomorphic data set
+rugosity_df = st_read("./DATA3888_data/geomorphic.gpkg")
+```
+
+Geodetic CRS: WGS 84 = 4326 
+
+```{r}
+#checking to ensure both are same CRS
+st_crs(reef_df) = 4326
+st_crs(reef_df)
+st_crs(rugosity_df)
+```
+
+
+
+```{r}
+ggplot() + 
+  geom_sf(data = reef_df,
+               colour = "grey", fill = "blue") +
+  geom_sf(data = rugosity_df,aes(group = class),
+                 colour = "red", fill = "gray80") +
+  theme_void()
+
+```
+
+
+
+
+
+
+
+
+
+
