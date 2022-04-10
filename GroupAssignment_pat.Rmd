@@ -18,6 +18,7 @@ reef_df <-  read.csv("/Users/patri/OneDrive/Desktop/DATA3888/Group assignment/Re
 file <- "/Users/patri/OneDrive/Desktop/DATA3888/Group assignment/geomorphic.gpkg"
 rugosity <- sf::st_read(file)
 
+#1st row
 str(rugosity$geom)
 row1 = rugosity[1,]
 row1_g = row1$geom
@@ -29,6 +30,7 @@ calculate <- function(degree,minutes,seconds){
 
 reef_df = reef_df %>% drop_na(Longitude.Degrees) %>% drop_na(Latitude.Degrees) %>% drop_na(Latitude.Minutes) %>% drop_na(Latitude.Seconds) %>% drop_na(Longitude.Minutes) %>% drop_na(Longitude.Seconds)
 
+
 #Long decimal
 reef_df$Longitude.Decimal <- mapply(calculate, reef_df$Longitude.Degrees,reef_df$Longitude.Minutes,reef_df$Longitude.Seconds)
 
@@ -36,12 +38,12 @@ reef_df$Longitude.Decimal <- mapply(calculate, reef_df$Longitude.Degrees,reef_df
 reef_df$Latitude.Decimal <- mapply(calculate,reef_df$Latitude.Degrees,reef_df$Latitude.Minutes,reef_df$Latitude.Seconds)
 
 #change to class sf
-rugosity$geom_sf <- st_as_sf(rugosity$geom)
+rugosity <- st_as_sf(rugosity)
 
-reef_df$geom <- reef_df %>% st_as_sf(coords = c("Longitude.Decimal", "Latitude.Decimal"),crs=4326)
+reef_df <- reef_df %>% st_as_sf(coords = c("Longitude.Decimal", "Latitude.Decimal"),crs=4326)
+
 
 reef_join<-st_join(rugosity, left=FALSE, reef_df)
-class(reef_df$geom)
-class(rugosity$geom_sf)
+reef_join
 ```
 
