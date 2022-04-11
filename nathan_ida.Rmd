@@ -68,17 +68,48 @@ geomorphic
 ## Reef data
 
 ```{r}
-reef_df = read.csv("Data/Reef Check Data Raw.csv")
+reef_df = read.csv("Data/Reef_Check_with_cortad_variables_with_annual_rate_of_SST_change.csv")
 reef_df = reef_df %>% 
   drop_na(Longitude.Degrees) %>%
-  drop_na(Latitude.Degrees) 
+  drop_na(Latitude.Degrees) %>%
+  mutate(Date = as.Date(Date, "%d-%b-%y"))
 
 calculate_degrees = function(degrees, minutes, seconds) {
   return (degrees + minutes/60 + seconds/3600)
 }
 
-reef_df$Longitude.Decimal = mapply(calculate_degrees, reef_df$Longitude.Degrees, reef_df$Longitude.Minutes, reef_df$Longitude.Seconds)
-reef_df$Latitude.Decimal = mapply(calculate_degrees, reef_df$Latitude.Degrees, reef_df$Latitude.Minutes, reef_df$Latitude.Seconds)
+# reef_df$Longitude.Decimal = mapply(calculate_degrees, reef_df$Longitude.Degrees, reef_df$Longitude.Minutes, reef_df$Longitude.Seconds)
+# reef_df$Latitude.Decimal = mapply(calculate_degrees, reef_df$Latitude.Degrees, reef_df$Latitude.Minutes, reef_df$Latitude.Seconds)
 reef_df$geom = reef_df %>% st_as_sf(coords = c("Longitude.Degrees", "Latitude.Degrees"),crs=4326)
+```
+
+```{r}
+reef_df
+```
+
+## Merged dataset
+
+```{r}
+reef_geomorphic = st_read("Data/reef_geomorphic_joined.gpkg")
+reef_geomorphic = reef_geomorphic %>% 
+  as.data.frame() %>%
+  mutate(Date = as.Date(Date, "%d-%b-%y")) %>%
+  mutate(Depth = as.numeric(Depth)) %>%
+  filter(Depth <= 15)
+
+reef_geomorphic
+```
+
+```{r}
+not_na = reef_geomorphic %>% 
+  slice(which(!is.na(reef_geomorphic$class))) %>%
+  select(Reef.ID, Depth, Average_bleaching, class) %>%
+  as.data.frame()
+
+not_na # 1187
+
+not_na %>% distinct(Reef.ID, Depth, class) # 685
+
+not_na %>% distinct(Reef.ID, Depth) # 685
 ```
 
