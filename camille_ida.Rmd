@@ -16,22 +16,12 @@ library(devtools)
 library(ggplot2)
 library(tsfeatures)
 library(sf)
+library(nngeo)
 library(maps)
 library(reshape2)
 library(viridis)
 library(plotly)
 library(GGally)
-```
-
-## Joining Reef and Geomorphic 
-
-```{r Reading in reef data}
-#reading in reef data set ! with variables as sf object using st_read
-reef_df =st_read("./DATA3888_data/Reef_Check_with_cortad_variables_with_annual_rate_of_SST_change.csv",
-                   options=c("X_POSSIBLE_NAMES=Longitude.Degrees","Y_POSSIBLE_NAMES=Latitude.Degrees"))
-#setting reef_df to same CRS 
-st_crs(reef_df) = 4326
-
 ```
 
 ## Extracting data 
@@ -61,11 +51,36 @@ reef_f_extract = function(file_path,zip_name,feature_path,out_dir, reef_df){
     rugosity_df = st_read(paste0(out_dir, feature_filename))
     sf_use_s2(FALSE)
     reef_join_df = st_join(reef_df, rugosity_df)
+    return(reef_join_df)
     }#end if
-  return(reef_join_df)
+  return(reef_df)
 } #end function
 ```
-```{r Data extraction loop}
+
+## Joining Reef and Geomorphic 
+
+```{r Reading in reef data}
+#reading in reef data set ! with variables as sf object using st_read
+reef_df_og =st_read("./DATA3888_data/Reef_Check_with_cortad_variables_with_annual_rate_of_SST_change.csv",
+                   options=c("X_POSSIBLE_NAMES=Longitude.Degrees","Y_POSSIBLE_NAMES=Latitude.Degrees"))
+#setting reef_df to same CRS: WGS84 = 4326
+st_crs(reef_df_og) = 4326
+```
+
+```{r Testing}
+# file name containing all data: Global-Dataset-20211006223100
+file_path = "./DATA3888_data/Global-Dataset-20211006223100.nosync/"
+#setting new directory for where data will go 
+outDir = "./DATA3888_data/geomorphic_all/"
+#target file name for extraction 
+geom_filepath = "^Geomorphic-Map/geomorphic"
+reef_join_df = reef_df_og
+test_error = "Northern-Caribbean--Florida----Bahamas-20201125220500.zip"
+north_test = reef_f_extract(file_path,test_error,geom_filepath,outDir,reef_join_df)
+
+```
+
+```{r Data extraction}
 # file name containing all data: Global-Dataset-20211006223100
 file_path = "./DATA3888_data/Global-Dataset-20211006223100.nosync/"
 #creating list of all files in folder 
@@ -74,41 +89,169 @@ files = list.files(path=file_path, pattern=".zip$", recursive = F)
 outDir = "./DATA3888_data/geomorphic_all/"
 #target file name for extraction 
 geom_filepath = "^Geomorphic-Map/geomorphic"
-reef_join_df = reef_df
+reef_join_df = reef_df_og
 
+#stopped as error ocurred when trying to open 'Northern Caribbean, Florida, & Bahamas' as file over 5Gb
+#removed file and continued with extraction
+second_files = files[17:31]
 #commented out so as not to run again 
-for (i in files) {
-  reef_join_df = reef_f_extract(file_path,i,geom_filepath,outDir,reef_join_df)
-} 
-
+#for (i in second_files) {
+  #reef_join_df = reef_f_extract(file_path,i,geom_filepath,outDir,reef_join_df)
+#} 
 ```
-
-Got up to `Northeastern Asia` before:
-
-Error: Cannot open "/Users/camillekarski/Documents/Uni/DATA3888/DATA3888_data/geomorphic_all/Geomorphic-Map/geomorphic.geojson"; The source could be corrupt or not supported. See `st_drivers()` for a list of supported formats.
 
 ```{r Combinded classes and writing to file}
 #there is an easier way to do this I am just tired rn
-reef_join_c = reef_join_df %>% mutate(class = coalesce(class.x, class.y, class.x.1, class.y.1, class.x.2, class.y.2, class.x.3, class.y.3, class.x.4, class.y.4, class.x.5, class.y.5, class.x.6, class.y.6)) %>%
-         select(-class.x, -class.y, -class.x.1, -class.y.1, -class.x.2, -class.y.2, -class.x.3, -class.y.3, -class.x.4, -class.y.4, -class.x.5, -class.y.5, -class.x.6, -class.y.6)
+reef_join_c = reef_join_df %>% mutate(class = coalesce(class.x, class.y, class.x.1, class.y.1, class.x.2, class.y.2, class.x.3, class.y.3, class.x.4, class.y.4, class.x.5, class.y.5, class.x.6, class.y.6, class.x.7, class.y.7)) %>%
+         select(-class.x, -class.y, -class.x.1, -class.y.1, -class.x.2, -class.y.2, -class.x.3, -class.y.3, -class.x.4, -class.y.4, -class.x.5, -class.y.5, -class.x.6, -class.y.6, -class.x.7, -class.y.7)
 
 #write to gpkg
-st_write(reef_join_c, 'reef_geomorphic_joined.gpkg')
+#st_write(reef_join_c, 'reef_geomorphic_joined.gpkg')
 ```
+
+As the `Northern Caribbean, Florida, & Bahamas` region was a 5GB zipped file, we had to extract the data manually by selecting smaller areas and downloading from AllensCoralAtlas
+
+```{r Reading in reef data with geomorphic}
+#reading in reef data set ! with variables as sf object using st_read
+reef_df =st_read("./DATA3888_GitHub/MARS_DATA3888_reefC4/Data/reef_geomorphic_joined.gpkg")
+#setting reef_df to same CRS 
+st_crs(reef_df) = 4326
+```
+
+```{r Extracting large files}
+all_reef_df = reef_df
+file_path = "./DATA3888_data/reef_geo_data/"
+files = list.files(path=file_path, recursive = F)
+for (i in files){
+  rugosity_df = st_read(paste0(file_path, i))
+  sf_use_s2(FALSE)
+  all_reef_df = st_join(all_reef_df, rugosity_df)
+}
+
+```
+
+```{r Combinded classes and writing to file}
+#there is an easier way to do this I am just tired rn
+reef_join_all = all_reef_df %>% mutate(class = coalesce(class.x, class.y, class.x.1, class.y.1, class.x.2, class.y.2, class.x.3, class.y.3)) %>%
+         select(-class.x, -class.y, -class.x.1, -class.y.1, -class.x.2, -class.y.2, -class.x.3, -class.y.3)
+
+#write to gpkg
+st_write(reef_join_all, 'reef_geomorphic_joined_all.gpkg')
+```
+
 Plotting to see the differences on a map in points
 
 ```{r Quick vis}
 #removing NAs for vis
-reef_join_c_NA = reef_join_c %>% drop_na()
+reef_join_NA = reef_join_all %>% drop_na(class)
+#creating df with only NAs 
+only_nas = reef_join_all[is.na(reef_join_all$class),]
 world_map = map_data("world")
 
-ggplot() +  
+geo_class_vis = ggplot() +  
   geom_polygon(data =world_map, aes(x=long, y = lat, group = group), fill="grey", alpha=0.3) +
-  geom_sf(data = reef_join_c_NA, aes(colour = class), alpha=0.6) +
-  #geom_sf(data = rugosity_df_small, aes(colour = class)) + #commented out as dataset is too large 
+  geom_sf(data = only_nas, aes(colour = class), alpha=1) +
+  geom_sf(data = reef_join_NA, aes(colour = class), alpha=0.6) +
   theme_void()
+geo_class_vis
+```
+
+The plot above still shows many NA values: 
+```{r Looking at NAs}
+length(reef_join_all$class) #9215
+length(reef_join_NA$class) #4557
+length(only_nas$class) #4658
+#4557 + 4658 = 9215
+#ggplotly(geo_class_vis)
+```
+
+From investigation of the data sets on the map, it looks like the reef dataset is not as precise as the Allen Coral dataset - hence points not touching some polygons. As such, to class as many reef points as possible, we will create a 200m buffer (as looking at geomorphic mapping on Allen, 200m is the smallest size that will include most datapoints). This may effect the data integrity, hence I will create a new `.gpgk` file `reef_geomorphic_joined_all_KNN.gpkg`. When modeling, we can then use both files to and calculate the difference in accuracy. 
+
+```{r Creating buffer for NA points}
+# change to Irish grid, which uses meters
+only_nas_i = st_transform(only_nas, 29902)
+reef_na_buffer = st_buffer(only_nas_i, 200)
+#change back to 4326 to perform extraction
+reef_na_buffer = st_transform(reef_na_buffer, 4326)
+```
+
+```{r Extracting class for NA values}
+# file name containing all data: Global-Dataset-20211006223100
+file_path = "./DATA3888_data/Global-Dataset-20211006223100.nosync/"
+#creating list of all files in folder 
+files = list.files(path=file_path, pattern=".zip$", recursive = F)
+#setting new directory for where data will go 
+outDir = "./DATA3888_data/geomorphic_all/"
+#target file name for extraction 
+geom_filepath = "^Geomorphic-Map/geomorphic"
+reef_join_df_nas = reef_na_buffer
+#commented out so as not to run again 
+for (i in files) {
+  reef_join_df_nas = reef_f_extract(file_path,i,geom_filepath,outDir,reef_join_df_nas)
+} 
+```
+
+```{r Joining class columns}
+#combining classes into 1 columns
+reef_join_na_df = reef_join_df_nas %>% mutate(class = coalesce(class.x, class.y, class.x.1, class.y.1, class.x.2, class.y.2, class.x.3, class.y.3, class.x.4, class.y.4, class.x.5, class.y.5, class.x.6, class.y.6, class.x.7, class.y.7, class.x.8, class.y.8, class.x.9, class.y.9, class.x.10, class.y.10, class.x.11, class.y.11, class.x.12, class.y.12, class.x.13, class.y.13, class.x.14, class.y.14)) %>%
+         select(-class.x, -class.y, -class.x.1, -class.y.1, -class.x.2, -class.y.2, -class.x.3, -class.y.3, -class.x.4, -class.y.4, -class.x.5, -class.y.5, -class.x.6, -class.y.6, -class.x.7, -class.y.7,-class.x.8, -class.y.8, -class.x.9, -class.y.9, -class.x.10, -class.y.10, -class.x.11, -class.y.11, -class.x.12, -class.y.12, -class.x.13, -class.y.13, -class.x.14, -class.y.14)
 
 ```
+
+```{r Extracting large NA data}
+all_reef_df_na = reef_join_na_df
+file_path = "./DATA3888_data/reef_geo_data/"
+files = list.files(path=file_path, recursive = F)
+for (i in files){
+  rugosity_df = st_read(paste0(file_path, i))
+  sf_use_s2(FALSE)
+  all_reef_df_na = st_join(all_reef_df_na, rugosity_df)
+}
+
+```
+
+```{r Joining class columns}
+#there is an easier way to do this I am just tired rn
+all_reef_df_na = all_reef_df_na %>% mutate(class_na = coalesce(class.x, class.y, class.x.1, class.y.1, class.x.2, class.y.2, class)) %>%
+         select(-class.x, -class.y, -class.x.1, -class.y.1, -class.x.2, -class.y.2, -class)
+#Simple feature collection with 10290 features and 56 fields
+
+#write to gpkg 
+#st_write(all_reef_df_na, 'reef_geomorphic_joined_nas.gpkg')
+```
+
+```{r Looking at NAs}
+only_nas = all_reef_df_na[is.na(all_reef_df_na$class_na),]
+length(reef_join_all$class) #9215
+length(all_reef_df_na$class_na) #10290
+length(only_nas$class) #2160
+```
+
+```{r Removing NAs and selecting distinct rows}
+#all_reef_df_c = all_reef_df_na %>% drop_na()
+#all_reef_df_c = distinct(all_reef_df_c)
+#st_write(all_reef_df_c, 'reef_geomorphic_joined_nas_c.gpkg')
+```
+
+```{r}
+table(rownames(all_reef_df_c))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
