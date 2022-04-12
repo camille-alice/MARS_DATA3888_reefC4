@@ -11,7 +11,6 @@ Repository for MARS/DATA3888 Reef Project for group C4.
 ### Table of Contents
 
 - [Project Description](#project-description)
-- [Group members and contacts](#group-members-and-contacts)
 - [Ethical Considerations](#ethical-considerations)
     - [Why It Matters](#why-it-matters)
     - [Stakeholder Analysis](#stakeholder-analysis)
@@ -22,6 +21,7 @@ Repository for MARS/DATA3888 Reef Project for group C4.
     - [Presentation](#presentation)
     - [Report](#report)
 - [Variables](#variables)
+- [Group members and contacts](#group-members-and-contacts)
 - [References](#references)
 - [License](#license)
 
@@ -33,73 +33,19 @@ Repository for MARS/DATA3888 Reef Project for group C4.
 
 Coral bleaching is when coral reefs, under environmental stress (such as change in temperature), release algae in their tissues, causing them to turn white. Bleached corals become susceptible to disease and vulnerable to death.
 
-Data used for global coral bleaching event can be found at the [Reef Check website](reefcheck.org) or on the [GitHub repository for the Institute for Global Ecology](https://github.com/InstituteForGlobalEcology/Coral-bleaching-a-global-analysis-of-the-past-two-decades)
-
 Purpose: We are researching Coral Bleaching for DATA/MARS3888 at the University of Sydney.
 
 Study aim:
 
-- Predicting which environmental factors is associated with bleaching event
+- Investigating rugosity of coral and the effect on bleaching severity and frequency. 
 
 - Predicting which Reef is likely to be suspectable to bleaching
 
 - Build interactive Shiny App to display predictions 
 
-The data used is from a public dataset taken from the paper ["A global analysis of coral bleaching over the past twodecades"](https://doi.org/10.1038/s41467-019-09238-2) published in Nature communications in 2019. Authors are: Sully, S., Burkepile, D. E., Donovan, M. K., Hodgson, G., & Van Woesik, R.
+The bleaching data used is from a public dataset taken from the paper ["A global analysis of coral bleaching over the past twodecades"](https://doi.org/10.1038/s41467-019-09238-2) published in Nature communications in 2019. Authors are: Sully, S., Burkepile, D. E., Donovan, M. K., Hodgson, G., & Van Woesik, R. The author has curated coral bleaching events at 3351 sites in 81 countries from 1998 to 2017 and a suite of environmental variables at each site. The raw data can be found at the [Reef Check website](reefcheck.org) or on the [GitHub repository for the Institute for Global Ecology](https://github.com/InstituteForGlobalEcology/Coral-bleaching-a-global-analysis-of-the-past-two-decades).
 
-The author has curated coral bleaching events at 3351 sites in 81 countries from 1998 to 2017 and a suite of environmental variables at each site.
-
-&nbsp;
-
-# Group Members and Contacts
-
- <table>
-       <tr>
-           <td> Team Member </td>
-           <td> Student ID </td>
-           <td> Personal Email </td>
-        </tr>
-        <tr>
-            <td> Camille Karski </td>
-            <td> 450125625 </td>
-            <td> c.a.karski@gmail.com </td>
-        </tr>
-        <tr>
-            <td> NAME </td>
-            <td> SID </td>
-            <td> EMAIL </td>
-        </tr>
-        <tr>
-            <td> Joshua Borgnolo </td>
-            <td> 500558159 </td>
-            <td> borgnolojosh@gmail.com </td>
-        </tr>
-        <tr>
-            <td> NAME </td>
-            <td> SID </td>
-            <td> EMAIL </td>
-        </tr>
-        <tr>
-            <td> NAME </td>
-            <td> SID </td>
-            <td> EMAIL </td>
-        </tr>
-        <tr>
-            <td> NAME </td>
-            <td> SID </td>
-            <td> EMAIL </td>
-        </tr>
-        <tr>
-            <td> NAME </td>
-            <td> SID </td>
-            <td> EMAIL </td>
-        </tr>
-        <tr>
-            <td> NAME </td>
-            <td> SID </td>
-            <td> EMAIL </td>
-        </tr>
- </table>
+We also used data gathered from [Allen Coral Atlas](https://allencoralatlas.org/atlas/) to build our rugosity dataset. Full extraction method can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/camille_ida.Rmd). *Note: The full dataset was downloaded locally to be processed as the zipped archive was over 13GB* 
 
 &nbsp; 
 # Ethical Considerations
@@ -117,17 +63,22 @@ The author has curated coral bleaching events at 3351 sites in 81 countries from
 
 ## Raw Data
 
-(Notes on raw data)
+We are combining two datasets via shape data: matching polygons from [Allen Coral Atlas](https://allencoralatlas.org/atlas) to points from processed dataset [Reef_Check_with_cortad_variables_with_annual_rate_of_SST_change.csv](https://github.com/InstituteForGlobalEcology/Coral-bleaching-a-global-analysis-of-the-past-two-decades/blob/master/Reef_Check_with_cortad_variables_with_annual_rate_of_SST_change.csv). 
+
+The rugosity of reefs are associated with their geomorphic class. Hence, we are using the [geomporhic data](https://storage.googleapis.com/coral-atlas-static-files/download-package-materials/Class-Descriptions-Geomorphic-Maps-v3.pdf) taken from Allen Coral Atlas to identify the area, then using a literature review to obtain the mean rugosity for that geomorphic region. 
+
+*Note about merging data sets: From investigation of the data sets on the map, it looks like the reef dataset is not as precise as the Allen Coral dataset - hence points not touching some polygons. As such, to class all the reef points, we will take the nearest neighbour to the point and class it from that polygon. This may effect the data integrity, hence a new `.gpgk` file `reef_geomorphic_joined_all_KNN.gpkg` was created. When modeling, we can then use both files to and calculate the difference in accuracy.* 
 
 <!-- Add buttons here -->
-
 
 
 
 &nbsp;
 # Key Files
 
-(add files here) 
+* Processed Reef Bleaching file: [Reef_Check_with_cortad_variables_with_annual_rate_of_SST_change.csv](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/Data/Reef_Check_with_cortad_variables_with_annual_rate_of_SST_change.csv)
+* Joined Geomorphic Reef file (without KNN): 
+* Joined Geomorphic Reef file (with KNN): 
 
 # Key Papers 
 
@@ -144,7 +95,6 @@ The author has curated coral bleaching events at 3351 sites in 81 countries from
 ### Report
 
 - Report can be found here 
-
 
 &nbsp;
 
@@ -166,6 +116,45 @@ The author has curated coral bleaching events at 3351 sites in 81 countries from
     
 </table>
 
+&nbsp;
+
+# Group Members and Contacts
+
+ <table>
+       <tr>
+           <td> Team Member </td>
+           <td> Personal Email </td>
+        </tr>
+        <tr>
+            <td> Camille Karski </td>
+            <td> c.a.karski@gmail.com </td>
+        </tr>
+        <tr>
+            <td> Kathryn Avieson </td>
+            <td> EMAIL </td>
+        </tr>
+        <tr>
+            <td> Joshua Borgnolo </td>
+            <td> borgnolojosh@gmail.com </td>
+        </tr>
+        <tr>
+            <td> Alex Burton </td>
+            <td> EMAIL </td>
+        </tr>
+        <tr>
+            <td> Nathan Cheung </td>
+            <td> EMAIL </td>
+        </tr>
+        <tr>
+            <td> Patrick Chang </td>
+            <td> EMAIL </td>
+        </tr>
+        <tr>
+            <td> Daniel Wright </td>
+            <td> EMAIL </td>
+        </tr>
+ </table>
+ 
 &nbsp;
 
 # References
