@@ -8,97 +8,42 @@ output: html_document
 ```{r}
 library(tidyverse)
 library(sf)
-```
-
-## Storm Data
-
-```{r}
-storms_list = read.csv("Data/ibtracs.ALL.list.v04r00.csv")
-storms_list = storms_list %>% 
-  slice(-1) %>%
-  select(SID, SEASON, LAT, LON, STORM_SPEED, STORM_DIR) %>%
-  mutate(SEASON = as.numeric(SEASON)) %>%
-  filter(SEASON >= 1997) %>%
-  mutate(LAT = as.numeric(LAT)) %>%
-  mutate(LON = as.numeric(LON)) %>%
-  mutate(STORM_SPEED = as.numeric(STORM_SPEED)) %>%
-  mutate(STORM_DIR = as.numeric(STORM_DIR)) %>%
-  drop_na()
-storms_list
-```
-
-## Benthic Map Data
-
-```{r}
-benthic = st_read("Data/benthic.gpkg")
-geom = lapply(benthic$geom, st_bbox)
-bbox_vector = c()
-for (i in 1:length(geom)) {
-  bbox_vector = rbind(bbox_vector, t(matrix(unlist(geom[[i]]))))
-}
-benthic = as.data.frame(cbind(benthic$class, bbox_vector))
-colnames(benthic) = c("Class", "xmin", "ymin", "xmax", "ymax")
-benthic = benthic %>%
-  mutate(xmin = as.numeric(xmin)) %>%
-  mutate(ymin = as.numeric(ymin)) %>%
-  mutate(xmax = as.numeric(xmax)) %>%
-  mutate(ymax = as.numeric(ymax))
-benthic
-```
-
-## Geomorphic data
-
-```{r}
-geomorphic = st_read("Data/geomorphic.gpkg")
-geom = lapply(geomorphic$geom, st_bbox)
-bbox_vector = c()
-for (i in 1:length(geom)) {
-  bbox_vector = rbind(bbox_vector, t(matrix(unlist(geom[[i]]))))
-}
-geomorphic = as.data.frame(cbind(geomorphic$class, bbox_vector))
-colnames(geomorphic) = c("Class", "xmin", "ymin", "xmax", "ymax")
-geomorphic = geomorphic %>%
-  mutate(xmin = as.numeric(xmin)) %>%
-  mutate(ymin = as.numeric(ymin)) %>%
-  mutate(xmax = as.numeric(xmax)) %>%
-  mutate(ymax = as.numeric(ymax))
-geomorphic
+library(ggplot2)
+library(maps)
+library(viridis)
 ```
 
 ## Reef data
+
+Reading it in and doing some cleaning
 
 ```{r}
 reef_df = read.csv("Data/Reef_Check_with_cortad_variables_with_annual_rate_of_SST_change.csv")
 reef_df = reef_df %>% 
   drop_na(Longitude.Degrees) %>%
   drop_na(Latitude.Degrees) %>%
-  mutate(Date = as.Date(Date, "%d-%b-%y"))
+  mutate(Date = as.Date(Date, "%d-%b-%y")) %>%
+  mutate(Average_bleaching = as.numeric(Average_bleaching))
 
-calculate_degrees = function(degrees, minutes, seconds) {
-  return (degrees + minutes/60 + seconds/3600)
-}
-
-# reef_df$Longitude.Decimal = mapply(calculate_degrees, reef_df$Longitude.Degrees, reef_df$Longitude.Minutes, reef_df$Longitude.Seconds)
-# reef_df$Latitude.Decimal = mapply(calculate_degrees, reef_df$Latitude.Degrees, reef_df$Latitude.Minutes, reef_df$Latitude.Seconds)
 reef_df$geom = reef_df %>% st_as_sf(coords = c("Longitude.Degrees", "Latitude.Degrees"),crs=4326)
-```
-
-```{r}
-reef_df
 ```
 
 ## Merged dataset
 
+Merging with geomorphic data and then cleaning
+
 ```{r}
-reef_geomorphic = st_read("Data/reef_geomorphic_joined.gpkg")
+reef_geomorphic = st_read("Data/reef_geomorphic_joined_all.gpkg")
 reef_geomorphic = reef_geomorphic %>% 
   as.data.frame() %>%
   mutate(Date = as.Date(Date, "%d-%b-%y")) %>%
   mutate(Depth = as.numeric(Depth)) %>%
-  filter(Depth <= 15)
+  filter(Depth <= 15) # as per Allen Coral Atlas specs
 
 reef_geomorphic
 ```
+
+## Investigating NAs
 
 ```{r}
 not_na = reef_geomorphic %>% 
@@ -106,10 +51,123 @@ not_na = reef_geomorphic %>%
   select(Reef.ID, Depth, Average_bleaching, class) %>%
   as.data.frame()
 
-not_na # 1187
+not_na # 4545 - still some missing data as we haven't finalised which dataset to use
 
-not_na %>% distinct(Reef.ID, Depth, class) # 685
+not_na %>% distinct(Reef.ID, Depth, class) # 3036 - meaning there are some duplicates
 
-not_na %>% distinct(Reef.ID, Depth) # 685
+not_na %>% distinct(Reef.ID, Depth) # 3036 - meaning that the same reefs but at different depths have the same class identifier, which might be a problem
+```
+
+## Frequency of bleaching
+
+Taken by how many dated entries there are for each reef, ignoring depth (as they are usually taken on the same day).
+
+```{r}
+reef_freq = reef_geomorphic %>%
+  select(Reef.ID, Date, Longitude.Degrees, Latitude.Degrees) %>%
+  distinct(Reef.ID, Longitude.Degrees, Latitude.Degrees, Date) %>%
+  group_by(Reef.ID, Longitude.Degrees, Latitude.Degrees) %>%
+  summarise(count = n())
+
+reef_freq
+
+world_map = map_data("world")
+ggplot() + 
+  geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "grey", alpha = 0.3) +
+  geom_point(data = reef_freq, alpha = 0.2, aes(y = Latitude.Degrees, x = Longitude.Degrees, size = count, colour = count)) + 
+  scale_colour_viridis() + 
+  theme_minimal()
+```
+
+## Severity of bleaching
+
+Taking the difference between the bleaching data of the most recent entry and the entry before that for each reef, if data exists (?). Will take the average of bleaching across different depths.
+
+```{r}
+# Bleaching record of the most recent date
+reef_sev1 = reef_geomorphic %>%
+  select(Reef.ID, Date, Average_bleaching, Longitude.Degrees, Latitude.Degrees) %>% 
+  mutate(Average_bleaching = as.numeric(Average_bleaching)) %>%
+  group_by(Reef.ID, Date, Longitude.Degrees, Latitude.Degrees) %>%
+  summarise(bleaching = mean(Average_bleaching)) %>%
+  group_by(Reef.ID) %>%
+  filter(Date == max(Date))
+
+# Bleaching record of the second most recent date
+reef_sev2 = reef_geomorphic %>%
+  select(Reef.ID, Date, Average_bleaching, Longitude.Degrees, Latitude.Degrees) %>% 
+  mutate(Average_bleaching = as.numeric(Average_bleaching)) %>%
+  group_by(Reef.ID, Date, Longitude.Degrees, Latitude.Degrees) %>%
+  summarise(bleaching = mean(Average_bleaching)) %>%
+  group_by(Reef.ID) %>%
+  filter(Date == sort(Date, decreasing = TRUE)[2])
+
+# Merging and taking the difference between them
+reef_sev = merge(reef_sev1, reef_sev2, by = "Reef.ID") %>%
+  mutate(Average_bleaching = bleaching.x - bleaching.y) %>%
+  select(Reef.ID, Longitude.Degrees.x, Latitude.Degrees.x, Average_bleaching) %>%
+  rename(Longitude.Degrees = Longitude.Degrees.x) %>%
+  rename(Latitude.Degrees = Latitude.Degrees.x)
+
+reef_sev
+
+ggplot() + 
+  geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "grey", alpha = 0.3) +
+  geom_point(data = reef_sev, alpha = 0.2, aes(y = Latitude.Degrees, x = Longitude.Degrees, size = Average_bleaching, colour = Average_bleaching)) + 
+  scale_colour_viridis() + 
+  theme_minimal()
+```
+
+
+## Deprecated code
+
+```{r}
+# storms_list = read.csv("Data/ibtracs.ALL.list.v04r00.csv")
+# storms_list = storms_list %>% 
+#   slice(-1) %>%
+#   select(SID, SEASON, LAT, LON, STORM_SPEED, STORM_DIR) %>%
+#   mutate(SEASON = as.numeric(SEASON)) %>%
+#   filter(SEASON >= 1997) %>%
+#   mutate(LAT = as.numeric(LAT)) %>%
+#   mutate(LON = as.numeric(LON)) %>%
+#   mutate(STORM_SPEED = as.numeric(STORM_SPEED)) %>%
+#   mutate(STORM_DIR = as.numeric(STORM_DIR)) %>%
+#   drop_na()
+# storms_list
+```
+
+```{r}
+# benthic = st_read("Data/benthic.gpkg")
+# geom = lapply(benthic$geom, st_bbox)
+# bbox_vector = c()
+# for (i in 1:length(geom)) {
+#   bbox_vector = rbind(bbox_vector, t(matrix(unlist(geom[[i]]))))
+# }
+# benthic = as.data.frame(cbind(benthic$class, bbox_vector))
+# colnames(benthic) = c("Class", "xmin", "ymin", "xmax", "ymax")
+# benthic = benthic %>%
+#   mutate(xmin = as.numeric(xmin)) %>%
+#   mutate(ymin = as.numeric(ymin)) %>%
+#   mutate(xmax = as.numeric(xmax)) %>%
+#   mutate(ymax = as.numeric(ymax))
+# benthic
+```
+
+```{r}
+# geomorphic = st_read("Data/geomorphic.gpkg")
+# geom = lapply(geomorphic$geom, st_bbox)
+# bbox_vector = c()
+# for (i in 1:length(geom)) {
+#   bbox_vector = rbind(bbox_vector, t(matrix(unlist(geom[[i]]))))
+# }
+# geomorphic = as.data.frame(cbind(geomorphic$class, bbox_vector))
+# colnames(geomorphic) = c("Class", "xmin", "ymin", "xmax", "ymax")
+# geomorphic = geomorphic %>%
+#   mutate(xmin = as.numeric(xmin)) %>%
+#   mutate(ymin = as.numeric(ymin)) %>%
+#   mutate(xmax = as.numeric(xmax)) %>%
+#   mutate(ymax = as.numeric(ymax))
+# geomorphic
+```
 ```
 
