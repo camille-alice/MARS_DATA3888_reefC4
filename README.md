@@ -67,7 +67,7 @@ We are combining two datasets via shape data: matching polygons from [Allen Cora
 
 The rugosity of reefs are associated with their geomorphic class. Hence, we are using the [geomporhic data](https://storage.googleapis.com/coral-atlas-static-files/download-package-materials/Class-Descriptions-Geomorphic-Maps-v3.pdf) taken from Allen Coral Atlas to identify the area, then using a literature review to obtain the mean rugosity for that geomorphic region. 
 
-*Note about merging data sets: From investigation of the data sets on the map, it looks like the reef dataset is not as precise as the Allen Coral dataset - hence points not touching some polygons. As such, to class all the reef points, we will take the nearest neighbour to the point and class it from that polygon. This may effect the data integrity, hence a new `.gpgk` file `reef_geomorphic_joined_all_KNN.gpkg` was created. When modeling, we can then use both files to and calculate the difference in accuracy.* 
+*Note about merging data sets: From investigation of the data sets on the map, it looks like the reef dataset is not as precise as the Allen Coral dataset - hence points not touching some polygons. As such, to class all the reef points, we tried to classify the points using a boarder of 200m. However, this seemed to be too uncertain as it ended up classifying different points with multiple classes. Hence, we used `reef_geomorphic_joined_all.gpkg` and drop the NA's.* 
 
 <!-- Add buttons here -->
 
@@ -77,8 +77,8 @@ The rugosity of reefs are associated with their geomorphic class. Hence, we are 
 # Key Files
 
 * Processed Reef Bleaching file: [Reef_Check_with_cortad_variables_with_annual_rate_of_SST_change.csv](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/Data/Reef_Check_with_cortad_variables_with_annual_rate_of_SST_change.csv)
-* Joined Geomorphic Reef file (without KNN): 
-* Joined Geomorphic Reef file (with KNN): 
+* Joined Geomorphic Reef file (with NA's): reef_geomorphic_joined_all.gpkg
+* Joined Geomorphic Reef file (with multiple classes): reef_geomorphic_joined_nas.gpkg
 
 # Key Papers 
 
