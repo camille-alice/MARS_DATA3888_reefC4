@@ -238,16 +238,118 @@ table(rownames(all_reef_df_c))
 ```
 
 
+```{r}
+reef_joined_na_c = st_read('./DATA3888_GitHub//MARS_DATA3888_reefC4/Data/reef_geomorphic_joined_nas_c.gpkg')
+```
+```{r}
+reef_joined_na_c
+```
+
+```{r}
+reef_joined_all = st_read('./DATA3888_GitHub//MARS_DATA3888_reefC4/Data/reef_geomorphic_joined_all.gpkg')
+```
+
+
+## Figures and Shiny App
+
+Correlation plot - can use rugosity, diversity, SSTA_std, and average bleaching. 
+```{r Q4 Customizing correlation plot}
+#Customizing correlation plot with colours 
+#code adapted from https://github.com/ggobi/ggally/issues/139
+
+my_custom_cor_color <- function(data, mapping, color = I("black"), sizeRange = c(1, 5), ...) {
+
+  #eval(mapping$x, data) should be switched to GGally::eval_data_col(data, mapping$x)
+  # get the x and y data to use the other code
+  x <- GGally::eval_data_col(data, mapping$x)
+  y <- GGally::eval_data_col(data, mapping$y)
+
+  ct <- cor.test(x,y)
+  
+  sig <- symnum(ct$p.value, corr = FALSE, na = FALSE,
+                cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1),
+                symbols = c("***", "**", "*", ".", " "))
+
+  r <- unname(ct$estimate)
+  rt <- format(r, digits=2)[1]
+  tt <- as.character(rt)
+
+  # plot the cor value
+  p <- ggally_text(
+   label = tt, 
+   mapping = aes(),
+   xP = 0.5, yP = 0.5, 
+   size = 6,
+   color=color,
+   ...
+  ) + 
+    # add the sig stars
+    geom_text(aes_string(x = 0.7, y = 0.7),
+      label = sig, 
+      color = color,
+      ...
+    ) +
+    geom_text(aes_string(x = 0.4, y = 0.7),
+              label = "Corr: ",
+              color = color
+              ) + 
+    # remove all the background stuff and wrap it with a dashed line
+    theme(
+      panel.background=element_rect(fill="white", linetype = "dashed"), 
+      panel.grid.minor=element_blank(), 
+      panel.grid.major=element_blank()) 
+
+  corColors <- RColorBrewer::brewer.pal(n = 7, name = "PuOr") #[2:6]
+
+  if (r <= -0.08) {
+    corCol <- corColors[7]
+  } else if (r <= -0.06) {
+    corCol <- corColors[6]
+  } else if (r < 0.06) {
+    corCol <- corColors[5]
+  } else if (r < 0.08) {
+    corCol <- corColors[3]
+  } else {
+    corCol <- corColors[2]
+  }
+  p <- p + theme(
+    panel.background = element_rect(fill= corCol)
+  )
+
+  p
+}
+
+my_custom_smooth <- function(data, mapping, ...) {
+  ggplot(data = data, mapping = mapping) +
+    geom_point(color = I("orange")) + 
+    scale_color_brewer(palette="PuOr") +
+    geom_smooth(method = "lm", color = I("black")) + 
+    theme(panel.background=element_blank(),
+        panel.grid.minor=element_blank(),
+        panel.grid.major=element_line(color="lightgray"))
+}
+
+```
+
+
+```{r Q4 Correlation plot, fig.cap= "Fig 3.3: Variable Correlation Visualisation", message=FALSE, warning=FALSE}
+reef_corri = ggpairs(reef_vis2, columns=6:8,
+        title = "Correlation of Bleaching and SSTA Variance (std)",
+        columnLabels = c("Average Bleaching", "SSTA Std", "SSTA Freq Std"),
+        upper=list(continuous=wrap(my_custom_cor_color)),
+        lower=list(continuous=wrap(my_custom_smooth), 
+                   combo = wrap("dot", color=Class)))         
+reef_corri
+```
 
 
 
-
-
-
-
-
-
-
+```{r}
+#reef_joined_all
+pca_eMat = prcomp(reef_joined_all, scale = TRUE)
+options(digits = 2)
+summary(pca_eMat)
+```
 
 
 
