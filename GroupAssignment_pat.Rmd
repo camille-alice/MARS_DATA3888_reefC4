@@ -9,41 +9,71 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
 ```{r}
 library(dplyr)
 library(sf)
 library(tidyverse)
-reef_df <-  read.csv("/Users/patri/OneDrive/Desktop/DATA3888/Group assignment/Reef Check Data Raw.csv")
 
-file <- "/Users/patri/OneDrive/Desktop/DATA3888/Group assignment/geomorphic.gpkg"
-rugosity <- sf::st_read(file)
+reef_geomorphic = st_read("/Users/patri/OneDrive/Desktop/DATA3888/MARS_DATA3888_reefC4/Data/reef_geomorphic_joined_all.gpkg")
+reef_geomorphic = reef_geomorphic %>% 
+  as.data.frame() %>%
+  mutate(Date = as.Date(Date, "%d-%b-%y")) %>%
+  mutate(Depth = as.numeric(Depth)) %>%
+  filter(Depth <= 15) # as per Allen Coral Atlas specs
+reef_geomorphic
+```
 
-#1st row
-str(rugosity$geom)
-row1 = rugosity[1,]
-row1_g = row1$geom
+## Investigating NAs
 
-calculate <- function(degree,minutes,seconds){
-  total = degree+minutes/60+(seconds/3600)
-  return(total)
-}
+```{r}
+not_na = reef_geomorphic %>% 
+  slice(which(!is.na(reef_geomorphic$class))) %>%
+  select(Reef.ID, Depth, Average_bleaching, class) %>%
+  as.data.frame()
+not_na # 4545 - still some missing data as we haven't finalised which dataset to use
+not_na %>% distinct(Reef.ID, Depth, class) # 3036 - meaning there are some duplicates
+not_na %>% distinct(Reef.ID, Depth) # 3036 - meaning that the same reefs but at different depths have the same class identifier, which might be a problem
+```
 
-reef_df = reef_df %>% drop_na(Longitude.Degrees) %>% drop_na(Latitude.Degrees) %>% drop_na(Latitude.Minutes) %>% drop_na(Latitude.Seconds) %>% drop_na(Longitude.Minutes) %>% drop_na(Longitude.Seconds)
+## 
+
+```{r}
+#Most recent entry
+#Select several attributes for our model
+reef_recent = reef_geomorphic %>%
+  select(Reef.ID, Date, SSTA_Frequency_Standard_Deviation, Depth, Diversity, class,Average_bleaching) %>% 
+  mutate(SSTA_Frequency_Standard_Deviation = as.numeric(SSTA_Frequency_Standard_Deviation),
+         Average_bleaching = as.numeric(Average_bleaching),
+         Depth = as.numeric(Depth), 
+         Diversity = as.numeric(Diversity)) %>%
+  group_by(Reef.ID) %>% filter(Date == max(Date))
+
+reef_recent
 
 
-#Long decimal
-reef_df$Longitude.Decimal <- mapply(calculate, reef_df$Longitude.Degrees,reef_df$Longitude.Minutes,reef_df$Longitude.Seconds)
-
-#Lat decimal
-reef_df$Latitude.Decimal <- mapply(calculate,reef_df$Latitude.Degrees,reef_df$Latitude.Minutes,reef_df$Latitude.Seconds)
-
-#change to class sf
-rugosity <- st_as_sf(rugosity)
-
-reef_df <- reef_df %>% st_as_sf(coords = c("Longitude.Decimal", "Latitude.Decimal"),crs=4326)
+#Rugosity
+reef_recent["rugosity"] <- ifelse(reef_recent$class == "Reef Slope" | reef_recent$class == "Outer Reef Flat","High",
+                                 ifelse(reef_recent$class == "Sheltered Reef Slope" | reef_recent$class == "Reef Crest","Medium","Low"))
 
 
-reef_join<-st_join(rugosity, left=FALSE, reef_df)
-reef_join
+#bleached or not bleached
+reef_recent["bleached"] <- ifelse(reef_recent$Average_bleaching > 0,1,0)
+
+
+#Remove NA
+reef_final <- reef_recent %>% drop_na()
+
+reef_final
+
+reef_model <- glm(formula = bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity + rugosity, data = reef_final, family = binomial)
+
+summary(reef_model)
+
+#Variable selection for logistic regression
+step_model_reef = step(reef_model, trace = 0)
+summary(step_model_reef)
+
+
 ```
 
