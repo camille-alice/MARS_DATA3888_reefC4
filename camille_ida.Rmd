@@ -22,6 +22,8 @@ library(reshape2)
 library(viridis)
 library(plotly)
 library(GGally)
+library(class)
+
 ```
 
 ## Extracting data 
@@ -249,6 +251,9 @@ reef_joined_na_c
 reef_joined_all = st_read('./DATA3888_GitHub//MARS_DATA3888_reefC4/Data/reef_geomorphic_joined_all.gpkg')
 ```
 
+```{r}
+reef_joined_all = reef_joined_all %>% drop_na(class)
+```
 
 ## Figures and Shiny App
 
@@ -330,16 +335,33 @@ my_custom_smooth <- function(data, mapping, ...) {
 }
 
 ```
+```{r}
+reef_joined_corri = reef_joined_all %>% select(Reef.ID, Average_bleaching, SSTA_Frequency_Standard_Deviation, Diversity, rate_of_SST_change, class)
+reef_joined_corri = data.frame(reef_joined_corri)
+```
+```{r}
+reef_joined_corri = transform(reef_joined_corri, Average_bleaching = as.numeric(Average_bleaching), 
+               SSTA_Frequency_Standard_Deviation = as.numeric(SSTA_Frequency_Standard_Deviation),
+          Diversity = as.numeric(Diversity), rate_of_SST_change = as.numeric(rate_of_SST_change))
+```
 
 
 ```{r Q4 Correlation plot, fig.cap= "Fig 3.3: Variable Correlation Visualisation", message=FALSE, warning=FALSE}
-reef_corri = ggpairs(reef_vis2, columns=6:8,
-        title = "Correlation of Bleaching and SSTA Variance (std)",
-        columnLabels = c("Average Bleaching", "SSTA Std", "SSTA Freq Std"),
+reef_corri = ggpairs(reef_joined_corri, columns=2:6,
+        title = "Correlation of Bleaching and other variables",
+        columnLabels = c("Average_bleaching","SSTA_Frequency_Standard_Deviation",
+                         "Diversity", "rate_of_SST_change", "class"),
         upper=list(continuous=wrap(my_custom_cor_color)),
+        cardinality_threshold=NULL,
         lower=list(continuous=wrap(my_custom_smooth), 
                    combo = wrap("dot", color=Class)))         
 reef_corri
+```
+```{r}
+ggpairs(reef_joined_corri, columns=2:6, 
+        columnLabels =c("Average_bleaching","SSTA_Frequency_Standard_Deviation",
+                         "Diversity", "rate_of_SST_change", "class"),
+        cardinality_threshold=NULL)
 ```
 
 

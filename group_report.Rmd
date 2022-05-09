@@ -1,0 +1,73 @@
+---
+title: "group_report"
+author: "Reef C4"
+date: '2022-05-08'
+output: 
+  html_document:
+    code_folding: hide
+    toc: true
+    number_sections: true
+    toc_float: true
+    theme: cosmo
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(maps)
+library(viridis)
+library(dplyr)
+
+
+```
+
+
+# Aim and Background 
+
+**A clear description of the problem, articulating the aim of this project. Provides appropriate multidisciplinary context and motivational background explained well in an appropriate language.**
+
+# Method
+
+**Part A: Clear description of the approach in data collection, developed model, the evaluation strategies from a data-science perspective. Here we refer to all types of evaluation metrics including graphical, qualitative and quantitative metric.**
+
+The bleaching data used is from a public dataset taken from the paper ["A global analysis of coral bleaching over the past twodecades"](https://doi.org/10.1038/s41467-019-09238-2) published in Nature communications in 2019. Authors are: Sully, S., Burkepile, D. E., Donovan, M. K., Hodgson, G., & Van Woesik, R. The author has curated coral bleaching events at 3351 sites in 81 countries from 1998 to 2017 and a suite of environmental variables at each site. The raw data can be found at the [Reef Check website](https://www.reefcheck.org/) or on the [GitHub repository for the Institute for Global Ecology](https://github.com/InstituteForGlobalEcology/Coral-bleaching-a-global-analysis-of-the-past-two-decades).
+
+We also used data gathered from [Allen Coral Atlas](https://allencoralatlas.org/atlas/) to build our rugosity dataset. Full extraction method can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/camille_ida.Rmd). *Note: The full dataset was downloaded locally to be processed as the zipped archive was over 13GB* 
+
+The data was downloaded from [Allen Coral Atlas](https://allencoralatlas.org/resources/) in a 13BG zip archive. We extracted the Geomorphic Map data that was in the shape files geomorphic.gpkg (or .geojson). 
+
+The bleaching data used is from a public dataset taken from the paper "A global analysis of coral bleaching over the past twodecades" published in Nature communications in 2019. Authors are: Sully, S., Burkepile, D. E., Donovan, M. K., Hodgson, G., & Van Woesik, R. The author has curated coral bleaching events at 3351 sites in 81 countries from 1998 to 2017 and a suite of environmental variables at each site. The raw data can be found at the Reef Check website or on the GitHub repository for the Institute for Global Ecology.
+
+**Part B: Reef project - Clear description of the approach in data collection to address appropriate research questions, developed model, the evaluation strategies from a marine science perspective**
+
+# Results 
+
+**Part A: A clear justification of the final approach based on the proposed evaluation strategies. Ensuring multiple evaluation strategies are used.**
+
+**Part B: A clear description of the deployment process. An engaging and clear illustration of the product (games, shiny app, learning device etc) with a discussion of concepts from multiple disciplines.**
+
+# Discusssion
+
+**Discussion of potential shortcomings or issues associated with the development process or the product with reference to both disciplines. Identification of future work or improvement in both disciplines. Conclusion adequately summarises the project and identification of future work.**
+
+
+
+### Side notes: 
+
+Presentation
+
+Part A: Report formatting and structure including the appropriate use of Appendix and adherence to the page and words limit.
+
+Part B: All figures and tables should be captioned and cited in the report. Label the axes and headings for all figures. Use legends if applicable. Use of language / Spelling and grammar.
+
+Part C: Data communication: effective use of figures and tables.
+
+Reproducibility & readability
+
+How well the report can be reproduced.
+
+
+
