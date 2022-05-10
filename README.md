@@ -79,6 +79,7 @@ The rugosity of reefs are associated with their geomorphic class. Hence, we are 
 * Processed Reef Bleaching file: [Reef_Check_with_cortad_variables_with_annual_rate_of_SST_change.csv](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/Data/Reef_Check_with_cortad_variables_with_annual_rate_of_SST_change.csv)
 * Joined Geomorphic Reef file (with NA's): reef_geomorphic_joined_all.gpkg
 * Joined Geomorphic Reef file (with multiple classes): reef_geomorphic_joined_nas.gpkg
+* Cleaned Rugosity Reef file (without NA's): reef_rugosity_cleaned.gpkg 
 
 # Key Papers 
 
