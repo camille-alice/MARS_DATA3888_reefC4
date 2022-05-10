@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir = '/Users/camillekarski/Documents/Uni/DATA3888')
+knitr::opts_knit$set(root.dir = '/Users/camillekarski/Documents/Uni/DATA3888/')
 
 library(plyr)
 library(tidyverse)
@@ -235,30 +235,47 @@ length(only_nas$class) #2160
 #st_write(all_reef_df_c, 'reef_geomorphic_joined_nas_c.gpkg')
 ```
 
-```{r}
-table(rownames(all_reef_df_c))
-```
-
-
-```{r}
-reef_joined_na_c = st_read('./DATA3888_GitHub//MARS_DATA3888_reefC4/Data/reef_geomorphic_joined_nas_c.gpkg')
-```
-```{r}
-reef_joined_na_c
-```
-
-```{r}
-reef_joined_all = st_read('./DATA3888_GitHub//MARS_DATA3888_reefC4/Data/reef_geomorphic_joined_all.gpkg')
-```
-
-```{r}
-reef_joined_all = reef_joined_all %>% drop_na(class)
-```
+As there were too many double ups of classes for the same points, we decided to use only the data we had an exact match to, as an incorrect geomorphic type could change the rugosity estimate. 
 
 ## Figures and Shiny App
+```{r Reading in data}
+reef_geomorphic = st_read("./DATA3888_Github/MARS_DATA3888_reefC4/Data/reef_geomorphic_joined_all.gpkg")
+reef_geomorphic = reef_geomorphic %>% 
+  mutate(Date = as.Date(Date, "%d-%b-%y")) %>%
+  mutate(Depth = as.numeric(Depth)) %>%
+  filter(Depth <= 15) # as per Allen Coral Atlas specs
+
+reef_recent = reef_geomorphic %>%
+  select(Reef.ID, Reef.Name, Country, Date, SSTA_Frequency_Standard_Deviation, rate_of_SST_change, Depth, Diversity, class,Average_bleaching, geom) %>% 
+  mutate(SSTA_Frequency_Standard_Deviation = as.numeric(SSTA_Frequency_Standard_Deviation),
+         rate_of_SST_change = as.numeric(rate_of_SST_change),
+         Average_bleaching = as.numeric(Average_bleaching),
+         Depth = as.numeric(Depth), 
+         Diversity = as.numeric(Diversity)) %>%
+  group_by(Reef.ID) %>% filter(Date == max(Date))
+
+#bleached or not bleached
+reef_recent["bleached"] = ifelse(reef_recent$Average_bleaching > 0, 1,0)
+
+#Rugosity
+reef_recent["rugosity"] = ifelse(reef_recent$class == "Reef Slope" | reef_recent$class == "Outer Reef Flat","High", ifelse(reef_recent$class == "Sheltered Reef Slope" | reef_recent$class == "Reef Crest" | reef_recent$class == "Back Reef Slope","Medium","Low"))
+
+#Rugosity
+reef_recent["rugosity_num"] = ifelse(reef_recent$class == "Reef Slope" | reef_recent$class == "Outer Reef Flat",3, ifelse(reef_recent$class == "Sheltered Reef Slope" | reef_recent$class == "Reef Crest" | reef_recent$class == "Back Reef Slope",2,1))
+#Remove NA
+reef_final = reef_recent %>% drop_na()
+
+#st_write(reef_final, 'reef_rugosity_cleaned.gpkg')
+```
 
 Correlation plot - can use rugosity, diversity, SSTA_std, and average bleaching. 
-```{r Q4 Customizing correlation plot}
+
+```{r Correlation plot df}
+reef_joined_corri = reef_final %>% select(Reef.ID, Average_bleaching, SSTA_Frequency_Standard_Deviation, Diversity, rate_of_SST_change, rugosity_num, class)
+reef_joined_corri = data.frame(reef_joined_corri)
+```
+
+```{r Customizing correlation plot}
 #Customizing correlation plot with colours 
 #code adapted from https://github.com/ggobi/ggally/issues/139
 
@@ -279,22 +296,23 @@ my_custom_cor_color <- function(data, mapping, color = I("black"), sizeRange = c
   rt <- format(r, digits=2)[1]
   tt <- as.character(rt)
 
-  # plot the cor value
+  # plot the cor value x and y for number 
   p <- ggally_text(
    label = tt, 
    mapping = aes(),
-   xP = 0.5, yP = 0.5, 
-   size = 6,
+   xP = 0.67, yP = 0.5, 
+   size = 4,
    color=color,
    ...
   ) + 
-    # add the sig stars
-    geom_text(aes_string(x = 0.7, y = 0.7),
+    # add the sig stars #x and y are position of stars
+    geom_text(aes_string(x = 0.8, y = 0.8),
       label = sig, 
       color = color,
       ...
-    ) +
-    geom_text(aes_string(x = 0.4, y = 0.7),
+    ) +   #x and y are position or text Corr: 
+    geom_text(aes_string(x = 0.28, y = 0.7),
+              size = 3,
               label = "Corr: ",
               color = color
               ) + 
@@ -335,46 +353,18 @@ my_custom_smooth <- function(data, mapping, ...) {
 }
 
 ```
-```{r}
-reef_joined_corri = reef_joined_all %>% select(Reef.ID, Average_bleaching, SSTA_Frequency_Standard_Deviation, Diversity, rate_of_SST_change, class)
-reef_joined_corri = data.frame(reef_joined_corri)
-```
-```{r}
-reef_joined_corri = transform(reef_joined_corri, Average_bleaching = as.numeric(Average_bleaching), 
-               SSTA_Frequency_Standard_Deviation = as.numeric(SSTA_Frequency_Standard_Deviation),
-          Diversity = as.numeric(Diversity), rate_of_SST_change = as.numeric(rate_of_SST_change))
-```
 
-
-```{r Q4 Correlation plot, fig.cap= "Fig 3.3: Variable Correlation Visualisation", message=FALSE, warning=FALSE}
-reef_corri = ggpairs(reef_joined_corri, columns=2:6,
+```{r Correlation plot, fig.cap= "Fig 3.3: Variable Correlation Visualisation", message=FALSE, warning=FALSE}
+reef_corri = ggpairs(reef_joined_corri, columns=2:7,
         title = "Correlation of Bleaching and other variables",
-        columnLabels = c("Average_bleaching","SSTA_Frequency_Standard_Deviation",
-                         "Diversity", "rate_of_SST_change", "class"),
-        upper=list(continuous=wrap(my_custom_cor_color)),
+        columnLabels = c("Averageb Bleaching","SSTA Frequency STD",
+                         "Diversity", "Rate of SST change", "Rugosity", "Class"),
+        upper=list(continuous=my_custom_cor_color),
         cardinality_threshold=NULL,
-        lower=list(continuous=wrap(my_custom_smooth), 
-                   combo = wrap("dot", color=Class)))         
+        lower=list(continuous=my_custom_smooth), 
+                   combo = "dot", color=Class)         
 reef_corri
 ```
-```{r}
-ggpairs(reef_joined_corri, columns=2:6, 
-        columnLabels =c("Average_bleaching","SSTA_Frequency_Standard_Deviation",
-                         "Diversity", "rate_of_SST_change", "class"),
-        cardinality_threshold=NULL)
-```
-
-
-
-```{r}
-#reef_joined_all
-pca_eMat = prcomp(reef_joined_all, scale = TRUE)
-options(digits = 2)
-summary(pca_eMat)
-```
-
-
-
 
 
 
