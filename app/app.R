@@ -1,3 +1,9 @@
+##########################################################
+
+# R and Data Setup
+
+##########################################################
+
 library(shinydashboard)
 library(ggplot2)
 library(viridis)
@@ -8,6 +14,7 @@ library(tidyverse)
 
 # R code to read and set up the data
 # Only run once at the start of the program
+# Code taken from Pat and Camille
 world_map = map_data("world")
 
 reef_geomorphic = st_read("../Data/reef_geomorphic_joined_all.gpkg")
@@ -35,7 +42,13 @@ reef_recent["bleached"] = ifelse(reef_recent$Average_bleaching > 0,1,0)
 reef_final = reef_recent %>% 
   drop_na() %>% 
   mutate(class = as.factor(class)) %>%
-  mutate(rugosity = as.factor(rugosity))
+  mutate(rugosity = factor(rugosity, levels = c("Low", "Medium", "High")))
+
+##########################################################
+
+# Plotting/Modelling Functions
+
+##########################################################
 
 # Function to plot the map, with variations based on the variables selected
 plot_map = function(var, start_date, end_date) {
@@ -84,13 +97,35 @@ plot_regression = function(x, y, start_date, end_date) {
     labs(title = title_string, x = x, y = y)
 }
 
-# SHINY component
+plot_rugosity = function(var, start_date, end_date) {
+  
+  reef_temp = reef_final %>%
+    filter(Date >= start_date) %>%
+    filter(Date <= end_date)
+  
+  ggplot(reef_temp, aes(x = rugosity, y = unlist(reef_temp[var]))) +
+    geom_boxplot() +
+    labs(title = var, x = "Rugosity", y = var)
+  
+}
+
+##########################################################
+
+# Shiny Component
+
+##########################################################
+
 ui = dashboardPage(
   dashboardHeader(title = "Reef C4"),
   dashboardSidebar(
     sidebarMenu(id = "menu",
+      
+      # Tabs
       menuItem("Map", tabName = "Map"),
       menuItem("Plots", tabName = "Plots"),
+      menuItem("Rugosity", tabName = "Rugosity"),
+      
+      # Conditional panels only appear when their respective tabs are active
       conditionalPanel(
         condition = 'input.menu == "Map"',
         sliderInput("map_year", "Year Range", min = 1998, max = 2017, value = c(1998, 2017), sep = ""),
@@ -109,6 +144,14 @@ ui = dashboardPage(
                                                              "Diversity" = "Diversity",
                                                              "Bleaching" = "Average_bleaching",
                                                              "Depth" = "Depth"), selected = "Diversity")
+      ),
+      conditionalPanel(
+        condition = 'input.menu == "Rugosity"',
+        sliderInput("rug_year", "Year Range", min = 1998, max = 2017, value = c(1998, 2017), sep = ""),
+        radioButtons("rug_var", "Variable", choices = list("SSTA Frequency Standard Deviation" = "SSTA_Frequency_Standard_Deviation",
+                                                           "Diversity" = "Diversity",
+                                                           "Bleaching" = "Average_bleaching",
+                                                           "Depth" = "Depth"), selected = "SSTA_Frequency_Standard_Deviation")
       )
     )
   ),
@@ -127,6 +170,13 @@ ui = dashboardPage(
             plotOutput("regression")
           )
         )
+      ),
+      tabItem(tabName = "Rugosity",
+        fluidRow(
+          box(
+            plotOutput("rugosity")
+          )
+        )
       )
     )
   )
@@ -142,6 +192,11 @@ server = function(input, output) {
   # Regression plots
   output$regression = renderPlot({
     plot_regression(input$reg_x, input$reg_y, input$reg_year[1], input$reg_year[2])
+  })
+  
+  # Rugosity plots
+  output$rugosity = renderPlot({
+    plot_rugosity(input$rug_var, input$rug_year[1], input$rug_year[2])
   })
   
 }
