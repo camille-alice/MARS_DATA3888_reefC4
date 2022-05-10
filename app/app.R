@@ -75,9 +75,9 @@ plot_regression = function(x, y, start_date, end_date) {
     filter(Date >= start_date) %>%
     filter(Date <= end_date)
   
-  title_string = paste(x, "vs", y, "from", start_date, "to", end_date)
+  title_string = paste(y, "vs", x, "from", start_date, "to", end_date)
   
-  ggplot(reef_temp, aes(unlist(reef_temp[x]), unlist(reef_temp[y]))) +
+  ggplot(reef_temp, aes(unlist(reef_temp[y]), unlist(reef_temp[x]))) +
     geom_point() +
     geom_smooth(method = "lm") +
     labs(title = title_string, x = x, y = y)
@@ -113,8 +113,8 @@ ui = dashboardPage(
       menuItem("Home", tabName = "Home", icon = icon("home")),
       menuItem("Map", tabName = "Map", icon = icon("globe")),
       menuItem("Plots", tabName = "Plots", icon = icon("line-chart")),
-      menuItem("Rugosity", tabName = "Rugosity", icon = icon("bar-chart")),
-      menuItem("Model", tabName = "Model", icon = icon("superpowers")),
+      menuItem("Rugosity", tabName = "Rugosity", icon = icon("sliders")),
+      menuItem("Model", tabName = "Model", icon = icon("sitemap")),
       
       # Conditional panels only appear when their respective tabs are active
       conditionalPanel(
