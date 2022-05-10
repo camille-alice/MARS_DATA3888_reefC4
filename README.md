@@ -16,7 +16,6 @@ Repository for MARS/DATA3888 Reef Project for group C4.
     - [Stakeholder Analysis](#stakeholder-analysis)
     - [Raw Data](#raw-data)
 - [Key Files](#key-files)
-- [Key Papers](#key-papers)
 - [Project Deliverables](#project-deliverables)
     - [Presentation](#presentation)
     - [Report](#report)
@@ -81,10 +80,6 @@ The rugosity of reefs are associated with their geomorphic class. Hence, we are 
 * Joined Geomorphic Reef file (with multiple classes): reef_geomorphic_joined_nas.gpkg
 * Cleaned Rugosity Reef file (without NA's): reef_rugosity_cleaned.gpkg 
 
-# Key Papers 
-
-(add files here)
-
 &nbsp;
 
 # Project Deliverables
@@ -105,14 +100,53 @@ The rugosity of reefs are associated with their geomorphic class. Hence, we are 
     <tr>
         <td>Variables name</td>
         <td>Explanation</td>
+        <td>Source</td> 
     </tr>
     <tr>
-        <td>VARIABLE NAME</td>
-        <td>EXPLANATION</td>
+        <td>Reef.ID</td>
+        <td>Unique Reef Identifier</td>
+        <td>[Reef Check](https://www.reefcheck.org/) </td>
     </tr>
     <tr>
-        <td>VARIABLE NAME</td>
-        <td>EXPLANATION</td>
+        <td>SSTA_Frequency_Standard_Deviation</td>
+        <td>The standard deviation of Sea Surface Temperature Anomaly Frequency (SSTA_Frequency: number of times over the previous 52 weeks that SSTA >= 1 degree C) over the entire time period</td>
+        <td> [NOAA’s Coral Reef Temperature Anomaly Database](www.nodc.noaa.gov/sog/cortad/Version6/)</td>
+    </tr>
+    <tr>
+        <td>rate_of_SST_change</td>
+        <td>The average annual rate of sea surface temperature change in degrees Celsius</td>
+        <td>[NOAA Optimum Interpolation (OI) Sea Surface Temperature (SST) V2](https://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html)</td>
+    </tr>
+    <tr>
+        <td>Depth</td>
+        <td>Provided in meters</td>
+        <td>[Reef Check](https://www.reefcheck.org/)</td>
+    </tr>
+    <tr>
+        <td>Diversity</td>
+        <td>The number of coral species confirmed present in an ecoregion</td>
+        <td>[Corals of the World](http://www.coralsoftheworld.org/page/overview-of-coral-taxonomy/) and J.E.N Veron (personal
+communication by original authors)</td>
+    </tr>
+    <tr>
+        <td>Class</td>
+        <td>Geomorphic zone of reef site</td>
+        <td>[Allen Coral Atlas](https://storage.googleapis.com/coral-atlas-static-files/download-package-materials/Class-Descriptions-Geomorphic-Maps-v3.pdf)</td>
+    </tr>
+    <tr>
+        <td>Average_Bleaching</td>
+        <td>Percent of reef corals that were recorded as bleached</td>
+        <td>[Reef Check](https://www.reefcheck.org/)</td>
+    </tr>
+    <tr>
+        <td>Bleached</td>
+        <td>Binary expression (0 or 1) to indicate whether reef has been bleached or not</td>
+        <td>Based on Average_Bleaching</td>
+    </tr>
+    <tr>
+        <td>Rugosity</td>
+        <td>Estimate of rugosity value for each reef site based on geomorphic zone (class)</td>
+        <td>Multiple sources from literature review</td>
     </tr>
     
 </table>
