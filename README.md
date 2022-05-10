@@ -105,38 +105,38 @@ The rugosity of reefs are associated with their geomorphic class. Hence, we are 
     <tr>
         <td>Reef.ID</td>
         <td>Unique Reef Identifier</td>
-        <td>[Reef Check](https://www.reefcheck.org/) </td>
+        <td><a href="https://www.reefcheck.org/"> Reef Check </a></td>
     </tr>
     <tr>
         <td>SSTA_Frequency_Standard_Deviation</td>
         <td>The standard deviation of Sea Surface Temperature Anomaly Frequency (SSTA_Frequency: number of times over the previous 52 weeks that SSTA >= 1 degree C) over the entire time period</td>
-        <td> [NOAA’s Coral Reef Temperature Anomaly Database](www.nodc.noaa.gov/sog/cortad/Version6/)</td>
+        <td><a href="www.nodc.noaa.gov/sog/cortad/Version6/"> NOAA’s Coral Reef Temperature Anomaly Database </a></td>
     </tr>
     <tr>
         <td>rate_of_SST_change</td>
         <td>The average annual rate of sea surface temperature change in degrees Celsius</td>
-        <td>[NOAA Optimum Interpolation (OI) Sea Surface Temperature (SST) V2](https://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html)</td>
+        <td><a href="https://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html"> NOAA Optimum Interpolation (OI) Sea Surface Temperature (SST) V2</a></td>
     </tr>
     <tr>
         <td>Depth</td>
         <td>Provided in meters</td>
-        <td>[Reef Check](https://www.reefcheck.org/)</td>
+        <td><a href="https://www.reefcheck.org/"> Reef Check </a></td>
     </tr>
     <tr>
         <td>Diversity</td>
         <td>The number of coral species confirmed present in an ecoregion</td>
-        <td>[Corals of the World](http://www.coralsoftheworld.org/page/overview-of-coral-taxonomy/) and J.E.N Veron (personal
+        <td><a href="http://www.coralsoftheworld.org/page/overview-of-coral-taxonomy/"> Corals of the World</a> and J.E.N Veron (personal
 communication by original authors)</td>
     </tr>
     <tr>
         <td>Class</td>
         <td>Geomorphic zone of reef site</td>
-        <td>[Allen Coral Atlas](https://storage.googleapis.com/coral-atlas-static-files/download-package-materials/Class-Descriptions-Geomorphic-Maps-v3.pdf)</td>
+        <td><a href="https://storage.googleapis.com/coral-atlas-static-files/download-package-materials/Class-Descriptions-Geomorphic-Maps-v3.pdf"> Allen Coral Atlas</a></td>
     </tr>
     <tr>
         <td>Average_Bleaching</td>
         <td>Percent of reef corals that were recorded as bleached</td>
-        <td>[Reef Check](https://www.reefcheck.org/)</td>
+        <td><a href="https://www.reefcheck.org/"> Reef Check </a></td>
     </tr>
     <tr>
         <td>Bleached</td>
