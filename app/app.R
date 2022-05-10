@@ -57,28 +57,14 @@ plot_map = function(var, start_date, end_date) {
     filter(Date >= start_date) %>%
     filter(Date <= end_date)
   
-  if (var == "SSTA_Frequency_Standard_Deviation") {
-    ggplot() + 
-      geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "grey", alpha = 0.3) +
-      geom_point(data = reef_temp, alpha = 0.2, aes(y = Latitude.Degrees, x = Longitude.Degrees, size = SSTA_Frequency_Standard_Deviation, color = SSTA_Frequency_Standard_Deviation)) + 
-      labs(title = "SSTA Frequency Standard Deviation of Coral Reefs", x = "", y = "", colour = "SSTA Frequency Standard Deviation", size = "SSTA Frequency Standard Deviation") +
-      scale_colour_viridis() + 
-      theme_void()
-  } else if (var == "Diversity") {
-    ggplot() + 
-      geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "grey", alpha = 0.3) +
-      geom_point(data = reef_temp, alpha = 0.2, aes(y = Latitude.Degrees, x = Longitude.Degrees, size = Diversity, color = Diversity)) + 
-      labs(title = "Diversity of Coral Reefs", x = "", y = "", colour = "Diversity", size = "Diversity") +
-      scale_colour_viridis() + 
-      theme_void()
-  } else if (var == "Bleaching") {
-    ggplot() + 
-      geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "grey", alpha = 0.3) +
-      geom_point(data = reef_temp, alpha = 0.2, aes(y = Latitude.Degrees, x = Longitude.Degrees, size = Average_bleaching, color = Average_bleaching)) + 
-      labs(title = "Bleaching of Coral Reefs", x = "", y = "", colour = "Bleaching", size = "Bleaching") +
-      scale_colour_viridis() + 
-      theme_void()
-  }
+  title_string = paste(var, "of Coral Reefs from", start_date, "to", end_date)
+  
+  ggplot() + 
+    geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "grey", alpha = 0.3) +
+    geom_point(data = reef_temp, alpha = 0.2, aes(y = Latitude.Degrees, x = Longitude.Degrees, size = unlist(reef_temp[var]), color = unlist(reef_temp[var]))) + 
+    labs(title = title_string, x = "", y = "", colour = var, size = var) +
+    scale_colour_viridis() + 
+    theme_void()
   
 }
 
@@ -89,7 +75,7 @@ plot_regression = function(x, y, start_date, end_date) {
     filter(Date >= start_date) %>%
     filter(Date <= end_date)
   
-  title_string = paste(x, "vs", y)
+  title_string = paste(x, "vs", y, "from", start_date, "to", end_date)
   
   ggplot(reef_temp, aes(unlist(reef_temp[x]), unlist(reef_temp[y]))) +
     geom_point() +
@@ -97,15 +83,18 @@ plot_regression = function(x, y, start_date, end_date) {
     labs(title = title_string, x = x, y = y)
 }
 
+# Function to plot boxplots of rugosity against different variables
 plot_rugosity = function(var, start_date, end_date) {
   
   reef_temp = reef_final %>%
     filter(Date >= start_date) %>%
     filter(Date <= end_date)
   
+  title_string = paste("Rugosity compared against", var, "from", start_date, "to", end_date)
+  
   ggplot(reef_temp, aes(x = rugosity, y = unlist(reef_temp[var]))) +
     geom_boxplot() +
-    labs(title = var, x = "Rugosity", y = var)
+    labs(title = title_string, x = "Rugosity", y = var)
   
 }
 
@@ -131,7 +120,7 @@ ui = dashboardPage(
         sliderInput("map_year", "Year Range", min = 1998, max = 2017, value = c(1998, 2017), sep = ""),
         radioButtons("map_var", "Variable", choices = list("SSTA Frequency Standard Deviation" = "SSTA_Frequency_Standard_Deviation",
                                                            "Diversity" = "Diversity",
-                                                           "Bleaching" = "Bleaching"))
+                                                           "Bleaching" = "Average_bleaching"))
       ),
       conditionalPanel(
         condition = 'input.menu == "Plots"',
