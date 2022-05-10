@@ -21,7 +21,6 @@ reef_geomorphic = reef_geomorphic %>%
   mutate(Date = as.Date(Date, "%d-%b-%y")) %>%
   mutate(Depth = as.numeric(Depth)) %>%
   filter(Depth <= 15) # as per Allen Coral Atlas specs
-reef_geomorphic
 ```
 
 ## Investigating NAs
@@ -36,7 +35,7 @@ not_na %>% distinct(Reef.ID, Depth, class) # 3036 - meaning there are some dupli
 not_na %>% distinct(Reef.ID, Depth) # 3036 - meaning that the same reefs but at different depths have the same class identifier, which might be a problem
 ```
 
-## 
+##Logistic regression
 
 ```{r}
 #Most recent entry
@@ -64,7 +63,6 @@ reef_recent["bleached"] <- ifelse(reef_recent$Average_bleaching > 0,1,0)
 #Remove NA
 reef_final <- reef_recent %>% drop_na()
 
-reef_final
 
 reef_model <- glm(formula = bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity + rugosity, data = reef_final, family = binomial)
 
@@ -74,6 +72,121 @@ summary(reef_model)
 step_model_reef = step(reef_model, trace = 0)
 summary(step_model_reef)
 
+```
 
+
+#K-nearest Neighbour
+
+```{r}
+#For KNN change the rugosity to 1,2,3
+reef_final["num_rugosity"] <- ifelse(reef_final$rugosity == "High", 3,
+                                     ifelse(reef_final$rugosity == "Medium",2,1))
+
+
+#Do KNN using the selected variable 
+set.seed(3888)
+
+#reef without "bleached" and other useless attributes
+reef_ungroup = reef_final %>% ungroup()
+X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity")) %>% scale()
+
+y = reef_ungroup %>% select(bleached) %>% pull()
+
+
+cv_acc50_knn = c()  # initialise results vector
+cv_acc_knn = c()
+K = 10
+
+for (i in 1:50){
+    
+    cvSets = cvTools::cvFolds(nrow(X), K) 
+
+    for (j in 1:K) {
+        test_id = cvSets$subsets[cvSets$which == j]
+        X_test = X[test_id, ]
+        X_train = X[-test_id, ]
+        y_test = y[test_id]
+        y_train = y[-test_id]
+        fit = class::knn(train = X_train, test = X_test, cl = y_train, k = 5)
+        cv_acc_knn[j] = mean(fit == y_test)
+    }
+    
+    cv_acc50_knn <- append(cv_acc50_knn, mean(cv_acc_knn))
+}
+
+mean(cv_acc50_knn)
+```
+
+#Random Forest
+```{r}
+#Do random forest
+set.seed(3888)
+cv_acc50_rf = c()  # initialise results vector
+cv_acc_rf = c()
+K = 10
+
+for (i in 1:50){
+    
+    cvSets = cvTools::cvFolds(nrow(X), K) 
+
+    for (j in 1:K) {
+        test_id = cvSets$subsets[cvSets$which == j]
+        X_test = X[test_id, ]
+        X_train = X[-test_id, ]
+        y_test = y[test_id]
+        y_train = y[-test_id]
+        rf_res <- randomForest::randomForest(x = X_train, y = as.factor(y_train))
+        fit <- predict(rf_res, X_test)
+        cv_acc_rf[j] = mean(fit == y_test)
+    }
+    
+    cv_acc50_rf <- append(cv_acc50_rf, mean(cv_acc_rf))
+}
+
+mean(cv_acc50_rf)
+```
+
+#SVM model
+```{r}
+#Do SVM model
+set.seed(3888)
+cv_acc50_svm = c()  # initialise results vector
+cv_acc_svm = c()
+K = 10
+
+for (i in 1:50){
+    
+    cvSets = cvTools::cvFolds(nrow(X), K) 
+
+    for (j in 1:K) {
+        test_id = cvSets$subsets[cvSets$which == j]
+        X_test = X[test_id, ]
+        X_train = X[-test_id, ]
+        y_test = y[test_id]
+        y_train = y[-test_id]
+        ## SVM
+        svm_res <- e1071::svm(x = X_train, y = as.factor(y_train))
+        fit <- predict(svm_res, X_test)
+        cv_acc_svm[j] = mean(fit == y_test)
+    }
+    
+    cv_acc50_svm <- append(cv_acc50_svm, mean(cv_acc_svm))
+}
+
+mean(cv_acc50_svm)
+```
+
+
+#Beta regression
+```{r}
+#Do beta regression
+library(betareg)
+
+#Create probability of bleaching which Average_bleaching/100, notes about this we need to at least add 0.0000001, since beta regression restrict the output (Y) to be completely 0
+reef_final["prob_bleached"] <- reef_final$Average_bleaching/100 + 0.0000001
+
+#reef without other useless attributes
+b_reef_model <- betareg(formula = prob_bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity + rugosity, data = reef_final)
+summary(b_reef_model)
 ```
 
