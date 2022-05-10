@@ -110,9 +110,11 @@ ui = dashboardPage(
     sidebarMenu(id = "menu",
       
       # Tabs
-      menuItem("Map", tabName = "Map"),
-      menuItem("Plots", tabName = "Plots"),
-      menuItem("Rugosity", tabName = "Rugosity"),
+      menuItem("Home", tabName = "Home", icon = icon("home")),
+      menuItem("Map", tabName = "Map", icon = icon("globe")),
+      menuItem("Plots", tabName = "Plots", icon = icon("line-chart")),
+      menuItem("Rugosity", tabName = "Rugosity", icon = icon("bar-chart")),
+      menuItem("Model", tabName = "Model", icon = icon("superpowers")),
       
       # Conditional panels only appear when their respective tabs are active
       conditionalPanel(
@@ -146,25 +148,36 @@ ui = dashboardPage(
   ),
   dashboardBody(
     tabItems(
+      tabItem(tabName = "Home",
+        fluidRow(
+          box(img(src = "ReefC4_banner.png", height = 360, width = 640))
+        ),
+        fluidRow(
+          box(h1("intro stuff"))
+        )
+      ),
       tabItem(tabName = "Map",
         fluidRow(
-          box(
-            plotOutput("map")
-          )
+          box(plotOutput("map"))
         )
       ),
       tabItem(tabName = "Plots",
         fluidRow(
-          box(
-            plotOutput("regression")
-          )
+          box(plotOutput("regression"))
         )
       ),
       tabItem(tabName = "Rugosity",
         fluidRow(
-          box(
-            plotOutput("rugosity")
-          )
+          box(plotOutput("rugosity"))
+        ),
+        fluidRow(
+          box(h1("What is rugosity?"), 
+              "idk i dont do mars")
+        )
+      ),
+      tabItem(tabName = "Model",
+        fluidRow(
+          box(h1("model stuff"))
         )
       )
     )
