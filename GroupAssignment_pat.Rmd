@@ -15,7 +15,7 @@ library(dplyr)
 library(sf)
 library(tidyverse)
 
-reef_geomorphic = st_read("/Users/patri/OneDrive/Desktop/DATA3888/MARS_DATA3888_reefC4/Data/reef_geomorphic_joined_all.gpkg")
+reef_geomorphic = st_read("Data/reef_geomorphic_joined_all.gpkg")
 reef_geomorphic = reef_geomorphic %>% 
   as.data.frame() %>%
   mutate(Date = as.Date(Date, "%d-%b-%y")) %>%
