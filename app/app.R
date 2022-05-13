@@ -15,9 +15,14 @@ library(tidyverse)
 # R code to read and set up the data
 # Only run once at the start of the program
 # Code taken from Pat and Camille
-world_map = map_data("world")
+# world2 has Australia in the center
+world_map = map_data("world2") 
 
 reef_geomorphic = st_read("../Data/reef_geomorphic_joined_all.gpkg")
+
+#adding to column with new long co-ords for world2 map
+wrapfunction = function(x){ifelse(x > 0, x, 360+x)}
+reef_geomorphic$wrapLongitute = sapply(reef_geomorphic$Longitude.Degrees, wrapfunction)
 
 reef_geomorphic = reef_geomorphic %>% 
   as.data.frame() %>%
@@ -27,7 +32,7 @@ reef_geomorphic = reef_geomorphic %>%
   filter(Depth <= 15) # as per Allen Coral Atlas specs
 
 reef_recent = reef_geomorphic %>%
-  select(Reef.ID, Date, SSTA_Frequency_Standard_Deviation, Depth, Diversity, class, Average_bleaching, Latitude.Degrees, Longitude.Degrees) %>% 
+  select(Reef.ID, Date, SSTA_Frequency_Standard_Deviation, Depth, Diversity, class, Average_bleaching, Latitude.Degrees, wrapLongitute) %>% 
   mutate(SSTA_Frequency_Standard_Deviation = as.numeric(SSTA_Frequency_Standard_Deviation),
          Average_bleaching = as.numeric(Average_bleaching),
          Depth = as.numeric(Depth), 
@@ -61,10 +66,12 @@ plot_map = function(var, start_date, end_date) {
   
   ggplot() + 
     geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "grey", alpha = 0.3) +
-    geom_point(data = reef_temp, alpha = 0.2, aes(y = Latitude.Degrees, x = Longitude.Degrees, size = unlist(reef_temp[var]), color = unlist(reef_temp[var]))) + 
+    geom_point(data = reef_temp, alpha = 0.7, aes(y = Latitude.Degrees, x = wrapLongitute, size = unlist(reef_temp[var]), color = unlist(reef_temp[var]))) + 
     labs(title = title_string, x = "", y = "", colour = var, size = var) +
     scale_colour_viridis() + 
-    theme_void()
+    theme_void() + 
+    theme(legend.position="bottom") +
+    guides(color= guide_legend(title = paste(var)),size=guide_legend(title = paste(var)))
   
 }
 

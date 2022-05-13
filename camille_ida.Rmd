@@ -237,7 +237,7 @@ length(only_nas$class) #2160
 
 As there were too many double ups of classes for the same points, we decided to use only the data we had an exact match to, as an incorrect geomorphic type could change the rugosity estimate. 
 
-## Figures and Shiny App
+## Figures 
 ```{r Reading in data}
 reef_geomorphic = st_read("./DATA3888_Github/MARS_DATA3888_reefC4/Data/reef_geomorphic_joined_all.gpkg")
 reef_geomorphic = reef_geomorphic %>% 
@@ -300,18 +300,18 @@ my_custom_cor_color <- function(data, mapping, color = I("black"), sizeRange = c
   p <- ggally_text(
    label = tt, 
    mapping = aes(),
-   xP = 0.67, yP = 0.5, 
+   xP = 0.5, yP = 0.5, 
    size = 4,
    color=color,
    ...
   ) + 
     # add the sig stars #x and y are position of stars
-    geom_text(aes_string(x = 0.8, y = 0.8),
+    geom_text(aes_string(x = 0.7, y = 0.75),
       label = sig, 
       color = color,
       ...
     ) +   #x and y are position or text Corr: 
-    geom_text(aes_string(x = 0.28, y = 0.7),
+    geom_text(aes_string(x = 0.5, y = 0.8),
               size = 3,
               label = "Corr: ",
               color = color
@@ -322,18 +322,19 @@ my_custom_cor_color <- function(data, mapping, color = I("black"), sizeRange = c
       panel.grid.minor=element_blank(), 
       panel.grid.major=element_blank()) 
 
-  corColors <- RColorBrewer::brewer.pal(n = 7, name = "PuOr") #[2:6]
+  #corColors <- RColorBrewer::brewer.pal(n = 7, name = "RdBu") #[2:6]
+  #"#B35806" "#E08214" "#D1E5F0" "#4393C3" "#2166AC" 
 
   if (r <= -0.08) {
-    corCol <- corColors[7]
+    corCol <- "#2166AC"
   } else if (r <= -0.06) {
-    corCol <- corColors[6]
+    corCol <- "#4393C3"
   } else if (r < 0.06) {
-    corCol <- corColors[5]
+    corCol <- "#D1E5F0"
   } else if (r < 0.08) {
-    corCol <- corColors[3]
+    corCol <- "#E08214"
   } else {
-    corCol <- corColors[2]
+    corCol <- "#B35806"
   }
   p <- p + theme(
     panel.background = element_rect(fill= corCol)
@@ -344,8 +345,8 @@ my_custom_cor_color <- function(data, mapping, color = I("black"), sizeRange = c
 
 my_custom_smooth <- function(data, mapping, ...) {
   ggplot(data = data, mapping = mapping) +
-    geom_point(color = I("orange")) + 
-    scale_color_brewer(palette="PuOr") +
+    geom_point(color = I("orange"), alpha =0.2) + 
+    scale_color_brewer(palette="RdBu") +
     geom_smooth(method = "lm", color = I("black")) + 
     theme(panel.background=element_blank(),
         panel.grid.minor=element_blank(),
@@ -356,7 +357,7 @@ my_custom_smooth <- function(data, mapping, ...) {
 
 ```{r Correlation plot, fig.cap= "Fig 3.3: Variable Correlation Visualisation", message=FALSE, warning=FALSE}
 reef_corri = ggpairs(reef_joined_corri, columns=2:7,
-        title = "Correlation of Bleaching and other variables",
+        title = "Correlation of Bleaching and chosen variables",
         columnLabels = c("Averageb Bleaching","SSTA Frequency STD",
                          "Diversity", "Rate of SST change", "Rugosity", "Class"),
         upper=list(continuous=my_custom_cor_color),
@@ -365,10 +366,6 @@ reef_corri = ggpairs(reef_joined_corri, columns=2:7,
                    combo = "dot", color=Class)         
 reef_corri
 ```
-
-
-
-
 
 
 

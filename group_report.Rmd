@@ -33,13 +33,9 @@ library(dplyr)
 
 **Part A: Clear description of the approach in data collection, developed model, the evaluation strategies from a data-science perspective. Here we refer to all types of evaluation metrics including graphical, qualitative and quantitative metric.**
 
-The bleaching data used is from a public dataset taken from the paper ["A global analysis of coral bleaching over the past twodecades"](https://doi.org/10.1038/s41467-019-09238-2) published in Nature communications in 2019. Authors are: Sully, S., Burkepile, D. E., Donovan, M. K., Hodgson, G., & Van Woesik, R. The author has curated coral bleaching events at 3351 sites in 81 countries from 1998 to 2017 and a suite of environmental variables at each site. The raw data can be found at the [Reef Check website](https://www.reefcheck.org/) or on the [GitHub repository for the Institute for Global Ecology](https://github.com/InstituteForGlobalEcology/Coral-bleaching-a-global-analysis-of-the-past-two-decades).
+The reef data containing the bleaching, diversity, sea-surface-temperature anomaly (SSTA), and depth metrics comes from a public dataset taken from the paper ["A global analysis of coral bleaching over the past twodecades"](https://doi.org/10.1038/s41467-019-09238-2) by Sully et al. (2019). The paper contains coral bleaching events at 3351 sites in 81 countries from 1998 to 2017. The raw data can be found at the [Reef Check website](https://www.reefcheck.org/) or on the [GitHub repository for the Institute for Global Ecology](https://github.com/InstituteForGlobalEcology/Coral-bleaching-a-global-analysis-of-the-past-two-decades).
 
-We also used data gathered from [Allen Coral Atlas](https://allencoralatlas.org/atlas/) to build our rugosity dataset. Full extraction method can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/camille_ida.Rmd). *Note: The full dataset was downloaded locally to be processed as the zipped archive was over 13GB* 
-
-The data was downloaded from [Allen Coral Atlas](https://allencoralatlas.org/resources/) in a 13BG zip archive. We extracted the Geomorphic Map data that was in the shape files geomorphic.gpkg (or .geojson). 
-
-The bleaching data used is from a public dataset taken from the paper "A global analysis of coral bleaching over the past twodecades" published in Nature communications in 2019. Authors are: Sully, S., Burkepile, D. E., Donovan, M. K., Hodgson, G., & Van Woesik, R. The author has curated coral bleaching events at 3351 sites in 81 countries from 1998 to 2017 and a suite of environmental variables at each site. The raw data can be found at the Reef Check website or on the GitHub repository for the Institute for Global Ecology.
+We also used data gathered from [Allen Coral Atlas](https://allencoralatlas.org/atlas/) to build our rugosity dataset. Full extraction method can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/camille_ida.Rmd). The full dataset was downloaded locally to be processed as the zipped archive was over 13GB. The files extracted contained the Geomorphic Map data that was in the shape files geomorphic.gpkg or .geojson. From investigation of the data sets on the map, it looked like the reef dataset is not as precise as the Allen Coral dataset - hence points not touching some polygons. As such, we decided to keep only the points from the Reef dataset that fell within the polygons of Allen Coral Atlas to limit uncertainty. 
 
 **Part B: Reef project - Clear description of the approach in data collection to address appropriate research questions, developed model, the evaluation strategies from a marine science perspective**
 
@@ -54,6 +50,11 @@ The bleaching data used is from a public dataset taken from the paper "A global 
 **Discussion of potential shortcomings or issues associated with the development process or the product with reference to both disciplines. Identification of future work or improvement in both disciplines. Conclusion adequately summarises the project and identification of future work.**
 
 
+# Conclusion
+
+# References 
+
+Sully, S., Burkepile, D.E., Donovan, M.K. et al. A global analysis of coral bleaching over the past two decades. Nat Commun 10, 1264 (2019). https://doi.org/10.1038/s41467-019-09238-2
 
 ### Side notes: 
 
@@ -68,6 +69,7 @@ Part C: Data communication: effective use of figures and tables.
 Reproducibility & readability
 
 How well the report can be reproduced.
+
 
 
 
