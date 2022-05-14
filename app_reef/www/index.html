@@ -1,0 +1,288 @@
+<!DOCTYPE HTML>
+<!--
+	Future Imperfect by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title id="toptitle">Reef C4</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		{{ headContent() }}
+		{{ slider_skin }}
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="#toptitle">Reef C4</a></h1>
+						<nav class="links">
+							<ul>
+								<li><a href="#reef_overview">Overview</a></li>
+								<li><a href="#map">Map</a></li>
+								<li><a href="#rugosity">Rugosity</a></li>
+								<li><a href="#plots">Plots</a></li>
+								<li><a href="#models">Models</a></li>
+							</ul>
+					</header>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post OVERVIEW -->
+							<article class="post">
+								<header>
+									<div class="title">
+										<h2><a id="reef_overview">Reef Overview</a></h2>
+										<p>Find out about coral reefs and our study</p>
+									</div>
+									<div class="meta">
+										<time class="published" datetime="2022-05-13">November 1, 2015</time>
+										<a href="#" class="author"><span class="name">Jane Doe</span><img src="images/avatar.jpg" alt="" /></a>
+									</div>
+								</header>
+								<a class="image featured"><img src="images/ReefC4_banner.png" alt="" /></a>
+								<p>Coral bleaching is when coral reefs, under environmental stress (such as change in temperature), release algae in their tissues, causing them to turn white. Bleached corals become susceptible to disease and vulnerable to death. The bleaching data used is from a public dataset taken from the paper "A global analysis of coral bleaching over the past twodecades" published in Nature communications in 2019. Authors are: Sully, S., Burkepile, D. E., Donovan, M. K., Hodgson, G., & Van Woesik, R. The author has curated coral bleaching events at 3351 sites in 81 countries from 1998 to 2017 and a suite of environmental variables at each site. The raw data can be found at the Reef Check website or on the GitHub repository for the Institute for Global Ecology.</p>
+							</article>
+<!-- -->
+
+						<!-- Post MAP -->
+							<article class="post">
+								<header>
+									<div class="title">
+										<h2><a id="map">Map</a></h2>
+										<p>View our data on a world map. Use the botton below to change variable selection and see the spread on the map</p>
+									</div>
+									<div class="meta">
+										<time class="published" datetime="2022-05-13">October 25, 2015</time>
+										<a href="#" class="author"><span class="name">Jane Doe</span><img src="images/avatar.jpg" alt="" /></a>
+									</div>
+								</header>
+								
+								<!-- Map vis -->
+								<section>
+								  <ul class="actions">
+								    <div class="row">
+									    <div class="col-7">
+									      <h4>Variable:</h4>
+									    	<select name="map_var" id="map_var">
+									    	  <option value="Average_bleaching">Bleaching</option>
+									    		<option value="SSTA_Frequency_Standard_Deviation">SSTA Frequency Standard Deviation</option>
+									    		<option value="Diversity">Diversity</option>
+									    		<option value="Depth">Depth</option>
+									    	</select>
+									    </div>
+									    <div class="col-7">
+									      <h4>Year Range:</h4>
+									    	<li><a id="slider">{{ map_slider }}</a></li>
+									    </div>
+									  </div>
+									    {{ map }}
+									</ul>									  
+								</section>
+								
+							</article>
+							
+						<!-- Post RUGOSITY -->
+							<article class="post">
+								<header>
+									<div class="title">
+										<h2><a id="rugosity">Rugosity</a></h2>
+										<p>An explanation of rugosity</p>
+									</div>
+									<div class="meta">
+										<time class="published" datetime="2015-10-22">October 22, 2015</time>
+										<a href="#" class="author"><span class="name">Jane Doe</span><img src="images/avatar.jpg" alt="" /></a>
+									</div>
+								</header>
+								<a id = "orange_coral" class="image featured"><img src="images/alexander-van-steenberge-QAMhHR0JHAg-unsplash.jpg" alt="" /></a>
+								<a id = "rug_diagram" class="image featured"><img src="images/rugosity3.png" alt="" /></a>
+								<p>Words about Rugosity</p>
+								
+              <!-- Rugosity vis -->
+								<section>
+								  <ul class="actions">
+								    <div class="row">
+									    <div class="col-7">
+									      <h4>Variable:</h4>
+									    	<select name="rug_var" id="rug_var">
+									    	  <option value="Diversity">Diversity</option>
+									    	  <option value="Average_bleaching">Bleaching</option>
+									    		<option value="SSTA_Frequency_Standard_Deviation">SSTA Frequency Standard Deviation</option>
+									    		<option value="Depth">Depth</option>
+									    	</select>
+									    </div>
+									    <div class="col-7">
+									      <h4>Year Range:</h4>
+									    	<li><a id="slider">{{ rug_slider }}</a></li>
+									    </div>
+									  </div>
+									    {{ rugosity_plot }}
+									</ul>									  
+								</section>
+							</article>
+
+						<!-- Post PLOTS -->
+							<article class="post">
+								<header>
+									<div class="title">
+										<h2><a id="plots">Correlation Plots</a></h2>
+										<p>Explore how different varibles look on a scatter plot</p>
+									</div>
+									<div class="meta">
+										<time class="published" datetime="2015-10-18">October 18, 2015</time>
+										<a href="#" class="author"><span class="name">Jane Doe</span><img src="images/avatar.jpg" alt="" /></a>
+									</div>
+								</header>
+      
+              <!-- Plots vis -->
+								<section>
+								  <ul class="actions">
+								    <div class="row">
+									    <div class="col-7">
+									      <h4>X Variable:</h4>
+									    	<select name="reg_x" id="reg_x">
+									    	  <option value="Average_bleaching">Bleaching</option>
+									    		<option value="SSTA_Frequency_Standard_Deviation">SSTA Frequency Standard Deviation</option>
+									    		<option value="Diversity">Diversity</option>
+									    		<option value="Depth">Depth</option>
+									    	</select>
+									    </div>
+									    <div class="col-7">
+									      <h4>Y Variable:</h4>
+									    	<select name="reg_y" id="reg_y">
+									    	  <option value="SSTA_Frequency_Standard_Deviation">SSTA Frequency Standard Deviation</option>
+									    	  <option value="Average_bleaching">Bleaching</option>
+									    		<option value="Diversity">Diversity</option>
+									    		<option value="Depth">Depth</option>
+									    	</select>
+									    </div>									    
+									    <div class="col-7">
+									      <h4>Year Range:</h4>
+									    	<li><a id="slider">{{ reg_slider }}</a></li>
+									    </div>
+									  </div>
+									    {{ regression }}
+									</ul>									  
+								</section>
+              </article>
+              
+						<!-- Post MODELS -->
+							<article class="post">
+								<header>
+									<div class="title">
+										<h2><a id="models">Models</a></h2>
+										<p>See how our models performed</p>
+									</div>
+									<div class="meta">
+										<time class="published" datetime="2022-05-13">October 25, 2015</time>
+										<a href="#" class="author"><span class="name">Jane Doe</span><img src="images/avatar.jpg" alt="" /></a>
+									</div>
+								</header>
+								<a id="white_bluecoral" class="image featured"><img src="images/bawah-reserve-aKAUZYouIXk-unsplash.jpg" alt="" /></a>
+								<p>Model words here </p>
+								<footer>
+									<ul class="actions">
+										<li><a href="single.html" class="button large">Continue Reading</a></li>
+									</ul>
+									<ul class="stats">
+										<li><a href="#">General</a></li>
+										<li><a href="#" class="icon solid fa-heart">28</a></li>
+										<li><a href="#" class="icon solid fa-comment">128</a></li>
+									</ul>
+								</footer>
+							</article>              
+              
+					</div>
+    
+				<!-- Sidebar -->
+					<section id="sidebar">
+
+						<!-- Intro -->
+							<section id="intro">
+								<a id="logo" class="logo"><img src="images/ReefC4_logo square.png" alt="" /></a>
+								<header>
+									<h2>Analysing Coral Reefs</h2>
+									<p>A study looking into coral rugosity and it's effect on coral bleaching by <a href="https://github.com/camille-alice/MARS_DATA3888_reefC4">Reef C4</a></p>
+								</header>
+							</section>
+
+						<!-- Mini Posts -->
+							<section>
+								<div class="mini-posts">
+
+									<!-- Mini Post -->
+										<article class="mini-post">
+											<header>
+												<h3><a href="single.html">Vitae sed condimentum</a></h3>
+												<time class="published" datetime="2015-10-20">October 20, 2015</time>
+												<a href="#" class="author"><img src="images/avatar.jpg" alt="" /></a>
+											</header>
+											<a id="purple_coral" class="image"><img src="images/david-clode-eOSqRq2Qm1c-unsplash.jpg" alt="" /></a>
+										</article>
+
+									<!-- Mini Post -->
+										<article class="mini-post">
+											<header>
+												<h3><a href="single.html">Rutrum neque accumsan</a></h3>
+												<time class="published" datetime="2015-10-19">October 19, 2015</time>
+												<a href="#" class="author"><img src="images/avatar.jpg" alt="" /></a>
+											</header>
+											<a id="leftcorner_coral" class="image"><img src="images/sandy-ravaloniaina-WypxDkRH1Ns-unsplash.jpg" alt="" /></a>
+										</article>
+
+									<!-- Mini Post -->
+										<article class="mini-post">
+											<header>
+												<h3><a href="single.html">Odio congue mattis</a></h3>
+												<time class="published" datetime="2015-10-18">October 18, 2015</time>
+												<a href="#" class="author"><img src="images/avatar.jpg" alt="" /></a>
+											</header>
+											<a id="nemo_home" class="image"><img src="images/francesco-ungaro-hqAGgNsMpEY-unsplash.jpg" alt="" /></a>
+										</article>
+
+									<!-- Mini Post -->
+										<article class="mini-post">
+											<header>
+												<h3><a href="single.html">Enim nisl veroeros</a></h3>
+												<time class="published" datetime="2015-10-17">October 17, 2015</time>
+												<a href="#" class="author"><img src="images/avatar.jpg" alt="" /></a>
+											</header>
+											<a id="nicelooking_coral" class="image"><img src="images/francesco-ungaro-DnLtZfBSjcU-unsplash.jpg" alt="" /></a>
+										</article>
+
+								</div>
+							</section>
+
+						<!-- About -->
+							<section class="blurb">
+								<h2>About</h2>
+								<p>This website was created as part of an interdeciplinary study by students at the The University of Sydney. This study combines knowledge from marine biology students and data science students. </p>
+							</section>
+
+						<!-- Footer -->
+							<section id="footer">
+								<ul class="icons">
+									<li><a href="https://github.com/camille-alice/MARS_DATA3888_reefC4" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+								</ul>
+								<p class="copyright">&copy; Template design by: <a href="http://html5up.net">HTML5 UP</a>. Images: <a href="http://unsplash.com">Unsplash</a>.</p>
+							</section>
+
+					</section>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>

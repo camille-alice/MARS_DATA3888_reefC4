@@ -5,6 +5,7 @@ date: '2022-04-09'
 output: html_document
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = '/Users/camillekarski/Documents/Uni/DATA3888/')
@@ -367,5 +368,38 @@ reef_corri = ggpairs(reef_joined_corri, columns=2:7,
 reef_corri
 ```
 
+```{r Saving final reef file for app}
+reef_geomorphic = st_read("/Users/camillekarski/Documents/Uni/DATA3888/DATA3888_GitHub/MARS_DATA3888_reefC4/Data/reef_geomorphic_joined_all.gpkg")
 
+#adding to column with new long co-ords for world2 map
+wrapfunction = function(x){ifelse(x > 0, x, 360+x)}
+reef_geomorphic$wrapLongitute = sapply(reef_geomorphic$Longitude.Degrees, wrapfunction)
 
+reef_geomorphic = reef_geomorphic %>% 
+  #as.data.frame() %>%
+  mutate(Date = as.Date(Date, "%d-%b-%y")) %>%
+  mutate(Date = as.numeric(format(Date, "%Y"))) %>%
+  mutate(Depth = as.numeric(Depth)) %>%
+  filter(Depth <= 15) # as per Allen Coral Atlas specs
+
+reef_recent = reef_geomorphic %>%
+  select(Reef.ID, Date, SSTA_Frequency_Standard_Deviation, Depth, Diversity, class, Average_bleaching, Latitude.Degrees, wrapLongitute) %>% 
+  mutate(SSTA_Frequency_Standard_Deviation = as.numeric(SSTA_Frequency_Standard_Deviation),
+         Average_bleaching = as.numeric(Average_bleaching),
+         Depth = as.numeric(Depth), 
+         Diversity = as.numeric(Diversity)) %>%
+  group_by(Reef.ID)
+
+reef_recent["rugosity"] = ifelse(reef_recent$class == "Reef Slope" | reef_recent$class == "Outer Reef Flat","High", ifelse(reef_recent$class == "Sheltered Reef Slope" | reef_recent$class == "Reef Crest" | reef_recent$class == "Back Reef Slope","Medium","Low"))
+reef_recent["rugosity_num"] = ifelse(reef_recent$class == "Reef Slope" | reef_recent$class == "Outer Reef Flat",3, ifelse(reef_recent$class == "Sheltered Reef Slope" | reef_recent$class == "Reef Crest" | reef_recent$class == "Back Reef Slope",2,1))
+
+reef_recent["bleached"] = ifelse(reef_recent$Average_bleaching > 0,1,0)
+
+reef_final = reef_recent %>% 
+  drop_na() %>% 
+  mutate(class = as.factor(class)) %>%
+  mutate(rugosity = factor(rugosity, levels = c("Low", "Medium", "High")))
+#st_write(reef_final, 'reef_final.gpkg')
+```
+
+          
