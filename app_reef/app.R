@@ -7,6 +7,7 @@
 library(shiny)
 library(shinyWidgets)
 library(ggplot2)
+library(plotly)
 library(viridis)
 library(maps)
 library(dplyr)
@@ -46,13 +47,49 @@ plot_map = function(var, start_date, end_date) {
     geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "grey", alpha = 0.3) +
     geom_point(data = reef_temp, alpha = 0.4, aes(y = Latitude.Degrees, x = wrapLongitute, size = unlist(reef_temp[var]), color = unlist(reef_temp[var]))) + 
     labs(title = title_string, x = "", y = "", colour = var, size = var) +
-    scale_colour_viridis() + 
+    scale_colour_viridis(option = "magma") + 
     theme_minimal() + 
     theme(legend.position="bottom") +
     guides(color= guide_legend(title = clean_var),
            size=guide_legend(title = clean_var))
   
 }
+
+## Function to plot the map, with variations based on the variables selected
+#plot_map_inter = function(var, start_date, end_date) {
+#  
+#  reef_temp = reef_final %>%
+#    filter(Date >= start_date) %>%
+#    filter(Date <= end_date) %>% 
+#    arrange(Average_bleaching) #re ordering so data appears on map with most bleached on top as ggplot plots from row=1
+#  
+#  #cleaning var name for titles 
+#  clean_var = str_replace_all(var, "_", " ")
+#  title_string = paste(clean_var, "of Coral Reefs from", start_date, "to", end_date)
+#  
+#  base_map = ggplot() + 
+#    geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "grey", alpha = 0.3) +
+#    geom_point(data = reef_temp, alpha = 0.7, aes(y = Latitude.Degrees, x = wrapLongitute, 
+#                                                  size = unlist(reef_temp[var]), 
+#                                                  color = unlist(reef_temp[var]),
+#                                                  text = paste('Reef Name: ', reef_temp$Reef.Name, 
+#                                                    '<br>Country: ', reef_temp$Country, 
+#                                                    paste(sprintf('<br> %s: ', unlist(reef_temp$reef_temp[var]))), unlist(reef_temp$reef_temp[var])))) + 
+#    labs(title = title_string, x = "", y = "", colour = var, size = var) +
+#    scale_colour_viridis(option="magma") + 
+#    theme_minimal() + 
+#    theme(legend.position="bottom") +
+#    guides(color= guide_legend(title = clean_var),
+#           size=guide_legend(title = clean_var))
+#  
+#  #interactive map
+#  plotly(base_map, tooltip = "text") %>% 
+#    layout(base_map, legend=list(orientation = "h"))
+#  
+#}
+#c('Reef Name: ', reef_temp$Reef.Name, 
+#  '<br>Country: ', reef_temp$Country, 
+#  sprintf('<br> %s: ', unlist(reef_temp$reef_temp[var])), unlist(reef_temp$reef_temp[var]))
 
 # Function to plot linear regression, with variations based on the variables selected
 plot_regression = function(x, y, start_date, end_date) {
@@ -110,6 +147,7 @@ ui = htmlTemplate("www/index.html",
                   
                   map_title = verbatimTextOutput("map_title"),
                   map = plotOutput("map"),
+                  #map_inter = plotlyOutput("map_inter"),
                   rugosity_plot = plotOutput("rugosity_plot"),
                   regression = plotOutput("regression")
 
@@ -123,6 +161,11 @@ server = function(input, output) {
     plot_map(input$map_var, input$map_year[1], input$map_year[2])
   })
   
+#  # Interactive map
+#  output$map_inter = renderPlotly({
+#    plot_map_inter(input$map_var, input$map_year[1], input$map_year[2])
+#  })
+
   # Regression plots
   output$regression = renderPlot({
     plot_regression(input$reg_x, input$reg_y, input$reg_year[1], input$reg_year[2])
