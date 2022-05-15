@@ -19,7 +19,7 @@ library(tidyverse)
 world_map = map_data("world2")
 
 #cleaned file to use for app - no warnings and less computationally expensive
-reef_geomorphic = st_read("/Users/camillekarski/Documents/Uni/DATA3888/reef_final.gpkg")
+reef_geomorphic = st_read("../Data/reef_final.gpkg")
 reef_final = reef_geomorphic %>% 
   as.data.frame()
 
