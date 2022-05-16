@@ -108,6 +108,24 @@ plot_regression = function(x, y, start_date, end_date) {
     labs(title = title_string, x = clean_x, y = clean_y)
 }
 
+# Function to plot qqplots for the variables selected in regression
+plot_qq = function(var, start_date, end_date) {
+  
+  reef_temp = reef_final %>%
+    filter(Date >= start_date) %>%
+    filter(Date <= end_date) 
+  
+  clean_var = str_replace_all(var, "_", " ")
+  title_string = paste("QQPlot of", clean_var, "from", start_date, "to", end_date)
+  
+  ggplot(reef_temp, aes(sample = unlist(reef_temp[var]))) +
+    stat_qq() +
+    stat_qq_line() + 
+    labs(title = title_string, x = "Theoretical", y = "Sample") +
+    theme_minimal() 
+  
+}
+
 # Function to plot boxplots of rugosity against different variables
 plot_rugosity = function(var, start_date, end_date) {
   
@@ -149,7 +167,9 @@ ui = htmlTemplate("www/index.html",
                   map = plotOutput("map"),
                   #map_inter = plotlyOutput("map_inter"),
                   rugosity_plot = plotOutput("rugosity_plot"),
-                  regression = plotOutput("regression")
+                  regression = plotOutput("regression"),
+                  qq_1 = plotOutput("qq_1"),
+                  qq_2 = plotOutput("qq_2")
 
                   
 )
@@ -169,6 +189,16 @@ server = function(input, output) {
   # Regression plots
   output$regression = renderPlot({
     plot_regression(input$reg_x, input$reg_y, input$reg_year[1], input$reg_year[2])
+  })
+  
+  # QQ plot for var 1
+  output$qq_1 = renderPlot({
+    plot_qq(input$reg_x, input$reg_year[1], input$reg_year[2])
+  })
+  
+  # QQ plot for var 2
+  output$qq_2 = renderPlot({
+    plot_qq(input$reg_y, input$reg_year[1], input$reg_year[2])
   })
   
   # Rugosity plots
