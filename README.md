@@ -11,10 +11,7 @@ Repository for MARS/DATA3888 Reef Project for group C4.
 ### Table of Contents
 
 - [Project Description](#project-description)
-- [Ethical Considerations](#ethical-considerations)
-    - [Why It Matters](#why-it-matters)
-    - [Stakeholder Analysis](#stakeholder-analysis)
-    - [Raw Data](#raw-data)
+- [Raw Data](#raw-data)
 - [Key Files](#key-files)
 - [Project Deliverables](#project-deliverables)
     - [Presentation](#presentation)
@@ -47,20 +44,8 @@ The bleaching data used is from a public dataset taken from the paper ["A global
 We also used data gathered from [Allen Coral Atlas](https://allencoralatlas.org/atlas/) to build our rugosity dataset. Full extraction method can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/camille_ida.Rmd). *Note: The full dataset was downloaded locally to be processed as the zipped archive was over 13GB* 
 
 &nbsp; 
-# Ethical Considerations
 
-(Not sure if necessary) 
-
-## Why It Matters
-
-(Importance of predicting coral bleaching) 
-
-
-## Stakeholder Analysis
-
-(Who are we aiming to convince of what?) 
-
-## Raw Data
+# Raw Data
 
 We are combining two datasets via shape data: matching polygons from [Allen Coral Atlas](https://allencoralatlas.org/atlas) to points from processed dataset [Reef_Check_with_cortad_variables_with_annual_rate_of_SST_change.csv](https://github.com/InstituteForGlobalEcology/Coral-bleaching-a-global-analysis-of-the-past-two-decades/blob/master/Reef_Check_with_cortad_variables_with_annual_rate_of_SST_change.csv). 
 
