@@ -1,0 +1,13 @@
+name: app_reef
+title:
+username:
+account: camille-alice
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6308921
+bundleId: 5909796
+url: https://camille-alice.shinyapps.io/app_reef/
+when: 1652683685.05192
+lastSyncTime: 1652683685.052
+asMultiple: FALSE
+asStatic: FALSE

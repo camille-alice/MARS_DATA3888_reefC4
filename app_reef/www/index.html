@@ -47,10 +47,16 @@
 									</div>
 								</header>
 								<a class="image featured"><img src="images/ReefC4_banner.png" alt="" /></a>
-								<p>The reef data containing the bleaching, diversity, sea-surface-temperature anomaly (SSTA), and depth metrics comes from a public dataset taken from the paper <a href="https://doi.org/10.1038/s41467-019-09238-2">"A global analysis of coral bleaching over the past twodecades"</a> by Sully et al. (2019). The paper contains coral bleaching events at 3351 sites in 81 countries from 1998 to 2017. The raw data can be found at the <a href="https://www.reefcheck.org/">Reef Check website</a> or on the <a href="https://github.com/InstituteForGlobalEcology/Coral-bleaching-a-global-analysis-of-the-past-two-decades">GitHub repository for the Institute for Global Ecology</a>.
+								<p>Bleaching events are occurring more frequently, at stronger intensities, and are having significant ramifications for the structural complexity of coral reefs. This is because climate change is leading to more profound changes in the physical ocean environment which leads to bleaching (Douglas, 2003). Coral bleaching refers to when corals expel their symbiotic algae, called zooxanthellae, leading to the coral turning white. Corals expel their algae when they become stressed (most commonly thermal stress) causing the zooxanthellae to release oxygen free radicals that damage coral tissue. Since the corals rely on the zooxanthellae for energy and nutrients, when the zooxanthellae is lost the corals turn white and are referred to as ‘bleached’. If stress conditions, such as temperature, do not return to normal conditions, zooxanthellae will not return and coral will transition from bleached to dead coral. We are researching coral bleaching for as part of an interdisciplinary study at the University of Sydney. We aim to investigate if coral reef diversity, rugosity and sea surface temperature anomalies (STTA) are correlated with frequency and severity of bleaching events. This will allow us to create a model which predicts coral bleaching and can help scientists prioritise which reefs are likely to be suspectable to bleaching in the future.</p>
+							<a class="image featured"><img src="images/coral_bleach_info.png" alt="" /></a>
+								<footer>
+									<ul class="stats">
+										<li><b>Coral Bleaching fig:</b> Adapted from <a href="https://oceanservice.noaa.gov/facts/coral_bleach.html">NOAA's Coral Reef Conservation Program.</a></li>
+									</ul>								  
+								</footer>							
+							<p>The reef data containing the bleaching, diversity, sea-surface-temperature anomaly (SSTA), and depth metrics comes from a public dataset taken from the paper <a href="https://doi.org/10.1038/s41467-019-09238-2">"A global analysis of coral bleaching over the past twodecades"</a> by Sully et al. (2019). The paper contains coral bleaching events at 3351 sites in 81 countries from 1998 to 2017. The raw data can be found at the <a href="https://www.reefcheck.org/">Reef Check website</a> or on the <a href="https://github.com/InstituteForGlobalEcology/Coral-bleaching-a-global-analysis-of-the-past-two-decades">GitHub repository</a>for the Institute for Global Ecology.
 <br>
-<br>
-We also used data gathered from <a href="https://allencoralatlas.org/atlas/">Allen Coral Atlas</a> to build our rugosity dataset. Full extraction method can be found <a href="https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/camille_ida.Rmd">here</a>. The full dataset was downloaded locally to be processed as the zipped archive was over 13GB. The files extracted contained the Geomorphic Map data that was in the shape files <code>geomorphic.gpkg</code> or <code>.geojson</code>. From investigation of the data sets on the map, it looked like the reef dataset is not as precise as the Allen Coral dataset - hence points not touching some polygons. As such, we decided to keep only the points from the Reef dataset that fell within the polygons of Allen Coral Atlas to limit uncertainty. </p>
+We also used data gathered from <a href="https://allencoralatlas.org/atlas/">Allen Coral Atlas</a> to build our rugosity dataset. Full extraction method can be found <a href="https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/camille_ida.Rmd">here</a>. The files extracted contained the Geomorphic Map data that was in the shape files labelled <code>geomorphic.gpkg</code> or <code>.geojson</code>. From investigation of the data sets on the map, it looked like the reef dataset is not as precise as the Allen Coral dataset. As such, we decided to keep only the points from the Reef dataset that fell within the polygons of Allen Coral Atlas to limit uncertainty. </p>
 							</article>
 <!-- -->
 
@@ -59,14 +65,17 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 								<header>
 									<div class="title">
 										<h2><a id="map">Map</a></h2>
-										<p>View our data on a world map. Use the botton below to change variable selection and see the spread on the map.</p>
+										<p>View our data on a world map.</p>
 									</div>
 								</header>
 
 								<!-- Map vis -->
 								<section>
 								  <div class="row">
-									  <div class="col-4">
+									  <div class="col-3">
+									    <p>
+									      Use the slider to change the year, and the drop down menu to change variable. 
+									    </p>
 									    <h4>Variable:</h4>
 									    <select name="map_var" id="map_var">
 									    	<option value="Average_bleaching">Bleaching</option>
@@ -78,7 +87,7 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 											<h4>Year Range:</h4>
 									    <a id="slider">{{ map_slider }}</a>
 									  </div>
-									  <div class="col-8">
+									  <div class="col-9">
 											{{ map }}
 									  </div>
 									</div>
@@ -117,13 +126,21 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 										<p>A measure of coral complexity. Explore what rugosity is below and how we used rugosity in our study.</p>
 									</div>
 								</header>
-								<a id = "orange_coral" class="image featured"><img src="images/alexander-van-steenberge-QAMhHR0JHAg-unsplash.jpg" alt="" /></a>
+								<a id = "rugosity_coral" class="image featured"><img src="images/rugosity_coral.jpg" alt="" /></a>
+								<p>Rugosity is a measure of coral completity. Below is a representation of the chain-tape method used to calculate the rugosity index. The gold studded line represents the chain used to measure the contour length and the ruler, the planar transect length. From left to right, the coral morphologies represented are free-living, vase, branching, tabular and massive. Generally the more branching a coral has, the higher the rugosity. Rugosity = contour length / planar length (Risk, 1972).</p>
 								<a id = "rug_diagram" class="image featured"><img src="images/rugosity3.png" alt="" /></a>
-								<p><b>Rugosity Diagram:</b> A representation of the chain-tape method used to calculate the rugosity index. The gold studded line represents the chain used to measure the contour length and the ruler, the planar transect length. From left to right, the coral morphologies represented are free-living, vase, branching, tabular and massive. Rugosity = contour length / planar length (Risk, 1972). Adapted from Friedman et al., (2012). Taken from (Husband, 2019).<br><b>Rugosity Table:</b> Below is a table of how we classified our rugosity estimates based off the  reef type that was extracted from the <a href="https://allencoralatlas.org/atlas/">Allen Coral Atlas.</a></p>
+								<footer>
+									<ul class="stats">
+										<li><b>Rugosity fig:</b> Adapted from Friedman et al., (2012). Fig taken from <a href="https://ore.exeter.ac.uk/repository/bitstream/handle/10871/37378/HusbandE.pdf?sequence=1&isAllowed=y">Husband (2019).</a></li>
+									</ul>								  
+								</footer>
 					
 					<!-- Rugosity Table -->			
 								<section>
-								<h4>Rugosity Classification</h4>
+								<h2>Rugosity Classification</h2>
+								<p>
+								  Below is a table of how we classified our rugosity estimates based off the reef type that was extracted from the <a href="https://allencoralatlas.org/atlas/">Allen Coral Atlas</a>, as well as a box-violin plot showing the different variables when compared with the rugosity estimate values. Use the slider to change the year, and the drop down menu to change variable. 
+								</p>
 									<div class="table-wrapper">
 										<table class="alt">
 											<thead>
@@ -135,8 +152,7 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 											</thead>
 											<tbody>
 												<tr>
-													<td>Reef Slope | 
-													Outer Reef Flat</td>
+													<td>Reef Slope | Outer Reef Flat</td>
 													<td>Alcyonaria coral: branching, massive, encrusting, laminar, and free-living</td>
 													<td>High</td>
 												</tr>
@@ -235,16 +251,6 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 								</header>
 								<a id="white_bluecoral" class="image featured"><img src="images/bawah-reserve-aKAUZYouIXk-unsplash.jpg" alt="" /></a>
 								<p>Model words here </p>
-								<footer>
-									<ul class="actions">
-										<li><a href="single.html" class="button large">Continue Reading</a></li>
-									</ul>
-									<ul class="stats">
-										<li><a href="#">General</a></li>
-										<li><a href="#" class="icon solid fa-heart">28</a></li>
-										<li><a href="#" class="icon solid fa-comment">128</a></li>
-									</ul>
-								</footer>
 							</article>
 
 					</div>
@@ -257,7 +263,7 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 								<a id="logo" class="logo"><img src="images/ReefC4_logo square.png" alt="" /></a>
 								<header>
 									<h2>Analysing Coral Reefs</h2>
-									<p>A study looking into coral rugosity and it's effect on coral bleaching by <a href="https://github.com/camille-alice/MARS_DATA3888_reefC4">Reef C4</a></p>
+									<p>A study looking into coral rugosity and it's effect on coral bleaching by Reef C4</p>
 								</header>
 							</section>
 
@@ -268,56 +274,41 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 									<!-- Mini Post -->
 										<article class="mini-post">
 											<header>
-												<h3><a href="single.html">Variable Description</a></h3>
+												<h2>Variable Description</h2>
 												<div class="table-wrapper">
 												  <table class="alt">
-											      <thead>
-											      	<tr>
-											      		<th>Variable</th>
-											      		<th>Explanation</th>
-											      	</tr>
-											      </thead>
-											      <tbody>
-											      	<tr>
-											      		<td>Average Bleaching</td>
-											      		<td>Percent of reef corals that were recorded as bleached.</td>
-												      </tr>
-											      	<tr>
-											      		<td>SSTA Frequency Standard Deviation</td>
-											      		<td>The standard deviation of Sea Surface Temperature Anomaly (SSTA) Frequency (SSTA Frequency: number of times over the previous 52 weeks that SSTA >= 1 degree C) over the entire time period.</td>
-											      	</tr>
-											      	<tr>
-											      		<td>Depth</td>
-											      		<td>Provided in meters.</td>
-												      </tr>
-												      <tr>
-													      <td>Diversity</td>
-													      <td>The number of coral species confirmed present in an ecoregion.</td>
-												      </tr>
-												      <tr>
-													      <td>Rugosity</td>
-													      <td>Estimate of rugosity value for each reef site based on geomorphic zone (reef type).</td>
-												      </tr>
+												    <div class="col-12">
+											        <thead>
+											        	<tr>
+											        		<th>Variable</th>
+											        		<th>Explanation</th>
+											        	</tr>
+											        </thead>
+											        <tbody>
+											        	<tr>
+											        		<td>Average Bleaching</td>
+											        		<td>Percent of reef corals that were recorded as bleached.</td>
+												        </tr>
+											        	<tr>
+											        		<td>SSTA Frequency Standard Deviation</td>
+											        		<td>The standard deviation of Sea Surface Temperature Anomaly (SSTA) Frequency (SSTA Frequency: number of times over the previous 52 weeks that SSTA >= 1 degree C) over the entire time period.</td>  
+											        	</tr>
+											        	<tr>
+											        		<td>Depth</td>
+											        		<td>Provided in meters.</td>
+												        </tr>
+												        <tr>
+													        <td>Diversity</td>
+													        <td>The number of coral species confirmed present in an ecoregion.</td>
+												        </tr>
+												        <tr>
+													        <td>Rugosity</td>
+													        <td>Estimate of rugosity value for each reef site based on geomorphic zone (reef type).</td>
+												        </tr>
+												      </div>
 											      </tbody>
 										      </table>
 									      </div>
-											</header>
-											<a id="purple_coral" class="image"><img src="images/david-clode-eOSqRq2Qm1c-unsplash.jpg" alt="" /></a>
-										</article>
-
-									<!-- Mini Post -->
-										<article class="mini-post">
-											<header>
-												<h3><a href="single.html">BLeached Coral</a></h3>
-												<time class="published" datetime="2015-10-19">An example of bleached coral.</time>
-											</header>
-											<a id="leftcorner_coral" class="image"><img src="images/sandy-ravaloniaina-WypxDkRH1Ns-unsplash.jpg" alt="" /></a>
-										</article>
-
-									<!-- Mini Post -->
-										<article class="mini-post">
-											<header>
-												<h3><a href="single.html">Odio congue mattis</a></h3>
 											</header>
 											<a id="nemo_home" class="image"><img src="images/francesco-ungaro-hqAGgNsMpEY-unsplash.jpg" alt="" /></a>
 										</article>
@@ -325,9 +316,32 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 									<!-- Mini Post -->
 										<article class="mini-post">
 											<header>
-												<h3><a href="single.html">Enim nisl veroeros</a></h3>
+												<h3>BLeached Coral</h3>
+												<div>
+												  An example of a fire coral that has been bleached during 2016 mass bleaching event. 
+												<br> Photo curtosy of the <a href="https://www.theoceanagency.org/about">The Ocean Agency</a> | <a href="https://www.catlinseaviewsurvey.com/">XL Catlin Seaview Survey</a> | Richard Vevers
+												</div>
 											</header>
-											<a id="nicelooking_coral" class="image"><img src="images/francesco-ungaro-DnLtZfBSjcU-unsplash.jpg" alt="" /></a>
+											<a id="fire_coral_bleached" class="image"><img src="images/fire_coral_bleached.jpg" alt="" /></a>
+										</article>
+
+									<!-- Mini Post -->
+										<article class="mini-post">
+											<header>
+												<h3>Healthy Coral</h3>
+												<div>
+												  Close up of some healthy coral with all it's glorious colour. 
+												</div>
+											</header>
+											<a id="orange_swirl" class="image"><img src="images/orange_swirl.jpg" alt="" /></a>
+										</article>
+
+									<!-- Mini Post -->
+										<article class="mini-post">
+											<header>
+												<h3>Enim nisl veroeros</h3>
+											</header>
+											<a id="white_coral" class="image"><img src="images/sandy-ravaloniaina-unsplash.jpg" alt="" /></a>
 										</article>
 
 								</div>
@@ -336,7 +350,7 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 						<!-- About -->
 							<section class="blurb">
 								<h2>About</h2>
-								<p>This website was created as part of an interdiciplinary study by students at the The University of Sydney. This study combines knowledge from marine biology students and data science students. </p>
+								<p>This website was created as part of an interdisciplinary study by students at the The University of Sydney. This study combines knowledge from marine biology students and data science students. </p>
 							</section>
 
 						<!-- Footer -->

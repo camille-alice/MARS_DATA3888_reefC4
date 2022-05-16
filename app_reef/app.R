@@ -20,7 +20,7 @@ library(tidyverse)
 world_map = map_data("world2")
 
 #cleaned file to use for app - no warnings and less computationally expensive
-reef_geomorphic = st_read("../Data/reef_final.gpkg")
+reef_geomorphic = st_read("Data/reef_final.gpkg")
 reef_final = reef_geomorphic %>% 
   as.data.frame()
 
@@ -50,9 +50,9 @@ plot_map = function(var, start_date, end_date) {
   
   ggplot() + 
     geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "grey", alpha = 0.3) +
-    geom_point(data = reef_temp, alpha = 0.4, aes(y = Latitude.Degrees, x = wrapLongitute, size = unlist(reef_temp[var]), color = unlist(reef_temp[var]))) + 
+    geom_point(data = reef_temp, alpha = 0.7, aes(y = Latitude.Degrees, x = wrapLongitute, size = unlist(reef_temp[var]), color = unlist(reef_temp[var]))) + 
     labs(title = title_string, x = "", y = "", colour = var, size = var) +
-    scale_colour_viridis(option = "magma") + 
+    scale_colour_viridis(option = "inferno") + 
     theme_minimal() + 
     theme(legend.position="bottom") +
     guides(color= guide_legend(title = clean_var),
