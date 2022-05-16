@@ -119,8 +119,8 @@ plot_qq = function(var, start_date, end_date) {
   title_string = paste("QQPlot of", clean_var, "from", start_date, "to", end_date)
   
   ggplot(reef_temp, aes(sample = unlist(reef_temp[var]))) +
-    stat_qq() +
-    stat_qq_line() + 
+    stat_qq(color="#e0812d", alpha = 0.3) +
+    stat_qq_line(color = I("#2ebaae"), fill = "#bf8058") + 
     labs(title = title_string, x = "Theoretical", y = "Sample") +
     theme_minimal() 
   
