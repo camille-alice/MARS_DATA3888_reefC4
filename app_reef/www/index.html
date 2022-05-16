@@ -62,24 +62,23 @@
 
 								<!-- Map vis -->
 								<section>
-								  <ul class="actions">
-								    <div class="row">
-									    <div class="col-7">
-									      <h4>Variable:</h4>
-									    	<select name="map_var" id="map_var">
-									    	  <option value="Average_bleaching">Bleaching</option>
-									    		<option value="SSTA_Frequency_Standard_Deviation">SSTA Frequency Standard Deviation</option>
-									    		<option value="Diversity">Diversity</option>
-									    		<option value="Depth">Depth</option>
-									    	</select>
-									    </div>
-									    <div class="col-7">
-									      <h4>Year Range:</h4>
-									    	<li><a id="slider">{{ map_slider }}</a></li>
-									    </div>
+								  <div class="row">
+									  <div class="col-4">
+									    <h4>Variable:</h4>
+									    <select name="map_var" id="map_var">
+									    	<option value="Average_bleaching">Bleaching</option>
+									    	<option value="SSTA_Frequency_Standard_Deviation">SSTA Frequency Standard Deviation</option>
+									    	<option value="Diversity">Diversity</option>
+									    	<option value="Depth">Depth</option>
+									    </select>
+											<br>
+											<h4>Year Range:</h4>
+									    <a id="slider">{{ map_slider }}</a>
 									  </div>
-									    {{ map }}
-									</ul>
+									  <div class="col-8">
+											{{ map }}
+									  </div>
+									</div>
 								</section>
 							</article>
 
@@ -121,24 +120,23 @@
 
               <!-- Rugosity vis -->
 								<section>
-								  <ul class="actions">
-								    <div class="row">
-									    <div class="col-7">
-									      <h4>Variable:</h4>
-									    	<select name="rug_var" id="rug_var">
-									    	  <option value="Diversity">Diversity</option>
-									    	  <option value="Average_bleaching">Bleaching</option>
-									    		<option value="SSTA_Frequency_Standard_Deviation">SSTA Frequency Standard Deviation</option>
-									    		<option value="Depth">Depth</option>
-									    	</select>
-									    </div>
-									    <div class="col-7">
-									      <h4>Year Range:</h4>
-									    	<li><a id="slider">{{ rug_slider }}</a></li>
-									    </div>
+								  <div class="row">
+									  <div class="col-4">
+									    <h4>Variable:</h4>
+									    <select name="rug_var" id="rug_var">
+									    	<option value="Diversity">Diversity</option>
+									    	<option value="Average_bleaching">Bleaching</option>
+									    	<option value="SSTA_Frequency_Standard_Deviation">SSTA Frequency Standard Deviation</option>
+									    	<option value="Depth">Depth</option>
+									    </select>
+											<br>
+											<h4>Year Range:</h4>
+											<a id="slider">{{ rug_slider }}</a>
 									  </div>
+									  <div class="col-8">
 									    {{ rugosity_plot }}
-									</ul>
+									  </div>
+									</div>
 								</section>
 							</article>
 
@@ -153,33 +151,32 @@
 
               <!-- Plots vis -->
 								<section>
-								  <ul class="actions">
-								    <div class="row">
-									    <div class="col-7">
-									      <h4>X Variable:</h4>
-									    	<select name="reg_x" id="reg_x">
-									    	  <option value="Average_bleaching">Bleaching</option>
-									    		<option value="SSTA_Frequency_Standard_Deviation">SSTA Frequency Standard Deviation</option>
-									    		<option value="Diversity">Diversity</option>
-									    		<option value="Depth">Depth</option>
-									    	</select>
-									    </div>
-									    <div class="col-7">
-									      <h4>Y Variable:</h4>
-									    	<select name="reg_y" id="reg_y">
-									    	  <option value="SSTA_Frequency_Standard_Deviation">SSTA Frequency Standard Deviation</option>
-									    	  <option value="Average_bleaching">Bleaching</option>
-									    		<option value="Diversity">Diversity</option>
-									    		<option value="Depth">Depth</option>
-									    	</select>
-									    </div>
-									    <div class="col-7">
-									      <h4>Year Range:</h4>
-									    	<li><a id="slider">{{ reg_slider }}</a></li>
-									    </div>
+									<div class="row">
+									  <div class="col-4">
+									    <h4>X Variable:</h4>
+									    <select name="reg_x" id="reg_x">
+									    	<option value="Average_bleaching">Bleaching</option>
+									    	<option value="SSTA_Frequency_Standard_Deviation">SSTA Frequency Standard Deviation</option>
+									    	<option value="Diversity">Diversity</option>
+									    	<option value="Depth">Depth</option>
+									    </select>
+											<br>
+											<h4>Y Variable:</h4>
+									    <select name="reg_y" id="reg_y">
+									    	<option value="SSTA_Frequency_Standard_Deviation">SSTA Frequency Standard Deviation</option>
+									    	<option value="Average_bleaching">Bleaching</option>
+									    	<option value="Diversity">Diversity</option>
+									    	<option value="Depth">Depth</option>
+									    </select>
+											<br>
+											<h4>Year Range:</h4>
+									    <a id="slider">{{ reg_slider }}</a>
 									  </div>
-									    {{ regression }}
-									</ul>
+										<div class="col-8">
+											{{ regression }}
+										</div>
+									</div>
+									<br>
 									<div class = "row">
 										<div class = "col-6">
 											{{ qq_1 }}
