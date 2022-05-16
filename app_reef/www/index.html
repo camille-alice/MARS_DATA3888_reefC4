@@ -39,7 +39,7 @@
 								<header>
 									<div class="title">
 										<h2><a id="reef_overview">Reef Overview</a></h2>
-										<p>Find out about coral reefs and our study</p>
+										<p>Find out about coral reefs and our study.</p>
 									</div>
 									<div class="meta">
 										<time class="published" datetime="2022-05-13">May 16, 2022</time>
@@ -47,7 +47,9 @@
 									</div>
 								</header>
 								<a class="image featured"><img src="images/ReefC4_banner.png" alt="" /></a>
-								<p>Coral bleaching is when coral reefs, under environmental stress (such as change in temperature), release algae in their tissues, causing them to turn white. Bleached corals become susceptible to disease and vulnerable to death. The bleaching data used is from a public dataset taken from the paper "A global analysis of coral bleaching over the past twodecades" published in Nature communications in 2019. Authors are: Sully, S., Burkepile, D. E., Donovan, M. K., Hodgson, G., & Van Woesik, R. The author has curated coral bleaching events at 3351 sites in 81 countries from 1998 to 2017 and a suite of environmental variables at each site. The raw data can be found at the Reef Check website or on the GitHub repository for the Institute for Global Ecology.</p>
+								<p>The reef data containing the bleaching, diversity, sea-surface-temperature anomaly (SSTA), and depth metrics comes from a public dataset taken from the paper <a href="https://doi.org/10.1038/s41467-019-09238-2">"A global analysis of coral bleaching over the past twodecades"</a> by Sully et al. (2019). The paper contains coral bleaching events at 3351 sites in 81 countries from 1998 to 2017. The raw data can be found at the <a href="https://www.reefcheck.org/">Reef Check website</a> or on the <a href="https://github.com/InstituteForGlobalEcology/Coral-bleaching-a-global-analysis-of-the-past-two-decades">GitHub repository for the Institute for Global Ecology</a>.
+
+We also used data gathered from <a href="https://allencoralatlas.org/atlas/">Allen Coral Atlas</a> to build our rugosity dataset. Full extraction method can be found <a href="https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/camille_ida.Rmd">here</a>. The full dataset was downloaded locally to be processed as the zipped archive was over 13GB. The files extracted contained the Geomorphic Map data that was in the shape files geomorphic.gpkg or .geojson. From investigation of the data sets on the map, it looked like the reef dataset is not as precise as the Allen Coral dataset - hence points not touching some polygons. As such, we decided to keep only the points from the Reef dataset that fell within the polygons of Allen Coral Atlas to limit uncertainty. </p>
 							</article>
 <!-- -->
 
@@ -56,7 +58,7 @@
 								<header>
 									<div class="title">
 										<h2><a id="map">Map</a></h2>
-										<p>View our data on a world map. Use the botton below to change variable selection and see the spread on the map</p>
+										<p>View our data on a world map. Use the botton below to change variable selection and see the spread on the map.</p>
 									</div>
 								</header>
 
@@ -111,12 +113,46 @@
 								<header>
 									<div class="title">
 										<h2><a id="rugosity">Rugosity</a></h2>
-										<p>An explanation of rugosity</p>
+										<p>A measure of coral complexity. Explore what rugosity is below and how we used rugosity in our study.</p>
 									</div>
 								</header>
 								<a id = "orange_coral" class="image featured"><img src="images/alexander-van-steenberge-QAMhHR0JHAg-unsplash.jpg" alt="" /></a>
 								<a id = "rug_diagram" class="image featured"><img src="images/rugosity3.png" alt="" /></a>
-								<p><b>Rugosity Diagram:</b> A representation of the chain-tape method used to calculate the rugosity index. The gold studded line represents the chain used to measure the contour length and the ruler, the planar transect length. From left to right, the coral morphologies represented are free-living, vase, branching, tabular and massive. Rugosity = contour length / planar length (Risk, 1972). Adapted from Friedman et al., (2012). Taken from (Husband, 2019).</p>
+								<p><b>Rugosity Diagram:</b> A representation of the chain-tape method used to calculate the rugosity index. The gold studded line represents the chain used to measure the contour length and the ruler, the planar transect length. From left to right, the coral morphologies represented are free-living, vase, branching, tabular and massive. Rugosity = contour length / planar length (Risk, 1972). Adapted from Friedman et al., (2012). Taken from (Husband, 2019).<br><b>Rugosity Table:</b> Below is a table of how we classified our rugosity estimates based off the  reef type that was extracted from the <a href="https://allencoralatlas.org/atlas/">Allen Coral Atlas</a></p>
+					
+					<!-- Rugosity Table -->			
+								<section>
+								<h4>Rugosity Classification</h4>
+									<div class="table-wrapper">
+										<table class="alt">
+											<thead>
+												<tr>
+													<th>Reef Type</th>
+													<th>Dominant Coral Species</th>
+													<th>Rugosity Estimate</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>Reef Slope | 
+													Outer Reef Flat</td>
+													<td>Alcyonaria coral: branching, massive, encrusting, laminar, and free-living</td>
+													<td>High</td>
+												</tr>
+												<tr>
+													<td>Sheltered Slope | Reef Crest | Back Reef Slope</td>
+													<td>Hemispherical coral: small-polyp, massive, encrusting, sheltered, branching coral, and highly diverse.</td>
+													<td>Medium</td>
+												</tr>
+												<tr>
+													<td>Inner Reef Flat | Terrestrial Reef Flat | Plateau | Deep Lagoon | Shallow Lagoon</td>
+													<td> Sediment dominated, lots of algae. Unclear, shallow and semi-exposed, subject to freshwater runoff</td>
+													<td>Low</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+								</section>
 
               <!-- Rugosity vis -->
 								<section>
@@ -231,9 +267,39 @@
 									<!-- Mini Post -->
 										<article class="mini-post">
 											<header>
-												<h3><a href="single.html">Vitae sed condimentum</a></h3>
-												<time class="published" datetime="2015-10-20">October 20, 2015</time>
-												<a href="#" class="author"><img src="images/avatar.jpg" alt="" /></a>
+												<h3><a href="single.html">Variable Description</a></h3>
+												<div class="table-wrapper">
+												  <table class="alt">
+											      <thead>
+											      	<tr>
+											      		<th>Variable</th>
+											      		<th>Explanation</th>
+											      	</tr>
+											      </thead>
+											      <tbody>
+											      	<tr>
+											      		<td>Average Bleaching</td>
+											      		<td>Percent of reef corals that were recorded as bleached.</td>
+												      </tr>
+											      	<tr>
+											      		<td>SSTA Frequency Standard Deviation</td>
+											      		<td>The standard deviation of Sea Surface Temperature Anomaly (SSTA) Frequency (SSTA Frequency: number of times over the previous 52 weeks that SSTA >= 1 degree C) over the entire time period.</td>
+											      	</tr>
+											      	<tr>
+											      		<td>Depth</td>
+											      		<td>Provided in meters.</td>
+												      </tr>
+												      <tr>
+													      <td>Diversity</td>
+													      <td>The number of coral species confirmed present in an ecoregion.</td>
+												      </tr>
+												      <tr>
+													      <td>Rugosity</td>
+													      <td>Estimate of rugosity value for each reef site based on geomorphic zone (reef type).</td>
+												      </tr>
+											      </tbody>
+										      </table>
+									      </div>
 											</header>
 											<a id="purple_coral" class="image"><img src="images/david-clode-eOSqRq2Qm1c-unsplash.jpg" alt="" /></a>
 										</article>
