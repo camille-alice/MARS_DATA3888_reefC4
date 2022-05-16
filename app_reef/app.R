@@ -24,6 +24,11 @@ reef_geomorphic = st_read("../Data/reef_final.gpkg")
 reef_final = reef_geomorphic %>% 
   as.data.frame()
 
+reef_final = reef_final %>% 
+  drop_na() %>% 
+  mutate(class = as.factor(class)) %>%
+  mutate(rugosity = factor(rugosity, levels = c("Low", "Medium", "High")))
+
 
 ##########################################################
 
@@ -131,7 +136,8 @@ plot_rugosity = function(var, start_date, end_date) {
   
   reef_rug = reef_final %>%
     filter(Date >= start_date) %>%
-    filter(Date <= end_date)
+    filter(Date <= end_date) %>% 
+    arrange(rugosity)
   
   clean_var = str_replace_all(var, "_", " ")
   title_string = paste("Rugosity compared against", clean_var, "from", start_date, "to", end_date)
@@ -145,7 +151,7 @@ plot_rugosity = function(var, start_date, end_date) {
                  outlier.size=3, 
                  show.legend = F) +
     labs(title = title_string, x = "Rugosity", y = clean_var) +
-    scale_fill_manual(values = c("#e0812d", "#0892c3", "#2ebaae")) + theme_minimal() +
+    scale_fill_manual(values = c("#2ebaae", "#0892c3", "#e0812d")) + theme_minimal() +
                         theme(legend.position="none") 
   
 }
