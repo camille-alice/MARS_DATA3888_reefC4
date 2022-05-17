@@ -14,6 +14,9 @@ library(dplyr)
 library(sf)
 library(tidyverse)
 
+# Assumes that the current working directory is just /MARS_DATA3888_reefC4/app_reef
+# Set wd to app_reef if not otherwise
+
 # R code to read and set up the data
 # Only run once at the start of the program
 # Code taken from Pat and Camille
@@ -159,6 +162,24 @@ plot_rugosity = function(var, start_date, end_date) {
   
 }
 
+# Function to plot f1 results of the models
+plot_f1 = function() {
+  
+  data = cbind(bin_cf$byClass['F1'], bin_sel_cf$byClass['F1'], nb_cf$byClass['F1'], 
+               knn_cf$byClass['F1'], rf_cf$byClass['F1'], svm_cf$byClass['F1']) %>%
+    as.data.frame() %>%
+    gather()
+  data$key = c("Initial Binomial Model", "Final Binomial Model", "Naive Bayes",
+               "K-Nearest Neighbours", "Random Forest", "Support Vector Machine")
+  
+  data %>% 
+    ggplot(aes(x = key, y = value, fill = key)) +
+    geom_bar(stat = "identity") +
+    labs(title = "F1 Results", x = "Model", y = "F1") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+  
+}
+
 # Function to plot the results of the models
 plot_model_results = function() {
   
@@ -256,6 +277,7 @@ ui = htmlTemplate("www/index.html",
                   # rf = plotOutput("rf"),
                   # svm = plotOutput("svm"),
                   # beta = plotOutput("beta"),
+                  model_f1 = plotOutput("model_f1"),
                   model_results = plotOutput("model_results"),
                   model_results_no_beta = plotOutput("model_results_no_beta")
 
@@ -298,10 +320,17 @@ server = function(input, output) {
     input$map_var 
   })
   
+  # F1 results
+  output$model_f1 = renderPlot({
+    plot_f1()
+  })
+  
+  # Model accuracy results
   output$model_results = renderPlot({
     plot_model_results()
   })
   
+  # Model accuracy results with no beta
   output$model_results_no_beta = renderPlot({
     plot_model_results_no_beta()
   })
