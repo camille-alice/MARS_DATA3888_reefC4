@@ -14,8 +14,11 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(sf)
 library(tidyverse)
+library(car)
+library(Metrics)
+library(caret)
 
-reef_geomorphic = st_read("Data/reef_geomorphic_joined_all.gpkg")
+reef_geomorphic = st_read("/Users/patri/OneDrive/Desktop/DATA3888/MARS_DATA3888_reefC4/Data/reef_geomorphic_joined_all.gpkg")
 reef_geomorphic = reef_geomorphic %>% 
   as.data.frame() %>%
   mutate(Date = as.Date(Date, "%d-%b-%y")) %>%
@@ -35,10 +38,11 @@ not_na %>% distinct(Reef.ID, Depth, class) # 3036 - meaning there are some dupli
 not_na %>% distinct(Reef.ID, Depth) # 3036 - meaning that the same reefs but at different depths have the same class identifier, which might be a problem
 ```
 
-##Logistic regression
+##Binomial regression
 
 ```{r}
 #Most recent entry
+
 #Select several attributes for our model
 reef_recent = reef_geomorphic %>%
   select(Reef.ID, Date, SSTA_Frequency_Standard_Deviation, Depth, Diversity, class,Average_bleaching) %>% 
@@ -53,27 +57,184 @@ reef_recent
 
 #Rugosity
 reef_recent["rugosity"] <- ifelse(reef_recent$class == "Reef Slope" | reef_recent$class == "Outer Reef Flat","High",
-                                 ifelse(reef_recent$class == "Sheltered Reef Slope" | reef_recent$class == "Reef Crest","Medium","Low"))
+                                 ifelse(reef_recent$class == "Sheltered Reef Slope" | reef_recent$class == "Reef Crest" | reef_recent$class == "Back Reef Slope","Medium","Low"))
 
 
 #bleached or not bleached
 reef_recent["bleached"] <- ifelse(reef_recent$Average_bleaching > 0,1,0)
+reef_recent$bleached <- as.factor(reef_recent$bleached)
 
 
 #Remove NA
 reef_final <- reef_recent %>% drop_na()
 
 
+#Binomial regression
 reef_model <- glm(formula = bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity + rugosity, data = reef_final, family = binomial)
 
 summary(reef_model)
 
-#Variable selection for logistic regression
+#Do VIF 
+vif_result <- vif(reef_model)
+vif_result
+#Based on the VIF test, it suggest that there is no severe multicollinearity problem between variables that we chose
+
+
+#Cross-validation using binomial
+
+#reef without "bleached" and other useless attributes
+reef_ungroup = reef_final %>% ungroup()
+X = reef_ungroup %>% select(-c("Average_bleaching","Reef.ID","Date","class","bleached"))
+
+y = reef_ungroup %>% select(bleached) %>% pull()
+
+cvK = 10 # number of CV folds
+cv_50acc5_bin = c()
+cv_acc_bin = c()
+n_sim = 50
+
+fitres_bin = factor()
+y_bin = c()
+
+for (i in 1:n_sim){
+  cvSets = cvTools::cvFolds(nrow(X), cvK)  # permute all the data, into 5 folds
+  cv_acc_bin = c()
+  
+  for (j in 1:cvK) {
+    test_id = cvSets$subsets[cvSets$which == j]
+    X_test = X[test_id, ]
+    X_train = X[-test_id, ]
+    y_test = y[test_id]
+    y_train = y[-test_id]
+    
+    X_train = X_train %>% mutate(bleached = y_train)
+    
+    lm = glm(formula = bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity + rugosity, data = X_train,family = binomial)
+    predicted_outcomes = predict.glm(lm, X_test, type = "response")
+    
+    predicted_outcomes = ifelse(predicted_outcomes > 0.5, 1, 0)
+    
+    fitres_bin = append(fitres_bin, predicted_outcomes)
+    y_bin = append(y_bin, y_test)
+    
+    cv_acc_bin[j] = mean(predicted_outcomes == y_test)
+    
+  }
+  cv_50acc5_bin = append(cv_50acc5_bin, mean(cv_acc_bin))
+  
+}
+
+mean(cv_50acc5_bin)
+
+#Variable selection for binomial regression, we decide to drop rugosity
 step_model_reef = step(reef_model, trace = 0)
 summary(step_model_reef)
 
+#Cross Validation using selected model
+
+cvK = 10 # number of CV folds
+cv_50acc5_sel = c()
+cv_acc_sel = c()
+n_sim = 50 
+
+fitres_sel = factor()
+y_sel = c()
+
+for (i in 1:n_sim){
+  cvSets = cvTools::cvFolds(nrow(X), cvK)  # permute all the data, into 5 folds
+  cv_acc_sel = c()
+  
+  for (j in 1:cvK) {
+    test_id = cvSets$subsets[cvSets$which == j]
+    X_test = X[test_id, ]
+    X_train = X[-test_id, ]
+    y_test = y[test_id]
+    y_train = y[-test_id]
+    
+    X_train = X_train %>% mutate(bleached = y_train)
+    
+    slm = glm(formula = bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity, data = X_train,family = binomial)
+    predicted_outcomes = predict.glm(slm, X_test, type = "response")
+    
+    predicted_outcomes = ifelse(predicted_outcomes > 0.5, 1, 0)
+    
+    fitres_sel = append(fitres_sel,predicted_outcomes)
+    y_sel = append(y_sel, y_test)
+    
+    cv_acc_sel[j] = mean(predicted_outcomes == y_test)
+    
+  }
+  cv_50acc5_sel = append(cv_50acc5_sel, mean(cv_acc_sel))
+  
+}
+
+mean(cv_50acc5_sel)
+
+#F1-Score for selected binomial
+confusionMatrix(as.factor(fitres_sel), y_sel,
+                mode = "everything",
+                positive="1")
+
+#F1-score for full binomial
+confusionMatrix(as.factor(fitres_bin), y_bin,
+                mode = "everything",
+                positive="1")
+
+#Boxplot for full binomial model accuracy
+boxplot(cv_50acc5_bin, ylab = 'CV Accuracy' ,xlab = 'Binomial Regression' , main = 'Accuracy of Binomial Regression in CV')
+
+#Boxplot for selected binomial model accuracy
+boxplot(cv_50acc5_sel, ylab = 'CV Accuracy' ,xlab = 'Selected Binomial Regression' , main = 'Accuracy of Selected Binomial Regression in CV')
 ```
 
+#Naive Bayes
+```{r}
+#Do Naive Bayes model
+set.seed(3888)
+cv_acc50_NB = c()  # initialise results vector
+cv_acc_NB = c()
+K = 10
+
+fitres_NB = factor()
+y_NB = c()
+
+for (i in 1:50){
+    
+    cvSets = cvTools::cvFolds(nrow(X), K) 
+
+    for (j in 1:K) {
+      test_id = cvSets$subsets[cvSets$which == j]
+      X_test = X[test_id, ]
+      X_train = X[-test_id, ]
+      y_test = y[test_id]
+      y_train = y[-test_id]
+      
+      X_train = X_train %>% mutate(bleached = y_train)
+      
+      nB = e1071::naiveBayes(formula = bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity + rugosity, data = X_train)
+      predicted_outcomes = predict(nB, X_test)
+      
+  
+      fitres_NB = append(fitres_NB, predicted_outcomes)
+      y_NB = append(y_NB, y_test)
+  
+      cv_acc_NB[j] = mean(predicted_outcomes == y_test)
+    }
+    
+    cv_acc50_NB <- append(cv_acc50_NB, mean(cv_acc_NB))
+}
+
+mean(cv_acc50_NB)
+
+#F1-score for Naive Bayes
+confusionMatrix(fitres_NB, y_NB,
+                mode = "everything",
+                positive="1")
+
+
+#Boxplot for Naive bayes  model
+boxplot(cv_acc50_NB, ylab = 'CV Accuracy' ,xlab = 'Naive Bayes' , main = 'Accuracy of Naive Bayes in CV')
+```
 
 #K-nearest Neighbour
 
@@ -92,6 +253,8 @@ X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","
 
 y = reef_ungroup %>% select(bleached) %>% pull()
 
+fitres_knn = factor()
+y_knn = c()
 
 cv_acc50_knn = c()  # initialise results vector
 cv_acc_knn = c()
@@ -109,12 +272,22 @@ for (i in 1:50){
         y_train = y[-test_id]
         fit = class::knn(train = X_train, test = X_test, cl = y_train, k = 5)
         cv_acc_knn[j] = mean(fit == y_test)
+        fitres_knn = append(fitres_knn, fit)
+        y_knn = append(y_knn, y_test)
     }
     
     cv_acc50_knn <- append(cv_acc50_knn, mean(cv_acc_knn))
 }
 
 mean(cv_acc50_knn)
+
+#F1-score for knn
+confusionMatrix(as.factor(fitres_knn), y_knn,
+                mode = "everything",
+                positive="1")
+
+#Boxplot for KNN model
+boxplot(cv_acc50_knn, ylab = 'CV Accuracy' ,xlab = 'K-Nearest Neighbour' , main = 'Accuracy of K-Nearest Neighbour in CV')
 ```
 
 #Random Forest
@@ -124,6 +297,9 @@ set.seed(3888)
 cv_acc50_rf = c()  # initialise results vector
 cv_acc_rf = c()
 K = 10
+
+fitres_rf = factor()
+y_rf = c()
 
 for (i in 1:50){
     
@@ -138,12 +314,22 @@ for (i in 1:50){
         rf_res <- randomForest::randomForest(x = X_train, y = as.factor(y_train))
         fit <- predict(rf_res, X_test)
         cv_acc_rf[j] = mean(fit == y_test)
+        fitres_rf = append(fitres_rf, fit)
+        y_rf = append(y_rf, y_test)
     }
     
     cv_acc50_rf <- append(cv_acc50_rf, mean(cv_acc_rf))
 }
 
 mean(cv_acc50_rf)
+
+#F1-score for rf
+confusionMatrix(as.factor(fitres_rf), y_rf,
+                mode = "everything",
+                positive="1")
+
+#Boxplot for Random forest model
+boxplot(cv_acc50_rf, ylab = 'CV Accuracy' ,xlab = 'Random Forest' , main = 'Accuracy of Random Forest in CV')
 ```
 
 #SVM model
@@ -153,6 +339,9 @@ set.seed(3888)
 cv_acc50_svm = c()  # initialise results vector
 cv_acc_svm = c()
 K = 10
+
+fitres_svm = factor()
+y_svm = c()
 
 for (i in 1:50){
     
@@ -168,12 +357,22 @@ for (i in 1:50){
         svm_res <- e1071::svm(x = X_train, y = as.factor(y_train))
         fit <- predict(svm_res, X_test)
         cv_acc_svm[j] = mean(fit == y_test)
+        fitres_svm = append(fitres_svm, fit)
+        y_svm = append(y_svm, y_test)
     }
     
     cv_acc50_svm <- append(cv_acc50_svm, mean(cv_acc_svm))
 }
 
 mean(cv_acc50_svm)
+
+#F1-score for svm
+confusionMatrix(as.factor(fitres_svm), y_svm,
+                mode = "everything",
+                positive="1")
+
+#Boxplot for SVM  model
+boxplot(cv_acc50_svm, ylab = 'CV Accuracy' ,xlab = 'Support Vector Machine' , main = 'Accuracy of Support Vector Machine in CV')
 ```
 
 
@@ -183,10 +382,67 @@ mean(cv_acc50_svm)
 library(betareg)
 
 #Create probability of bleaching which Average_bleaching/100, notes about this we need to at least add 0.0000001, since beta regression restrict the output (Y) to be completely 0
-reef_final["prob_bleached"] <- reef_final$Average_bleaching/100 + 0.0000001
+N <- nrow(reef_final)
+reef_final["prob_bleached"] <- ((reef_final$Average_bleaching/100)*(N - 1) + 0.5)/N
 
 #reef without other useless attributes
 b_reef_model <- betareg(formula = prob_bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity + rugosity, data = reef_final)
 summary(b_reef_model)
+
+#Cross-validation using beta
+
+#reef without "bleached" and other useless attributes
+reef_ungroup = reef_final %>% ungroup()
+X = reef_ungroup %>% select(-c("Average_bleaching","Reef.ID","Date","class","bleached","prob_bleached"))
+
+y = reef_ungroup %>% select(prob_bleached) %>% pull()
+
+cvK = 5 # number of CV folds
+
+CV_pred = c()
+cvK = 10
+cv_50acc5_beta = c()
+cv_acc_beta = c()
+n_sim = 50
+
+for (i in 1:n_sim){
+  cvSets = cvTools::cvFolds(nrow(X), cvK)  # permute all the data, into 5 folds
+  cv_acc_bin = c()
+  
+  for (j in 1:cvK) {
+    test_id = cvSets$subsets[cvSets$which == j]
+    X_test = X[test_id, ]
+    X_train = X[-test_id, ]
+    y_test = y[test_id]
+    y_train = y[-test_id]
+    
+    X_train = X_train %>% mutate(prob_bleached = y_train)
+    
+    beta_lm = betareg(formula = prob_bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity + rugosity, data = X_train)
+    predicted_outcomes = predict(beta_lm, X_test, type = "response")
+    
+    cv_acc_beta[j] = rmse(predicted_outcomes,y_test)
+    
+  }
+  cv_50acc5_beta = append(cv_50acc5_beta, mean(cv_acc_beta))
+  
+}
+
+mean(cv_50acc5_beta)
+
+
+#Running time, scalability different size of the data
+#Stability, standard deviation of the box
+#Interprebality just how we word the model
+
+#Conclusion Summary
+#Selected Binomial model gave 0.6498449 accuracy (w/o rugosity) and f1 score 0.18499 
+#Full Binomial model gave 0.6465043 accuracy and f1 score 0.18224
+#Knn gave 0.6456981 accuracy and f1 score 0.4354
+#Random forest gave 0.6939897 accuracy and f1 score 0.5226
+#Support Vector Machine gave 0.6472468 accuracy and f1 score
+#Naive Bayes gave 0.6247871 accuracy and f1 score 0.33155
+
+#Full Binomial has sd of 
 ```
 
