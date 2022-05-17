@@ -52,8 +52,8 @@
 								<footer>
 									<ul class="stats">
 										<li><b>Coral Bleaching fig:</b> Adapted from <a href="https://oceanservice.noaa.gov/facts/coral_bleach.html">NOAA's Coral Reef Conservation Program.</a></li>
-									</ul>								  
-								</footer>							
+									</ul>
+								</footer>
 							<p>The reef data containing the bleaching, diversity, sea-surface-temperature anomaly (SSTA), and depth metrics comes from a public dataset taken from the paper <a href="https://doi.org/10.1038/s41467-019-09238-2">"A global analysis of coral bleaching over the past twodecades"</a> by Sully et al. (2019). The paper contains coral bleaching events at 3351 sites in 81 countries from 1998 to 2017. The raw data can be found at the <a href="https://www.reefcheck.org/">Reef Check website</a> or on the <a href="https://github.com/InstituteForGlobalEcology/Coral-bleaching-a-global-analysis-of-the-past-two-decades">GitHub repository</a>for the Institute for Global Ecology.
 <br>
 We also used data gathered from <a href="https://allencoralatlas.org/atlas/">Allen Coral Atlas</a> to build our rugosity dataset. Full extraction method can be found <a href="https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/camille_ida.Rmd">here</a>. The files extracted contained the Geomorphic Map data that was in the shape files labelled <code>geomorphic.gpkg</code> or <code>.geojson</code>. From investigation of the data sets on the map, it looked like the reef dataset is not as precise as the Allen Coral dataset. As such, we decided to keep only the points from the Reef dataset that fell within the polygons of Allen Coral Atlas to limit uncertainty. </p>
@@ -74,7 +74,7 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 								  <div class="row">
 									  <div class="col-3">
 									    <p>
-									      Use the slider to change the year, and the drop down menu to change variable. 
+									      Use the slider to change the year, and the drop down menu to change variable.
 									    </p>
 									    <h4>Variable:</h4>
 									    <select name="map_var" id="map_var">
@@ -132,14 +132,14 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 								<footer>
 									<ul class="stats">
 										<li><b>Rugosity fig:</b> Adapted from Friedman et al., (2012). Fig taken from <a href="https://ore.exeter.ac.uk/repository/bitstream/handle/10871/37378/HusbandE.pdf?sequence=1&isAllowed=y">Husband (2019).</a></li>
-									</ul>								  
+									</ul>
 								</footer>
-					
-					<!-- Rugosity Table -->			
+
+					<!-- Rugosity Table -->
 								<section>
 								<h2>Rugosity Classification</h2>
 								<p>
-								  Below is a table of how we classified our rugosity estimates based off the reef type that was extracted from the <a href="https://allencoralatlas.org/atlas/">Allen Coral Atlas</a>, as well as a box-violin plot showing the different variables when compared with the rugosity estimate values. Use the slider to change the year, and the drop down menu to change variable. 
+								  Below is a table of how we classified our rugosity estimates based off the reef type that was extracted from the <a href="https://allencoralatlas.org/atlas/">Allen Coral Atlas</a>, as well as a box-violin plot showing the different variables when compared with the rugosity estimate values. Use the slider to change the year, and the drop down menu to change variable.
 								</p>
 									<div class="table-wrapper">
 										<table class="alt">
@@ -249,8 +249,16 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 										<p>See how our models performed</p>
 									</div>
 								</header>
-								<a id="white_bluecoral" class="image featured"><img src="images/bawah-reserve-aKAUZYouIXk-unsplash.jpg" alt="" /></a>
-								<p>Model words here </p>
+
+								<section>
+									<div class="row">
+									  {{ model_results }}
+									</div>
+									<br>
+									<div class="row">
+									  {{ model_results_no_beta }}
+									</div>
+								</section>
 							</article>
 
 					</div>
@@ -291,7 +299,7 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 												        </tr>
 											        	<tr>
 											        		<td>SSTA Frequency Standard Deviation</td>
-											        		<td>The standard deviation of Sea Surface Temperature Anomaly (SSTA) Frequency (SSTA Frequency: number of times over the previous 52 weeks that SSTA >= 1 degree C) over the entire time period.</td>  
+											        		<td>The standard deviation of Sea Surface Temperature Anomaly (SSTA) Frequency (SSTA Frequency: number of times over the previous 52 weeks that SSTA >= 1 degree C) over the entire time period.</td>
 											        	</tr>
 											        	<tr>
 											        		<td>Depth</td>
@@ -318,7 +326,7 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 											<header>
 												<h3>BLeached Coral</h3>
 												<div>
-												  An example of a fire coral that has been bleached during 2016 mass bleaching event. 
+												  An example of a fire coral that has been bleached during 2016 mass bleaching event.
 												<br> Photo curtosy of the <a href="https://www.theoceanagency.org/about">The Ocean Agency</a> | <a href="https://www.catlinseaviewsurvey.com/">XL Catlin Seaview Survey</a> | Richard Vevers
 												</div>
 											</header>
@@ -330,7 +338,7 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 											<header>
 												<h3>Healthy Coral</h3>
 												<div>
-												  Close up of some healthy coral with all it's glorious colour. 
+												  Close up of some healthy coral with all it's glorious colour.
 												</div>
 											</header>
 											<a id="orange_swirl" class="image"><img src="images/orange_swirl.jpg" alt="" /></a>

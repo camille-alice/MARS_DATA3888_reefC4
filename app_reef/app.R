@@ -19,8 +19,8 @@ library(tidyverse)
 # Code taken from Pat and Camille
 world_map = map_data("world2")
 
-#cleaned file to use for app - no warnings and less computationally expensive
-reef_geomorphic = st_read("Data/reef_final.gpkg")
+# cleaned file to use for app - no warnings and less computationally expensive
+reef_geomorphic = st_read("../Data/reef_final.gpkg")
 reef_final = reef_geomorphic %>% 
   as.data.frame()
 
@@ -28,6 +28,9 @@ reef_final = reef_final %>%
   drop_na() %>% 
   mutate(class = as.factor(class)) %>%
   mutate(rugosity = factor(rugosity, levels = c("Low", "Medium", "High")))
+
+# File with all the results from model testing (so we don't have to run the models here)
+model_results = load("../Data/model_results.rds")
 
 
 ##########################################################
@@ -156,6 +159,76 @@ plot_rugosity = function(var, start_date, end_date) {
   
 }
 
+# Function to plot the results of the models
+plot_model_results = function() {
+  
+  data = cbind(cv_50acc5_bin, cv_50acc5_sel, cv_acc50_NB, cv_acc50_knn, cv_acc50_rf, cv_acc50_svm, cv_50acc5_beta) %>%
+    as.data.frame() %>%
+    rename("Initial Binomial Regression" = cv_50acc5_bin,
+            "Final Binomial Regression" = cv_50acc5_sel,
+            "Naive Bayes" = cv_acc50_NB,
+            "K-Nearest Neighbours" = cv_acc50_knn,
+            "Random Forest" = cv_acc50_rf,
+            "Support Vector Machine" = cv_acc50_svm,
+            "Beta Regression" = cv_50acc5_beta) %>%
+    gather()
+  
+  data %>%
+    ggplot(aes(x=key, y=value, fill=key)) + 
+    geom_violin(alpha=0.6,trim=FALSE, position = position_dodge(width = 0.75),size=1,color=NA) +
+    geom_boxplot(width=0.4, color="black", alpha=0.5,
+                 outlier.colour="red",
+                 outlier.fill="red",
+                 outlier.size=3, 
+                 show.legend = F) +
+    labs(title = "Model Accuracy", x = "Models", y = "Accuracy") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+  
+}
+
+# Function to plot the results of the models except for beta regression
+plot_model_results_no_beta = function() {
+  
+  data = cbind(cv_50acc5_bin, cv_50acc5_sel, cv_acc50_NB, cv_acc50_knn, cv_acc50_rf, cv_acc50_svm) %>%
+    as.data.frame() %>%
+    rename("Initial Binomial Regression" = cv_50acc5_bin,
+           "Final Binomial Regression" = cv_50acc5_sel,
+           "Naive Bayes" = cv_acc50_NB,
+           "K-Nearest Neighbours" = cv_acc50_knn,
+           "Random Forest" = cv_acc50_rf,
+           "Support Vector Machine" = cv_acc50_svm) %>%
+    gather()
+  
+  data %>%
+    ggplot(aes(x=key, y=value, fill=key)) + 
+    geom_violin(alpha=0.6,trim=FALSE, position = position_dodge(width = 0.75),size=1,color=NA) +
+    geom_boxplot(width=0.4, color="black", alpha=0.5,
+                 outlier.colour="red",
+                 outlier.fill="red",
+                 outlier.size=3, 
+                 show.legend = F) +
+    labs(title = "Model Accuracy", x = "Models", y = "Accuracy") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+  
+}
+
+# Alternative function to plotting each model result individually
+# plot_model_results = function(data, title) { # maybe add colour code to params?
+#   
+#   data_df = data %>%
+#     as.data.frame()
+#   
+#   ggplot(data = data_df, aes(x = "", y = .)) +
+#     geom_violin(alpha=0.6,trim=FALSE, position = position_dodge(width = 0.75),size=1,color=NA) +
+#     geom_boxplot(width=0.4, color="black", alpha=0.5,
+#                  outlier.colour="red",
+#                  outlier.fill="red",
+#                  outlier.size=3, 
+#                  show.legend = F) +
+#     labs(title = title, x = "", y = "Accuracy")
+#   
+# }
+
 ##########################################################
 
 # Shiny Component
@@ -175,9 +248,17 @@ ui = htmlTemplate("www/index.html",
                   rugosity_plot = plotOutput("rugosity_plot"),
                   regression = plotOutput("regression"),
                   qq_1 = plotOutput("qq_1"),
-                  qq_2 = plotOutput("qq_2")
+                  qq_2 = plotOutput("qq_2"),
+                  # binom_initial = plotOutput("binom_initial"),
+                  # binom_selected = plotOutput("binom_selected"),
+                  # nb = plotOutput("nb"),
+                  # knn = plotOutput("knn"),
+                  # rf = plotOutput("rf"),
+                  # svm = plotOutput("svm"),
+                  # beta = plotOutput("beta"),
+                  model_results = plotOutput("model_results"),
+                  model_results_no_beta = plotOutput("model_results_no_beta")
 
-                  
 )
 
 server = function(input, output) {
@@ -216,6 +297,42 @@ server = function(input, output) {
   output$map_title = renderPrint({ 
     input$map_var 
   })
+  
+  output$model_results = renderPlot({
+    plot_model_results()
+  })
+  
+  output$model_results_no_beta = renderPlot({
+    plot_model_results_no_beta()
+  })
+  
+  # output$binom_initial = renderPlot({
+  #   plot_model_results(cv_50acc5_bin, "Initial Binomial Regression Model Accuracy") # maybe add colour code to params?
+  # })
+  # 
+  # output$binom_selected = renderPlot({
+  #   plot_model_results(cv_50acc5_sel, "Final Binomial Regression Model Accuracy")
+  # })
+  # 
+  # output$nb = renderPlot({
+  #   plot_model_results(cv_acc50_NB, "Naive-Bayes Model Accuracy")
+  # })
+  # 
+  # output$knn = renderPlot({
+  #   plot_model_results(cv_acc50_knn, "K-Nearest Neighbours Model Accuracy")
+  # })
+  # 
+  # output$rf = renderPlot({
+  #   plot_model_results(cv_acc50_rf, "Random Forest Model Accuracy")
+  # })
+  # 
+  # output$svm = renderPlot({
+  #   plot_model_results(cv_acc50_svm, "Support Vector Machine Model Accuracy")
+  # })
+  # 
+  # output$beta = renderPlot({
+  #   plot_model_results(cv_50acc5_beta, "Beta Regression Model Accuracy")
+  # })
   
 }
 

@@ -18,7 +18,7 @@ library(car)
 library(Metrics)
 library(caret)
 
-reef_geomorphic = st_read("/Users/patri/OneDrive/Desktop/DATA3888/MARS_DATA3888_reefC4/Data/reef_geomorphic_joined_all.gpkg")
+reef_geomorphic = st_read("Data/reef_geomorphic_joined_all.gpkg")
 reef_geomorphic = reef_geomorphic %>% 
   as.data.frame() %>%
   mutate(Date = as.Date(Date, "%d-%b-%y")) %>%
@@ -444,5 +444,11 @@ mean(cv_50acc5_beta)
 #Naive Bayes gave 0.6247871 accuracy and f1 score 0.33155
 
 #Full Binomial has sd of 
+```
+
+# Saving results to file
+
+```{r}
+
 ```
 
