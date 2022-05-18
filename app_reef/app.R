@@ -13,6 +13,7 @@ library(maps)
 library(dplyr)
 library(sf)
 library(tidyverse)
+library(car)
 
 # Assumes that the current working directory is just /MARS_DATA3888_reefC4/app_reef
 # Set wd to app_reef if not otherwise
@@ -58,7 +59,8 @@ plot_map = function(var, start_date, end_date) {
     geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "grey", alpha = 0.3) +
     geom_point(data = reef_temp, alpha = 0.7, aes(y = Latitude.Degrees, x = wrapLongitute, size = unlist(reef_temp[var]), color = unlist(reef_temp[var]))) + 
     labs(title = title_string, x = "", y = "", colour = var, size = var) +
-    scale_colour_viridis(option = "inferno") + 
+    scale_colour_viridis(option="magma") + 
+    #scale_colour_gradientn(colours=c("#023e7d", "#4dcde4", "#80cdc4", "#e0812d", "#bf4402")) + 
     theme_minimal() + 
     theme(legend.position="bottom") +
     guides(color= guide_legend(title = clean_var),
@@ -109,6 +111,7 @@ plot_regression = function(x, y, start_date, end_date) {
     filter(Date >= start_date) %>%
     filter(Date <= end_date) 
   
+  
   clean_x = str_replace_all(x, "_", " ")
   clean_y = str_replace_all(y, "_", " ")
   title_string = paste(clean_x, "vs", clean_y, "from", start_date, "to", end_date)
@@ -116,7 +119,8 @@ plot_regression = function(x, y, start_date, end_date) {
   ggplot(reef_temp, aes(unlist(reef_temp[x]), unlist(reef_temp[y]))) +
     geom_point(color="#e0812d", alpha = 0.3) +
     geom_smooth(method = "lm", color = I("#2ebaae"), fill = "#bf8058") +
-    labs(title = title_string, x = clean_x, y = clean_y)
+    labs(title = title_string, x = clean_x, y = clean_y) + 
+    theme_minimal()
 }
 
 # Function to plot qqplots for the variables selected in regression
@@ -161,75 +165,83 @@ plot_rugosity = function(var, start_date, end_date) {
                         theme(legend.position="none") 
   
 }
-
+# hex colour palette 
+#015d6f, #1c858b, #2ebaae, #82d8ac, #c5ffb6, #c37c0b, #bf4402
 # Function to plot f1 results of the models
 plot_f1 = function() {
   
-  data = cbind(bin_cf$byClass['F1'], bin_sel_cf$byClass['F1'], nb_cf$byClass['F1'], 
-               knn_cf$byClass['F1'], rf_cf$byClass['F1'], svm_cf$byClass['F1']) %>%
+  data = cbind(bin_cf$byClass['F1'], bin_sel_cf$byClass['F1'], svm_cf$byClass['F1'], 
+               nb_cf$byClass['F1'], knn_cf$byClass['F1'], rf_cf$byClass['F1']) %>%
     as.data.frame() %>%
     gather()
-  data$key = c("Initial Binomial Model", "Final Binomial Model", "Naive Bayes",
-               "K-Nearest Neighbours", "Random Forest", "Support Vector Machine")
+  data$key = c("Initial Binomial Model", "Final Binomial Model", "Support Vector Machine",
+               "Naive Bayes","K-Nearest Neighbours", "Random Forest")
   
-  data %>% 
-    ggplot(aes(x = key, y = value, fill = key)) +
+  data %>%
+    ggplot(aes(x=reorder(key,value,na.rm = TRUE), y = value, fill = reorder(key,value,na.rm = TRUE))) +
     geom_bar(stat = "identity") +
-    labs(title = "F1 Results", x = "Model", y = "F1") +
-    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+    scale_fill_manual(values=c("#023e7d", "#0892c3", "#4dcde4", "#e79f52", "#e0812d", "#bf4402")) +
+    labs(title = "F1 Results", x = "Models", y = "F1") +
+    theme_minimal() + 
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position="none") 
   
 }
 
 # Function to plot the results of the models
 plot_model_results = function() {
   
-  data = cbind(cv_50acc5_bin, cv_50acc5_sel, cv_acc50_NB, cv_acc50_knn, cv_acc50_rf, cv_acc50_svm, cv_50acc5_beta) %>%
+  data = cbind(cv_50acc5_bin, cv_50acc5_sel, cv_acc50_svm, cv_acc50_NB, 
+               cv_acc50_knn, cv_acc50_rf, cv_50acc5_beta) %>%
     as.data.frame() %>%
     rename("Initial Binomial Regression" = cv_50acc5_bin,
             "Final Binomial Regression" = cv_50acc5_sel,
+            "Support Vector Machine" = cv_acc50_svm,
             "Naive Bayes" = cv_acc50_NB,
             "K-Nearest Neighbours" = cv_acc50_knn,
             "Random Forest" = cv_acc50_rf,
-            "Support Vector Machine" = cv_acc50_svm,
             "Beta Regression" = cv_50acc5_beta) %>%
     gather()
   
   data %>%
-    ggplot(aes(x=key, y=value, fill=key)) + 
+    ggplot(aes(x=reorder(key,value,na.rm = TRUE), y=value, fill=reorder(key,value,na.rm = TRUE))) + 
     geom_violin(alpha=0.6,trim=FALSE, position = position_dodge(width = 0.75),size=1,color=NA) +
     geom_boxplot(width=0.4, color="black", alpha=0.5,
                  outlier.colour="red",
                  outlier.fill="red",
                  outlier.size=3, 
                  show.legend = F) +
+    scale_fill_manual(name = "Models", values=c("#023e7d", "#0892c3", "#4dcde4", "#80cdc4", "#e79f52", "#e0812d", "#bf4402")) +
     labs(title = "Model Accuracy", x = "Models", y = "Accuracy") +
-    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+    theme_minimal() + 
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))#, legend.position="none") 
   
 }
 
 # Function to plot the results of the models except for beta regression
 plot_model_results_no_beta = function() {
   
-  data = cbind(cv_50acc5_bin, cv_50acc5_sel, cv_acc50_NB, cv_acc50_knn, cv_acc50_rf, cv_acc50_svm) %>%
+  data = cbind(cv_50acc5_bin, cv_50acc5_sel, cv_acc50_svm, cv_acc50_NB, cv_acc50_knn, cv_acc50_rf) %>%
     as.data.frame() %>%
     rename("Initial Binomial Regression" = cv_50acc5_bin,
            "Final Binomial Regression" = cv_50acc5_sel,
+           "Support Vector Machine" = cv_acc50_svm,
            "Naive Bayes" = cv_acc50_NB,
            "K-Nearest Neighbours" = cv_acc50_knn,
-           "Random Forest" = cv_acc50_rf,
-           "Support Vector Machine" = cv_acc50_svm) %>%
+           "Random Forest" = cv_acc50_rf) %>%
     gather()
   
   data %>%
-    ggplot(aes(x=key, y=value, fill=key)) + 
+    ggplot(aes(x=reorder(key,value,na.rm = TRUE), y=value, fill=reorder(key,value,na.rm = TRUE))) + 
     geom_violin(alpha=0.6,trim=FALSE, position = position_dodge(width = 0.75),size=1,color=NA) +
     geom_boxplot(width=0.4, color="black", alpha=0.5,
                  outlier.colour="red",
                  outlier.fill="red",
                  outlier.size=3, 
                  show.legend = F) +
+    scale_fill_manual(values=c("#023e7d", "#0892c3", "#4dcde4", "#e79f52", "#e0812d", "#bf4402")) +  
     labs(title = "Model Accuracy", x = "Models", y = "Accuracy") +
-    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+    theme_minimal() + 
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position="none")
   
 }
 

@@ -8,7 +8,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir = '/Users/camillekarski/Documents/Uni/DATA3888/')
+#knitr::opts_knit$set(root.dir = '/Users/camillekarski/Documents/Uni/DATA3888/')
 
 library(plyr)
 library(tidyverse)
@@ -402,4 +402,9 @@ reef_final = reef_recent %>%
 #st_write(reef_final, 'reef_final.gpkg')
 ```
 
-          
+# Code for normaliation (regression?)
+```{r}
+normalized_bleaching = c(reef_final$Average_bleaching-min(reef_final$Average_bleaching))/(max(reef_final$Average_bleaching)-min(reef_final$Average_bleaching))
+reef_final$Average_bleaching_logit = logit(normalized_bleaching, 
+                                           percents=max(normalized_bleaching, na.rm = TRUE) > 1, adjust=0.25)
+```
