@@ -170,17 +170,17 @@ plot_rugosity = function(var, start_date, end_date) {
 # Function to plot f1 results of the models
 plot_f1 = function() {
   
-  data = cbind(bin_cf$byClass['F1'], bin_sel_cf$byClass['F1'], svm_cf$byClass['F1'], 
+  data = cbind(bin_cf$byClass['F1'], bin_sel_cf$byClass['F1'], rnd_cf$byClass['F1'], svm_cf$byClass['F1'], 
                nb_cf$byClass['F1'], knn_cf$byClass['F1'], rf_cf$byClass['F1']) %>%
     as.data.frame() %>%
     gather()
-  data$key = c("Initial Binomial Model", "Final Binomial Model", "Support Vector Machine",
+  data$key = c("Initial Binomial Model", "Final Binomial Model", "Binomial Model with random effect", "Support Vector Machine",
                "Naive Bayes","K-Nearest Neighbours", "Random Forest")
   
   data %>%
     ggplot(aes(x=reorder(key,value,na.rm = TRUE), y = value, fill = reorder(key,value,na.rm = TRUE))) +
     geom_bar(stat = "identity") +
-    scale_fill_manual(values=c("#023e7d", "#0892c3", "#4dcde4", "#e79f52", "#e0812d", "#bf4402")) +
+    scale_fill_manual(values=c("#023e7d", "#0892c3", "#4dcde4", "#80cdc4", "#e79f52", "#e0812d", "#bf4402")) +
     labs(title = "F1 Results", x = "Models", y = "F1") +
     theme_minimal() + 
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position="none") 
@@ -190,11 +190,12 @@ plot_f1 = function() {
 # Function to plot the results of the models
 plot_model_results = function() {
   
-  data = cbind(cv_50acc5_bin, cv_50acc5_sel, cv_acc50_svm, cv_acc50_NB, 
-               cv_acc50_knn, cv_acc50_rf) %>%
+  data = cbind(cv_50acc5_bin, cv_50acc5_sel, cv_50acc_rnd, cv_acc50_svm, 
+               cv_acc50_NB, cv_acc50_knn, cv_acc50_rf) %>%
     as.data.frame() %>%
     rename("Initial Binomial Regression" = cv_50acc5_bin,
             "Final Binomial Regression" = cv_50acc5_sel,
+            "Binomial Regression with random effect" = cv_50acc_rnd,
             "Support Vector Machine" = cv_acc50_svm,
             "Naive Bayes" = cv_acc50_NB,
             "K-Nearest Neighbours" = cv_acc50_knn,
@@ -218,17 +219,17 @@ plot_model_results = function() {
 
 plot_mean = function() {
   
-  data = cbind(bin_mean, sel_mean, svm_mean, 
+  data = cbind(bin_mean, sel_mean, rnd_mean, svm_mean, 
                nb_mean, knn_mean, rf_mean) %>%
     as.data.frame() %>%
     gather()
-  data$key = c("Initial Binomial Model", "Final Binomial Model", "Support Vector Machine",
+  data$key = c("Initial Binomial Model", "Final Binomial Model", "Binomial Model with random effect", "Support Vector Machine",
                "Naive Bayes","K-Nearest Neighbours", "Random Forest")
   
   data %>%
     ggplot(aes(x=reorder(key,value,na.rm = TRUE), y = value, fill = reorder(key,value,na.rm = TRUE))) +
     geom_bar(stat = "identity") +
-    scale_fill_manual(values=c("#023e7d", "#0892c3", "#4dcde4", "#e79f52", "#e0812d", "#bf4402")) +
+    scale_fill_manual(values=c("#023e7d", "#0892c3", "#4dcde4", "#80cdc4", "#e79f52", "#e0812d", "#bf4402")) +
     labs(title = "Mean Accuracy", x = "Models", y = "Accuracy") +
     theme_minimal() + 
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position="none") 
@@ -237,39 +238,28 @@ plot_mean = function() {
 
 plot_sd = function() {
   
-  data = cbind(bin_sd, sel_sd, svm_sd, 
+  data = cbind(bin_sd, sel_sd, rnd_sd, svm_sd, 
                nb_sd, knn_sd, rf_sd) %>%
     as.data.frame() %>%
     gather()
-  data$key = c("Initial Binomial Model", "Final Binomial Model", "Support Vector Machine",
+  data$key = c("Initial Binomial Model", "Final Binomial Model", "Binomial Model with random effect", "Support Vector Machine",
                "Naive Bayes","K-Nearest Neighbours", "Random Forest")
   
   data %>%
     ggplot(aes(x=reorder(key,value,na.rm = TRUE), y = value, fill = reorder(key,value,na.rm = TRUE))) +
     geom_bar(stat = "identity") +
-    scale_fill_manual(values=c("#023e7d", "#0892c3", "#4dcde4", "#e79f52", "#e0812d", "#bf4402")) +
+    scale_fill_manual(values=c("#023e7d", "#0892c3", "#4dcde4", "#80cdc4", "#e79f52", "#e0812d", "#bf4402")) +
     labs(title = "SD Accuracy", x = "Models", y = "SD") +
     theme_minimal() + 
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position="none") 
   
 }
 
-# Alternative function to plotting each model result individually
-# plot_model_results = function(data, title) { # maybe add colour code to params?
-#   
-#   data_df = data %>%
-#     as.data.frame()
-#   
-#   ggplot(data = data_df, aes(x = "", y = .)) +
-#     geom_violin(alpha=0.6,trim=FALSE, position = position_dodge(width = 0.75),size=1,color=NA) +
-#     geom_boxplot(width=0.4, color="black", alpha=0.5,
-#                  outlier.colour="red",
-#                  outlier.fill="red",
-#                  outlier.size=3, 
-#                  show.legend = F) +
-#     labs(title = title, x = "", y = "Accuracy")
-#   
-# }
+plot_time = function() {
+  
+  
+  
+}
 
 ##########################################################
 
@@ -283,7 +273,6 @@ ui = htmlTemplate("www/index.html",
                   map_slider = sliderInput("map_year", "", min = 1998, max = 2017, value = c(1998, 2017), sep = ""),
                   reg_slider = sliderInput("reg_year", "", min = 1998, max = 2017, value = c(1998, 2017), sep = ""),
                   rug_slider = sliderInput("rug_year", "", min = 1998, max = 2017, value = c(1998, 2017), sep = ""),
-                  
                   map_title = verbatimTextOutput("map_title"),
                   map = plotOutput("map"),
                   #map_inter = plotlyOutput("map_inter"),
@@ -291,17 +280,11 @@ ui = htmlTemplate("www/index.html",
                   regression = plotOutput("regression"),
                   qq_1 = plotOutput("qq_1"),
                   qq_2 = plotOutput("qq_2"),
-                  # binom_initial = plotOutput("binom_initial"),
-                  # binom_selected = plotOutput("binom_selected"),
-                  # nb = plotOutput("nb"),
-                  # knn = plotOutput("knn"),
-                  # rf = plotOutput("rf"),
-                  # svm = plotOutput("svm"),
-                  # beta = plotOutput("beta"),
                   model_f1 = plotOutput("model_f1"),
                   model_results = plotOutput("model_results"),
                   model_mean = plotOutput("model_mean"),
-                  model_sd = plotOutput("model_sd")
+                  model_sd = plotOutput("model_sd"),
+                  model_time = plotOutput("model_time")
 
 )
 
@@ -361,34 +344,11 @@ server = function(input, output) {
   output$model_sd = renderPlot({
     plot_sd()
   })
-
-  # output$binom_initial = renderPlot({
-  #   plot_model_results(cv_50acc5_bin, "Initial Binomial Regression Model Accuracy") # maybe add colour code to params?
-  # })
-  # 
-  # output$binom_selected = renderPlot({
-  #   plot_model_results(cv_50acc5_sel, "Final Binomial Regression Model Accuracy")
-  # })
-  # 
-  # output$nb = renderPlot({
-  #   plot_model_results(cv_acc50_NB, "Naive-Bayes Model Accuracy")
-  # })
-  # 
-  # output$knn = renderPlot({
-  #   plot_model_results(cv_acc50_knn, "K-Nearest Neighbours Model Accuracy")
-  # })
-  # 
-  # output$rf = renderPlot({
-  #   plot_model_results(cv_acc50_rf, "Random Forest Model Accuracy")
-  # })
-  # 
-  # output$svm = renderPlot({
-  #   plot_model_results(cv_acc50_svm, "Support Vector Machine Model Accuracy")
-  # })
-  # 
-  # output$beta = renderPlot({
-  #   plot_model_results(cv_50acc5_beta, "Beta Regression Model Accuracy")
-  # })
+  
+  # Model time results
+  output$model_time = renderPlot({
+    plot_time()
+  })
   
 }
 

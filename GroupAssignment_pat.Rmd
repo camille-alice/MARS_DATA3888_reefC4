@@ -255,7 +255,7 @@ rnd_mean = mean(cv_50acc_rnd)
 rnd_sd = sd(cv_50acc_rnd)
 
 #F1-score for random effect
-confusionMatrix(as.factor(fitres_rnd), y_rnd,
+rnd_cf = confusionMatrix(as.factor(fitres_rnd), y_rnd,
                 mode = "everything",
                 positive="1")
 
@@ -670,10 +670,10 @@ legend(x = "topright", legend = c("Binary","KNN","RF","NB","SVM"),lty = c(1, 1,1
 # Saving results to file
 
 ```{r}
-save(cv_50acc5_bin, cv_50acc5_sel, cv_acc50_NB, cv_acc50_knn, cv_acc50_rf, cv_acc50_svm, 
-     bin_cf, bin_sel_cf, nb_cf, knn_cf, rf_cf, svm_cf, 
-     bin_mean, sel_mean, nb_mean, knn_mean, rf_mean, svm_mean,
-     bin_sd, sel_sd, nb_sd, knn_sd, rf_sd, svm_sd,
+save(cv_50acc5_bin, cv_50acc5_sel, cv_50acc_rnd, cv_acc50_NB, cv_acc50_knn, cv_acc50_rf, cv_acc50_svm, 
+     bin_cf, bin_sel_cf, rnd_cf, nb_cf, knn_cf, rf_cf, svm_cf, 
+     bin_mean, sel_mean, rnd_mean, nb_mean, knn_mean, rf_mean, svm_mean,
+     bin_sd, sel_sd, rnd_sd, nb_sd, knn_sd, rf_sd, svm_sd,
      time_bin, time_nb, time_knn, time_rf, time_svm,
      file = "model_results.rds")
 ```
