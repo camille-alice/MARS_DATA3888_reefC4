@@ -257,7 +257,25 @@ plot_sd = function() {
 
 plot_time = function() {
   
+  i = 10
+  num_record = c()
+  while (i < 1000){
+    num_record = append(num_record,i)
+    i = i + 10
+  }
   
+  data = cbind(time_bin, time_svm, time_nb, 
+               time_knn, time_rf, num_record) %>%
+    as.data.frame() %>%
+    gather()
+  data$key = c("Binomial Model", "Support Vector Machine","Naive Bayes",
+            "K-Nearest Neighbours", "Random Forest", "Time")
+  
+  print(data$Time)
+  
+  # data %>%
+  #   ggplot(aes(x=reorder(key,value,na.rm = TRUE), y = value, fill = reorder(key,value,na.rm = TRUE))) +
+    
   
 }
 
