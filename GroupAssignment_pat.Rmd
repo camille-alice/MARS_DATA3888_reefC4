@@ -19,7 +19,7 @@ library(Metrics)
 library(caret)
 library(lme4)
 
-reef_geomorphic = st_read("Data/reef_geomorphic_joined_all.gpkg")
+reef_geomorphic = st_read("/Users/patri/OneDrive/Desktop/DATA3888/MARS_DATA3888_reefC4/Data/reef_geomorphic_joined_all.gpkg")
 reef_geomorphic = reef_geomorphic %>% 
   as.data.frame() %>%
   mutate(Date = as.Date(Date, "%d-%b-%y")) %>%
@@ -53,16 +53,14 @@ reef_recent = reef_geomorphic %>%
          Diversity = as.numeric(Diversity)) %>%
   group_by(Reef.ID) %>% filter(Date == max(Date))
 
-reef_recent
-
 
 #Rugosity
 reef_recent["rugosity"] <- ifelse(reef_recent$class == "Reef Slope" | reef_recent$class == "Outer Reef Flat","High",
                                  ifelse(reef_recent$class == "Sheltered Reef Slope" | reef_recent$class == "Reef Crest" | reef_recent$class == "Back Reef Slope","Medium","Low"))
 
 #For knn,svm and rf change the rugosity to 1,2,3
-reef_final["num_rugosity"] <- ifelse(reef_final$rugosity == "High", 3,
-                                     ifelse(reef_final$rugosity == "Medium",2,1))
+reef_recent["num_rugosity"] <- ifelse(reef_recent$rugosity == "High", 3,
+                                     ifelse(reef_recent$rugosity == "Medium",2,1))
 
 
 #bleached or not bleached
@@ -86,9 +84,9 @@ vif_result
 
 
 #Cross-validation using binomial
+set.seed(3888)
 
 #reef without "bleached" and other useless attributes
-set.seed(3888)
 reef_ungroup = reef_final %>% ungroup()
 X = reef_ungroup %>% select(-c("Average_bleaching","Reef.ID","Date","class","bleached","num_rugosity"))
 
@@ -131,9 +129,10 @@ for (i in 1:n_sim){
 }
 
 mean(cv_50acc5_bin)
+sd(cv_50acc5_bin)
 
 #F1-score for full binomial
-confusionMatrix(as.factor(fitres_bin), y_bin,
+bin_cf = confusionMatrix(as.factor(fitres_bin), y_bin,
                 mode = "everything",
                 positive="1")
 
@@ -145,12 +144,18 @@ boxplot(cv_50acc5_bin, ylab = 'CV Accuracy' ,xlab = 'Binomial Regression' , main
 ##Binomial regression with selected variables
 
 ```{r}
-
 #Variable selection for binomial regression, we decide to drop rugosity
 step_model_reef = step(reef_model, trace = 0)
 summary(step_model_reef)
 
 #Cross Validation using selected model
+set.seed(3888)
+
+#reef without "bleached" and other useless attributes
+reef_ungroup = reef_final %>% ungroup()
+X = reef_ungroup %>% select(-c("Average_bleaching","Reef.ID","Date","class","bleached","num_rugosity","rugosity"))
+
+y = reef_ungroup %>% select(bleached) %>% pull()
 
 cvK = 10 # number of CV folds
 cv_50acc5_sel = c()
@@ -190,16 +195,14 @@ for (i in 1:n_sim){
 }
 
 mean(cv_50acc5_sel)
+sd(cv_50acc5_sel)
 
 #F1-Score for selected binomial
 bin_sel_cf = confusionMatrix(as.factor(fitres_sel), y_sel,
                 mode = "everything",
                 positive="1")
 
-<<<<<<< Updated upstream
-#F1-score for full binomial
-bin_cf = confusionMatrix(as.factor(fitres_bin), y_bin,
-=======
+
 #Boxplot for selected binomial model accuracy
 boxplot(cv_50acc5_sel, ylab = 'CV Accuracy' ,xlab = 'Selected Binomial Regression' , main = 'Accuracy of Selected Binomial Regression in CV')
 ```
@@ -209,7 +212,7 @@ boxplot(cv_50acc5_sel, ylab = 'CV Accuracy' ,xlab = 'Selected Binomial Regressio
 ```{r}
 set.seed(3888)
 reef_ungroup = reef_final %>% ungroup()
-X = reef_ungroup %>% select(-c("Average_bleaching","Date","class","bleached","num_rugosity","prob_bleached","rugosity"))
+X = reef_ungroup %>% select(-c("Average_bleaching","Date","class","bleached","num_rugosity","rugosity"))
 
 y = reef_ungroup %>% select(bleached) %>% pull()
 
@@ -252,7 +255,6 @@ mean(cv_50acc_rnd)
 
 #F1-score for random effect
 confusionMatrix(as.factor(fitres_rnd), y_rnd,
->>>>>>> Stashed changes
                 mode = "everything",
                 positive="1")
 
@@ -264,6 +266,12 @@ boxplot(cv_50acc_rnd, ylab = 'CV Accuracy' ,xlab = 'Binomial Regression with Ran
 
 ```{r}
 #Do Naive Bayes model
+#reef without "bleached" and other useless attributes
+reef_ungroup = reef_final %>% ungroup()
+X = reef_ungroup %>% select(-c("Average_bleaching","Reef.ID","Date","class","bleached","num_rugosity"))
+
+y = reef_ungroup %>% select(bleached) %>% pull()
+
 set.seed(3888)
 cv_acc50_NB = c()  # initialise results vector
 cv_acc_NB = c()
@@ -299,6 +307,7 @@ for (i in 1:50){
 }
 
 mean(cv_acc50_NB)
+sd(cv_acc50_NB)
 
 #F1-score for Naive Bayes
 nb_cf = confusionMatrix(fitres_NB, y_NB,
@@ -350,6 +359,7 @@ for (i in 1:50){
 }
 
 mean(cv_acc50_knn)
+sd(cv_acc50_knn)
 
 #F1-score for knn
 knn_cf = confusionMatrix(as.factor(fitres_knn), y_knn,
@@ -392,6 +402,7 @@ for (i in 1:50){
 }
 
 mean(cv_acc50_rf)
+sd(cv_acc50_rf)
 
 #F1-score for rf
 rf_cf = confusionMatrix(as.factor(fitres_rf), y_rf,
@@ -435,6 +446,7 @@ for (i in 1:50){
 }
 
 mean(cv_acc50_svm)
+sd(cv_acc50_svm)
 
 #F1-score for svm
 svm_cf = confusionMatrix(as.factor(fitres_svm), y_svm,
@@ -446,60 +458,8 @@ boxplot(cv_acc50_svm, ylab = 'CV Accuracy' ,xlab = 'Support Vector Machine' , ma
 ```
 
 
-#Beta regression
+#Little summary
 ```{r}
-#Do beta regression
-library(betareg)
-
-#Create probability of bleaching which Average_bleaching/100, notes about this we need to at least add 0.0000001, since beta regression restrict the output (Y) to be completely 0
-N <- nrow(reef_final)
-reef_final["prob_bleached"] <- ((reef_final$Average_bleaching/100)*(N - 1) + 0.5)/N
-
-#reef without other useless attributes
-b_reef_model <- betareg(formula = prob_bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity + rugosity, data = reef_final)
-summary(b_reef_model)
-
-#Cross-validation using beta
-
-#reef without "bleached" and other useless attributes
-reef_ungroup = reef_final %>% ungroup()
-X = reef_ungroup %>% select(-c("Average_bleaching","Reef.ID","Date","class","bleached","prob_bleached"))
-
-y = reef_ungroup %>% select(prob_bleached) %>% pull()
-
-cvK = 5 # number of CV folds
-
-CV_pred = c()
-cvK = 10
-cv_50acc5_beta = c()
-cv_acc_beta = c()
-n_sim = 50
-
-for (i in 1:n_sim){
-  cvSets = cvTools::cvFolds(nrow(X), cvK)  # permute all the data, into 5 folds
-  cv_acc_bin = c()
-  
-  for (j in 1:cvK) {
-    test_id = cvSets$subsets[cvSets$which == j]
-    X_test = X[test_id, ]
-    X_train = X[-test_id, ]
-    y_test = y[test_id]
-    y_train = y[-test_id]
-    
-    X_train = X_train %>% mutate(prob_bleached = y_train)
-    
-    beta_lm = betareg(formula = prob_bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity + rugosity, data = X_train)
-    predicted_outcomes = predict(beta_lm, X_test, type = "response")
-    
-    cv_acc_beta[j] = rmse(predicted_outcomes,y_test)
-    
-  }
-  cv_50acc5_beta = append(cv_50acc5_beta, mean(cv_acc_beta))
-  
-}
-
-mean(cv_50acc5_beta)
-
 
 #Running time, scalability different size of the data
 #Stability, standard deviation of the box
@@ -513,7 +473,7 @@ mean(cv_50acc5_beta)
 #Support Vector Machine gave 0.6472468 accuracy and f1 score 0.23449
 #Naive Bayes gave 0.6247871 accuracy and f1 score 0.33155
 
-#Full Binomial has sd of  
+#Full Binomial has sd of 
 ```
 
 #Time all the algorithm
@@ -526,7 +486,7 @@ set.seed(3888)
 
 #reef without "bleached" and other useless attributes
 reef_ungroup = reef_final %>% ungroup()
-X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity","prob_bleached"))
+X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity"))
 
 y = reef_ungroup %>% select(bleached) %>% pull()
 
@@ -562,7 +522,7 @@ set.seed(3888)
 
 #reef without "bleached" and other useless attributes
 reef_ungroup = reef_final %>% ungroup()
-X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","num_rugosity","prob_bleached"))
+X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","num_rugosity"))
 
 y = reef_ungroup %>% select(bleached) %>% pull()
 
@@ -596,7 +556,7 @@ set.seed(3888)
 
 #reef without "bleached" and other useless attributes
 reef_ungroup = reef_final %>% ungroup()
-X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity","prob_bleached")) %>% scale()
+X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity")) %>% scale()
 
 y = reef_ungroup %>% select(bleached) %>% pull()
 
@@ -629,7 +589,7 @@ set.seed(3888)
 
 #reef without "bleached" and other useless attributes
 reef_ungroup = reef_final %>% ungroup()
-X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity","prob_bleached")) %>% scale()
+X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity")) %>% scale()
 
 y = reef_ungroup %>% select(bleached) %>% pull()
 
@@ -663,7 +623,7 @@ set.seed(3888)
 
 #reef without "bleached" and other useless attributes
 reef_ungroup = reef_final %>% ungroup()
-X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity","prob_bleached")) %>% scale()
+X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity")) %>% scale()
 
 y = reef_ungroup %>% select(bleached) %>% pull()
 
@@ -704,6 +664,7 @@ lines(num_record, time_svm, type="l", col="pink", lwd=2, pch=19)
 title("Time of all models")
 legend(x = "topright", legend = c("Binary","KNN","RF","NB","SVM"),lty = c(1, 1,1,1,1), col=c("green","red","blue","yellow","pink"))
 ```
+
 
 # Saving results to file
 
