@@ -191,15 +191,14 @@ plot_f1 = function() {
 plot_model_results = function() {
   
   data = cbind(cv_50acc5_bin, cv_50acc5_sel, cv_acc50_svm, cv_acc50_NB, 
-               cv_acc50_knn, cv_acc50_rf, cv_50acc5_beta) %>%
+               cv_acc50_knn, cv_acc50_rf) %>%
     as.data.frame() %>%
     rename("Initial Binomial Regression" = cv_50acc5_bin,
             "Final Binomial Regression" = cv_50acc5_sel,
             "Support Vector Machine" = cv_acc50_svm,
             "Naive Bayes" = cv_acc50_NB,
             "K-Nearest Neighbours" = cv_acc50_knn,
-            "Random Forest" = cv_acc50_rf,
-            "Beta Regression" = cv_50acc5_beta) %>%
+            "Random Forest" = cv_acc50_rf) %>%
     gather()
   
   data %>%
@@ -217,31 +216,41 @@ plot_model_results = function() {
   
 }
 
-# Function to plot the results of the models except for beta regression
-plot_model_results_no_beta = function() {
+plot_mean = function() {
   
-  data = cbind(cv_50acc5_bin, cv_50acc5_sel, cv_acc50_svm, cv_acc50_NB, cv_acc50_knn, cv_acc50_rf) %>%
+  data = cbind(bin_mean, sel_mean, svm_mean, 
+               nb_mean, knn_mean, rf_mean) %>%
     as.data.frame() %>%
-    rename("Initial Binomial Regression" = cv_50acc5_bin,
-           "Final Binomial Regression" = cv_50acc5_sel,
-           "Support Vector Machine" = cv_acc50_svm,
-           "Naive Bayes" = cv_acc50_NB,
-           "K-Nearest Neighbours" = cv_acc50_knn,
-           "Random Forest" = cv_acc50_rf) %>%
     gather()
+  data$key = c("Initial Binomial Model", "Final Binomial Model", "Support Vector Machine",
+               "Naive Bayes","K-Nearest Neighbours", "Random Forest")
   
   data %>%
-    ggplot(aes(x=reorder(key,value,na.rm = TRUE), y=value, fill=reorder(key,value,na.rm = TRUE))) + 
-    geom_violin(alpha=0.6,trim=FALSE, position = position_dodge(width = 0.75),size=1,color=NA) +
-    geom_boxplot(width=0.4, color="black", alpha=0.5,
-                 outlier.colour="red",
-                 outlier.fill="red",
-                 outlier.size=3, 
-                 show.legend = F) +
-    scale_fill_manual(values=c("#023e7d", "#0892c3", "#4dcde4", "#e79f52", "#e0812d", "#bf4402")) +  
-    labs(title = "Model Accuracy", x = "Models", y = "Accuracy") +
+    ggplot(aes(x=reorder(key,value,na.rm = TRUE), y = value, fill = reorder(key,value,na.rm = TRUE))) +
+    geom_bar(stat = "identity") +
+    scale_fill_manual(values=c("#023e7d", "#0892c3", "#4dcde4", "#e79f52", "#e0812d", "#bf4402")) +
+    labs(title = "Mean Accuracy", x = "Models", y = "Accuracy") +
     theme_minimal() + 
-    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position="none")
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position="none") 
+  
+}
+
+plot_sd = function() {
+  
+  data = cbind(bin_sd, sel_sd, svm_sd, 
+               nb_sd, knn_sd, rf_sd) %>%
+    as.data.frame() %>%
+    gather()
+  data$key = c("Initial Binomial Model", "Final Binomial Model", "Support Vector Machine",
+               "Naive Bayes","K-Nearest Neighbours", "Random Forest")
+  
+  data %>%
+    ggplot(aes(x=reorder(key,value,na.rm = TRUE), y = value, fill = reorder(key,value,na.rm = TRUE))) +
+    geom_bar(stat = "identity") +
+    scale_fill_manual(values=c("#023e7d", "#0892c3", "#4dcde4", "#e79f52", "#e0812d", "#bf4402")) +
+    labs(title = "SD Accuracy", x = "Models", y = "SD") +
+    theme_minimal() + 
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position="none") 
   
 }
 
@@ -291,7 +300,8 @@ ui = htmlTemplate("www/index.html",
                   # beta = plotOutput("beta"),
                   model_f1 = plotOutput("model_f1"),
                   model_results = plotOutput("model_results"),
-                  model_results_no_beta = plotOutput("model_results_no_beta")
+                  model_mean = plotOutput("model_mean"),
+                  model_sd = plotOutput("model_sd")
 
 )
 
@@ -342,11 +352,16 @@ server = function(input, output) {
     plot_model_results()
   })
   
-  # Model accuracy results with no beta
-  output$model_results_no_beta = renderPlot({
-    plot_model_results_no_beta()
+  # Model mean results
+  output$model_mean = renderPlot({
+    plot_mean()
   })
   
+  # Model sd results
+  output$model_sd = renderPlot({
+    plot_sd()
+  })
+
   # output$binom_initial = renderPlot({
   #   plot_model_results(cv_50acc5_bin, "Initial Binomial Regression Model Accuracy") # maybe add colour code to params?
   # })
