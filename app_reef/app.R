@@ -100,9 +100,7 @@ plot_map = function(var, start_date, end_date) {
 #    layout(base_map, legend=list(orientation = "h"))
 #  
 #}
-#c('Reef Name: ', reef_temp$Reef.Name, 
-#  '<br>Country: ', reef_temp$Country, 
-#  sprintf('<br> %s: ', unlist(reef_temp$reef_temp[var])), unlist(reef_temp$reef_temp[var]))
+
 
 # Function to plot linear regression, with variations based on the variables selected
 plot_regression = function(x, y, start_date, end_date) {
@@ -161,7 +159,7 @@ plot_rugosity = function(var, start_date, end_date) {
                  outlier.size=3, 
                  show.legend = F) +
     labs(title = title_string, x = "Rugosity", y = clean_var) +
-    scale_fill_manual(values = c("#2ebaae", "#0892c3", "#e0812d")) + theme_minimal() +
+    scale_fill_manual(values = c("#0892c3", "#2ebaae", "#e0812d")) + theme_minimal() +
                         theme(legend.position="none") 
   
 }
@@ -280,11 +278,91 @@ plot_time = function() {
   data %>%
     ggplot(aes(x = time, y = value, group = key)) +
     geom_line(aes(colour = reorder(key,value,na.rm = TRUE))) +
-    scale_fill_manual(values=c("#023e7d", "#0892c3", "#4dcde4", "#80cdc4", "#e79f52")) +
+    scale_colour_manual(values=c("#023e7d", "#0892c3", "#4dcde4", "#80cdc4", "#e79f52")) +
     labs(title = "Time Performance", x = "Size of test data", y = "Time (ms)", colour = "Models") +
     theme_minimal() + 
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
     
+}
+
+reg_words = function(reg_x, reg_y) {
+  
+  clean_x = str_replace_all(reg_x, "_", " ")
+  if (reg_x == reg_y){
+    print(paste("The plot above is a straight line as you are comparing", clean_x, "with", clean_x,"!",
+                "\nPlease select differing variables to gain a deeper insight."))
+  }
+  
+  else if (reg_x == "Average_bleaching" & reg_y == "SSTA_Frequency_Standard_Deviation"){
+    print("As you can see from the plot above, there is a negative correlation with average bleaching and sea surface temperature anomalies 
+(SSTA) frequency standard deviation (SD). What this means is that the more variance (SD) in frequency of SSTAs experienced by a reef, the less 
+bleaching it has. As per Darwin’s theory of evolution, we believe this is due to higher variance in the frequency of SSTAs making the reef more adaptable, 
+therefore more robust to changes in temperature. Thus, the coral is able to ‘keep their cool’ (and their algae) and be less susceptible to bleaching.")
+  }
+  
+  else if (reg_x == "SSTA_Frequency_Standard_Deviation" & reg_y == "Average_bleaching"){
+    print("As you can see from the plot above, there is a negative correlation with sea surface temperature anomalies (SSTA) frequency standard deviation (SD)
+and average bleaching. What this means is that the more variance (SD) in frequency of SSTAs experienced by a reef, the less 
+bleaching it has. As per Darwin’s theory of evolution, we believe this is due to higher variance in the frequency of SSTAs making the reef more adaptable, 
+therefore more robust to changes in temperature. Thus, the coral is able to ‘keep their cool’ (and their algae) and be less susceptible to bleaching.
+          Hint: Try swapping the X and Y variable for a clearer correlation.")
+  }
+  
+  else if (reg_x == "Average_bleaching" & reg_y == "Diversity"){
+    print("As you can see from the plot above, there is a negative correlation with bleaching and diversity. What this means is that the more diverse a reef 
+is (i.e. the more coral species live within that reef), the less percentage of bleaching it has. The causation of this correlation is not so simple as diversity
+and coral bleaching have a complex feedback relationship where coral bleaching impacts diversity of reefs, and the diversity of coral reefs impacts the chances 
+of a reef to bleach. We expect more diverse reefs to experience less bleaching since the higher genetic diversity results in higher general resilience against 
+not only increases in sea surface temperature, but also other causes of bleaching such as: pollution, disease, sedimentation, freshwater flooding, and changes
+in light (West, et. al. 2003).")
+  }
+  
+  else if (reg_x == "Diversity" & reg_y == "Average_bleaching"){
+    print("As you can see from the plot above, there is a negative correlation with bleaching and diversity. What this means is that the more diverse a reef 
+is (i.e. the more coral species live within that reef), the less percentage of bleaching it has. The causation of this correlation is not so simple as diversity
+and coral bleaching have a complex feedback relationship where coral bleaching impacts diversity of reefs, and the diversity of coral reefs impacts the chances 
+of a reef to bleach. We expect more diverse reefs to experience less bleaching since the higher genetic diversity results in higher general resilience against 
+not only increases in sea surface temperature, but also other causes of bleaching such as: pollution, disease, sedimentation, freshwater flooding, and changes
+in light (West, et. al. 2003).
+          Hint: Try swapping the X and Y variable for a clearer correlation.")
+  }
+  
+  else if (reg_x == "Average_bleaching" & reg_y == "Depth"){
+    print("As you can see from the plot above, there is a positive correlation with bleaching and depth. What this means is that the deeper a reef is,
+the more percentage of bleaching it has. While this may be a significant correlation, more research is needed in this area as deeper environments are 
+generally less impacted by people, so are healthier and more resilient. Deep water corals usually prefer cooler waters so they might be more vulnerable 
+to changes in temperature and therefore bleach easier. The deep-water currents could also have an impact on the corals.")
+  }
+  
+  else if (reg_x == "Depth" & reg_y == "Average_bleaching"){
+    print("As you can see from the plot above, there is a positive correlation with bleaching and depth. What this means is that the deeper a reef is,
+the more percentage of bleaching it has. While this may be a significant correlation, more research is needed in this area as deeper environments are 
+generally less impacted by people, so are healthier and more resilient. Deep water corals usually prefer cooler waters so they might be more vulnerable 
+to changes in temperature and therefore bleach easier. The deep-water currents could also have an impact on the corals.
+          Hint: Try swapping the X and Y variable for a clearer correlation.")
+  }
+  
+  else if (reg_x == "SSTA_Frequency_Standard_Deviation" & reg_y == "Diversity"){
+    print("As you can see from the plot above, there is a positive correlation with sea surface temperature anomalies (SSTA) frequency standard deviation (SD) 
+and diversity. What this means is that the higher variance in SSTAs frequency a reef experience, the more diverse a reef is.")
+  }
+  
+  else if (reg_x == "Diversity" & reg_y == "SSTA_Frequency_Standard_Deviation"){
+    print("As you can see from the plot above, there is a positive correlation with sea surface temperature anomalies (SSTA) frequency standard deviation (SD) 
+and diversity. What this means is that the higher variance in SSTAs frequency a reef experience, the more diverse a reef is.
+          Hint: Try swapping the X and Y variable for a clearer correlation.")
+  }
+  
+  else if (reg_x == "SSTA_Frequency_Standard_Deviation" & reg_y == "Depth" | reg_x == "Depth" & reg_y == "SSTA_Frequency_Standard_Deviation"){
+    print("While it is interesting to see the spread of depth and SSTA frequency SD, our studies focus is on bleaching. 
+Try swapping a variable for bleaching and see the results!")
+  }
+  
+  else if (reg_x == "Diversity" & reg_y == "Depth" | reg_x == "Depth" & reg_y == "Diversity"){
+    print("While it is interesting to see the spread of depth and diversity, our studies focus is on bleaching. 
+Try swapping a variable for bleaching and see the results!")
+  }
+
 }
 
 ##########################################################
@@ -310,7 +388,8 @@ ui = htmlTemplate("www/index.html",
                   model_results = plotOutput("model_results"),
                   model_mean = plotOutput("model_mean"),
                   model_sd = plotOutput("model_sd"),
-                  model_time = plotOutput("model_time")
+                  model_time = plotOutput("model_time"),
+                  regres_words = textOutput("regres_words")
 
 )
 
@@ -374,6 +453,11 @@ server = function(input, output) {
   # Model time results
   output$model_time = renderPlot({
     plot_time()
+  })
+  
+  # Regression words 
+  output$regres_words = renderText({ 
+    reg_words(input$reg_x, input$reg_y) 
   })
   
 }

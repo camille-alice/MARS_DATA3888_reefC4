@@ -216,7 +216,7 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 											<br>
 											<h4>Y Variable:</h4>
 									    <select name="reg_y" id="reg_y">
-									    	<option value="SSTA_Frequency_Standard_Deviation">SSTA Frequency Standard Deviation</option>
+									      <option value="SSTA_Frequency_Standard_Deviation">SSTA Frequency Standard Deviation</option>
 									    	<option value="Average_bleaching">Bleaching</option>
 									    	<option value="Diversity">Diversity</option>
 									    	<option value="Depth">Depth</option>
@@ -229,6 +229,24 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 											{{ regression }}
 										</div>
 									</div>
+                  <div id="corr_explanation">
+                    <p>{{ regres_words }}</p>
+                  </div>
+                <!--  <script>
+                    var var_x = document.getElementById("reg_x"),
+                        corr_explanation = document.getElementById("corr_explanation"),
+                        words = {
+                          Average_bleaching: "This is average bleaching",
+                          SSTA_Frequency_Standard_Deviation: "12345678",
+                          Diversity: "222 444 666",
+                          Depth: "999 999 999",
+                        }
+                        
+                    var_x.onchange = function(){
+                      corr_explanation.innerHTML = words[this.value];
+                    }
+                  </script>	
+                  -->
 									<br>
 									<div class = "row">
 										<div class = "col-6">
@@ -249,19 +267,13 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 										<p>See how our models performed</p>
 									</div>
 								</header>
-
-								<section>
-									<div class="row">
-									  {{ model_f1 }}
-									</div>
-									<br>
 									<div class="row">
 									  {{ model_results }}
 									</div>
 									<br>
 									<div class="row">
 										<div class="col-6">
-											{{ model_mean }}
+											{{ model_f1 }}
 										</div>
 										<div class="col-6">
 											{{ model_sd }}
