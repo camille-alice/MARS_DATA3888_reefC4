@@ -213,7 +213,7 @@ plot_model_results = function() {
     scale_fill_manual(name = "Models", values=c("#023e7d", "#0892c3", "#4dcde4", "#80cdc4", "#e79f52", "#e0812d", "#bf4402")) +
     labs(title = "Model Accuracy", x = "Models", y = "Accuracy") +
     theme_minimal() + 
-    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))#, legend.position="none") 
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
   
 }
 
@@ -265,18 +265,26 @@ plot_time = function() {
   }
   
   data = cbind(time_bin, time_svm, time_nb, 
-               time_knn, time_rf, num_record) %>%
+               time_knn, time_rf) %>%
     as.data.frame() %>%
-    gather()
-  data$key = c("Binomial Model", "Support Vector Machine","Naive Bayes",
-            "K-Nearest Neighbours", "Random Forest", "Time")
+    gather() %>%
+    mutate(key = case_when(
+      key == "time_bin" ~ "Binomial Model",
+      key == "time_svm" ~ "Support Vector Machine",
+      key == "time_nb" ~ "Naive Bayes",
+      key == "time_knn" ~ "K-Nearest Neighbours",
+      key == "time_rf" ~ "Random Forest"
+    ))
+  data$time = num_record
   
-  print(data$Time)
-  
-  # data %>%
-  #   ggplot(aes(x=reorder(key,value,na.rm = TRUE), y = value, fill = reorder(key,value,na.rm = TRUE))) +
+  data %>%
+    ggplot(aes(x = time, y = value, group = key)) +
+    geom_line(aes(colour = reorder(key,value,na.rm = TRUE))) +
+    scale_fill_manual(values=c("#023e7d", "#0892c3", "#4dcde4", "#80cdc4", "#e79f52")) +
+    labs(title = "Time Performance", x = "Size of test data", y = "Time (ms)", colour = "Models") +
+    theme_minimal() + 
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
     
-  
 }
 
 ##########################################################
