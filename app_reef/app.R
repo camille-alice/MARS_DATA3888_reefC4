@@ -59,8 +59,8 @@ plot_map = function(var, start_date, end_date) {
     geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "grey", alpha = 0.3) +
     geom_point(data = reef_temp, alpha = 0.7, aes(y = Latitude.Degrees, x = wrapLongitute, size = unlist(reef_temp[var]), color = unlist(reef_temp[var]))) + 
     labs(title = title_string, x = "", y = "", colour = var, size = var) +
-    scale_colour_viridis(option="magma") + 
-    #scale_colour_gradientn(colours=c("#023e7d", "#4dcde4", "#80cdc4", "#e0812d", "#bf4402")) + 
+    #scale_colour_viridis(option="magma") + 
+    scale_colour_gradientn(colours=c("#023e7d", "#0892c3", "#e79f52", "#e0812d", "#bf4402")) + 
     theme_minimal() + 
     theme(legend.position="bottom") +
     guides(color= guide_legend(title = clean_var),
@@ -277,7 +277,7 @@ plot_time = function() {
   
   data %>%
     ggplot(aes(x = time, y = value, group = key)) +
-    geom_line(aes(colour = reorder(key,value,na.rm = TRUE))) +
+    geom_line(aes(colour = reorder(key,value,na.rm = TRUE)), size=1) +
     scale_colour_manual(values=c("#023e7d", "#0892c3", "#4dcde4", "#80cdc4", "#e79f52")) +
     labs(title = "Time Performance", x = "Size of test data", y = "Time (ms)", colour = "Models") +
     theme_minimal() + 
