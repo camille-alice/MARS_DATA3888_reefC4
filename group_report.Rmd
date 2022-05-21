@@ -70,6 +70,3 @@ Reproducibility & readability
 
 How well the report can be reproduced.
 
-
-
-
