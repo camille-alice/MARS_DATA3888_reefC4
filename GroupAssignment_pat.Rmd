@@ -27,26 +27,14 @@ reef_geomorphic = reef_geomorphic %>%
   filter(Depth <= 15) # as per Allen Coral Atlas specs
 ```
 
-## Investigating NAs
-
-```{r}
-not_na = reef_geomorphic %>% 
-  slice(which(!is.na(reef_geomorphic$class))) %>%
-  select(Reef.ID, Depth, Average_bleaching, class) %>%
-  as.data.frame()
-not_na # 4545 - still some missing data as we haven't finalised which dataset to use
-not_na %>% distinct(Reef.ID, Depth, class) # 3036 - meaning there are some duplicates
-not_na %>% distinct(Reef.ID, Depth) # 3036 - meaning that the same reefs but at different depths have the same class identifier, which might be a problem
-```
 
 ##Binomial regression
-
 ```{r}
 #Most recent entry
 
 #Select several attributes for our model
 reef_recent = reef_geomorphic %>%
-  select(Reef.ID, Date, SSTA_Frequency_Standard_Deviation, Depth, Diversity, class,Average_bleaching) %>% 
+  select(Reef.ID, Longitude.Degrees, Latitude.Degrees, Date, SSTA_Frequency_Standard_Deviation, Depth, Diversity, class,Average_bleaching) %>% 
   mutate(SSTA_Frequency_Standard_Deviation = as.numeric(SSTA_Frequency_Standard_Deviation),
          Average_bleaching = as.numeric(Average_bleaching),
          Depth = as.numeric(Depth), 
@@ -73,7 +61,7 @@ reef_final <- reef_recent %>% drop_na()
 
 
 #Binomial regression
-reef_model <- glm(formula = bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity + rugosity, data = reef_final, family = binomial)
+reef_model <- glm(formula = bleached ~ Longitude.Degrees + Latitude.Degrees + SSTA_Frequency_Standard_Deviation + Depth + Diversity + rugosity, data = reef_final, family = binomial)
 
 summary(reef_model)
 
@@ -113,7 +101,7 @@ for (i in 1:n_sim){
     
     X_train = X_train %>% mutate(bleached = y_train)
     
-    lm = glm(formula = bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity + rugosity, data = X_train,family = binomial)
+    lm = glm(formula = bleached ~ Longitude.Degrees + Latitude.Degrees + SSTA_Frequency_Standard_Deviation + Depth + Diversity + rugosity, data = X_train,family = binomial)
     predicted_outcomes = predict.glm(lm, X_test, type = "response")
     
     predicted_outcomes = ifelse(predicted_outcomes > 0.5, 1, 0)
@@ -135,6 +123,8 @@ bin_sd = sd(cv_50acc5_bin)
 bin_cf = confusionMatrix(as.factor(fitres_bin), y_bin,
                 mode = "everything",
                 positive="1")
+
+bin_cf
 
 #Boxplot for full binomial model accuracy
 boxplot(cv_50acc5_bin, ylab = 'CV Accuracy' ,xlab = 'Binomial Regression' , main = 'Accuracy of Binomial Regression in CV')
@@ -178,7 +168,7 @@ for (i in 1:n_sim){
     
     X_train = X_train %>% mutate(bleached = y_train)
     
-    slm = glm(formula = bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity, data = X_train,family = binomial)
+    slm = glm(formula = bleached ~ Latitude.Degrees + SSTA_Frequency_Standard_Deviation + Depth + Diversity, data = X_train,family = binomial)
     predicted_outcomes = predict.glm(slm, X_test, type = "response")
     
     predicted_outcomes = ifelse(predicted_outcomes > 0.5, 1, 0)
@@ -202,9 +192,9 @@ bin_sel_cf = confusionMatrix(as.factor(fitres_sel), y_sel,
                 mode = "everything",
                 positive="1")
 
-
+bin_sel_cf
 #Boxplot for selected binomial model accuracy
-boxplot(cv_50acc5_sel, ylab = 'CV Accuracy' ,xlab = 'Selected Binomial Regression' , main = 'Accuracy of Selected Binomial Regression in CV')
+boxplot(cv_50acc5_sel, ylab = 'CV Accuracy' ,xlab = 'Selected Binomial Regression' , main = 'Accuracy of Selected Binomial Regression Without Rugosity in CV')
 ```
 
 #Adding random effect to the binomial model without rugosity variable
@@ -314,10 +304,67 @@ nb_sd = sd(cv_acc50_NB)
 nb_cf = confusionMatrix(fitres_NB, y_NB,
                 mode = "everything",
                 positive="1")
-
+nb_cf
 
 #Boxplot for Naive bayes  model
 boxplot(cv_acc50_NB, ylab = 'CV Accuracy' ,xlab = 'Naive Bayes' , main = 'Accuracy of Naive Bayes in CV')
+```
+
+#Naive Bayes without rugosity
+```{r}
+#Do Naive Bayes model without rugosity
+#reef without "bleached" and other useless attributes
+reef_ungroup = reef_final %>% ungroup()
+X = reef_ungroup %>% select(-c("Average_bleaching","Reef.ID","Date","class","bleached","num_rugosity","rugosity"))
+
+y = reef_ungroup %>% select(bleached) %>% pull()
+
+set.seed(3888)
+cv_acc50_NB_WO = c()  # initialise results vector
+cv_acc_NB_WO = c()
+K = 10
+
+fitres_NB_WO = factor()
+y_NB_WO = c()
+
+for (i in 1:50){
+    
+    cvSets = cvTools::cvFolds(nrow(X), K) 
+
+    for (j in 1:K) {
+      test_id = cvSets$subsets[cvSets$which == j]
+      X_test = X[test_id, ]
+      X_train = X[-test_id, ]
+      y_test = y[test_id]
+      y_train = y[-test_id]
+      
+      X_train = X_train %>% mutate(bleached = y_train)
+      
+      nB = e1071::naiveBayes(formula = bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity, data = X_train)
+      predicted_outcomes = predict(nB, X_test)
+      
+  
+      fitres_NB_WO = append(fitres_NB_WO, predicted_outcomes)
+      y_NB_WO = append(y_NB_WO, y_test)
+  
+      cv_acc_NB_WO[j] = mean(predicted_outcomes == y_test)
+    }
+    
+    cv_acc50_NB_WO <- append(cv_acc50_NB_WO, mean(cv_acc_NB_WO))
+}
+
+mean(cv_acc50_NB_WO)
+sd(cv_acc50_NB_WO)
+
+#F1-score for Naive Bayes
+nb_cf_WO = confusionMatrix(fitres_NB_WO, y_NB_WO,
+                mode = "everything",
+                positive="1")
+nb_cf_WO
+
+
+#Boxplot for Naive bayes  model
+boxplot(cv_acc50_NB_WO, ylab = 'CV Accuracy' ,xlab = 'Naive Bayes' , main = 'Accuracy of Naive Bayes Without Rugosity in CV')
 ```
 
 
@@ -368,13 +415,73 @@ knn_sd = sd(cv_acc50_knn)
 knn_cf = confusionMatrix(as.factor(fitres_knn), y_knn,
                 mode = "everything",
                 positive="1")
+knn_cf
 
 #Boxplot for KNN model
 boxplot(cv_acc50_knn, ylab = 'CV Accuracy' ,xlab = 'K-Nearest Neighbour' , main = 'Accuracy of K-Nearest Neighbour in CV')
 ```
 
-#Random Forest
+#K Nearest Neighbour without rugosity
+
 ```{r}
+#Do KNN using the selected variable 
+set.seed(3888)
+
+#reef without "bleached","rugosity" and other useless attributes
+reef_ungroup = reef_final %>% ungroup()
+X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity","num_rugosity")) %>% scale()
+
+y = reef_ungroup %>% select(bleached) %>% pull()
+
+fitres_knn_WO = factor()
+y_knn_WO = c()
+
+cv_acc50_knn_WO = c()  # initialise results vector
+cv_acc_knn_WO = c()
+K = 10
+
+for (i in 1:50){
+    
+    cvSets = cvTools::cvFolds(nrow(X), K) 
+
+    for (j in 1:K) {
+        test_id = cvSets$subsets[cvSets$which == j]
+        X_test = X[test_id, ]
+        X_train = X[-test_id, ]
+        y_test = y[test_id]
+        y_train = y[-test_id]
+        fit = class::knn(train = X_train, test = X_test, cl = y_train, k = 5)
+        cv_acc_knn_WO[j] = mean(fit == y_test)
+        fitres_knn_WO = append(fitres_knn_WO, fit)
+        y_knn_WO = append(y_knn_WO, y_test)
+    }
+    
+    cv_acc50_knn_WO <- append(cv_acc50_knn_WO, mean(cv_acc_knn_WO))
+}
+
+mean(cv_acc50_knn_WO)
+sd(cv_acc50_knn_WO)
+
+#F1-score for knn
+knn_cf_WO = confusionMatrix(as.factor(fitres_knn_WO), y_knn_WO,
+                mode = "everything",
+                positive="1")
+knn_cf_WO
+
+#Boxplot for KNN model
+boxplot(cv_acc50_knn_WO, ylab = 'CV Accuracy' ,xlab = 'K-Nearest Neighbour' , main = 'Accuracy of K-Nearest Neighbour Without Rugosity in CV')
+```
+
+
+#Random Forest
+
+```{r}
+#reef without "bleached" and other useless attributes
+reef_ungroup = reef_final %>% ungroup()
+X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity")) %>% scale()
+
+y = reef_ungroup %>% select(bleached) %>% pull()
+
 #Do random forest
 set.seed(3888)
 cv_acc50_rf = c()  # initialise results vector
@@ -411,13 +518,73 @@ rf_sd = sd(cv_acc50_rf)
 rf_cf = confusionMatrix(as.factor(fitres_rf), y_rf,
                 mode = "everything",
                 positive="1")
+rf_cf
 
 #Boxplot for Random forest model
 boxplot(cv_acc50_rf, ylab = 'CV Accuracy' ,xlab = 'Random Forest' , main = 'Accuracy of Random Forest in CV')
 ```
 
-#SVM model
+#Random Forest Without Rugosity
+
 ```{r}
+#reef without "bleached","rugosity" and other useless attributes
+reef_ungroup = reef_final %>% ungroup()
+X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity","num_rugosity")) %>% scale()
+
+y = reef_ungroup %>% select(bleached) %>% pull()
+
+#Do random forest
+set.seed(3888)
+cv_acc50_rf_WO = c()  # initialise results vector
+cv_acc_rf_WO = c()
+K = 10
+
+fitres_rf_WO = factor()
+y_rf_WO = c()
+
+for (i in 1:50){
+    
+    cvSets = cvTools::cvFolds(nrow(X), K) 
+
+    for (j in 1:K) {
+        test_id = cvSets$subsets[cvSets$which == j]
+        X_test = X[test_id, ]
+        X_train = X[-test_id, ]
+        y_test = y[test_id]
+        y_train = y[-test_id]
+        rf_res <- randomForest::randomForest(x = X_train, y = as.factor(y_train))
+        fit <- predict(rf_res, X_test)
+        cv_acc_rf_WO[j] = mean(fit == y_test)
+        fitres_rf_WO = append(fitres_rf_WO, fit)
+        y_rf_WO = append(y_rf_WO, y_test)
+    }
+    
+    cv_acc50_rf_WO <- append(cv_acc50_rf_WO, mean(cv_acc_rf_WO))
+}
+
+mean(cv_acc50_rf_WO)
+sd(cv_acc50_rf_WO)
+#F1-score for rf
+rf_cf_WO = confusionMatrix(as.factor(fitres_rf_WO), y_rf_WO,
+                mode = "everything",
+                positive="1")
+rf_cf_WO
+
+#Boxplot for Random forest model
+boxplot(cv_acc50_rf_WO, ylab = 'CV Accuracy' ,xlab = 'Random Forest' , main = 'Accuracy of Random Forest Without Rugosity in CV')
+
+```
+
+
+#SVM model
+
+```{r}
+#reef without "bleached" and other useless attributes
+reef_ungroup = reef_final %>% ungroup()
+X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity")) %>% scale()
+
+y = reef_ungroup %>% select(bleached) %>% pull()
+
 #Do SVM model
 set.seed(3888)
 cv_acc50_svm = c()  # initialise results vector
@@ -455,11 +622,62 @@ svm_sd = sd(cv_acc50_svm)
 svm_cf = confusionMatrix(as.factor(fitres_svm), y_svm,
                 mode = "everything",
                 positive="1")
+svm_cf
 
 #Boxplot for SVM  model
 boxplot(cv_acc50_svm, ylab = 'CV Accuracy' ,xlab = 'Support Vector Machine' , main = 'Accuracy of Support Vector Machine in CV')
 ```
 
+#SVM model without Rugosity
+
+```{r}
+#reef without "bleached","rugosity" and other useless attributes
+reef_ungroup = reef_final %>% ungroup()
+X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity","num_rugosity")) %>% scale()
+
+y = reef_ungroup %>% select(bleached) %>% pull()
+#Do SVM model
+set.seed(3888)
+cv_acc50_svm_WO = c()  # initialise results vector
+cv_acc_svm_WO = c()
+K = 10
+
+fitres_svm_WO = factor()
+y_svm_WO = c()
+
+for (i in 1:50){
+    
+    cvSets = cvTools::cvFolds(nrow(X), K) 
+
+    for (j in 1:K) {
+        test_id = cvSets$subsets[cvSets$which == j]
+        X_test = X[test_id, ]
+        X_train = X[-test_id, ]
+        y_test = y[test_id]
+        y_train = y[-test_id]
+        ## SVM
+        svm_res <- e1071::svm(x = X_train, y = as.factor(y_train))
+        fit <- predict(svm_res, X_test)
+        cv_acc_svm_WO[j] = mean(fit == y_test)
+        fitres_svm_WO = append(fitres_svm_WO, fit)
+        y_svm_WO = append(y_svm_WO, y_test)
+    }
+    
+    cv_acc50_svm_WO <- append(cv_acc50_svm_WO, mean(cv_acc_svm_WO))
+}
+
+mean(cv_acc50_svm_WO)
+sd(cv_acc50_svm_WO)
+
+#F1-score for svm
+svm_cf_WO = confusionMatrix(as.factor(fitres_svm_WO), y_svm_WO,
+                mode = "everything",
+                positive="1")
+
+svm_cf_WO
+#Boxplot for SVM  model
+boxplot(cv_acc50_svm_WO, ylab = 'CV Accuracy' ,xlab = 'Support Vector Machine' , main = 'Accuracy of Support Vector Machine without Rugosity in CV')
+```
 
 #Little summary
 ```{r}
@@ -469,14 +687,18 @@ boxplot(cv_acc50_svm, ylab = 'CV Accuracy' ,xlab = 'Support Vector Machine' , ma
 #Interprebality just how we word the model
 
 #Conclusion Summary
-#Selected Binomial model gave 0.6498449 accuracy (w/o rugosity) and f1 score 0.18499 
-#Full Binomial model gave 0.6465043 accuracy and f1 score 0.18224
-#Knn gave 0.6456981 accuracy and f1 score 0.4354
-#Random forest gave 0.6939897 accuracy and f1 score 0.5226
-#Support Vector Machine gave 0.6472468 accuracy and f1 score 0.23449
-#Naive Bayes gave 0.6247871 accuracy and f1 score 0.33155
+#Full Binomial model gave 0.6498735 accuracy, f1 score 0.20677, sd:0.002481738
+#Naive Bayes gave 0.6247871 accuracy, f1 score 0.33155, sd: 0.002666694
+#KNN gave 0.6587548 accuracy, f1 score 0.4596, sd: 0.005003624
+#Support Vector Machine gave 0.6647083 accuracy, f1 score 0.25099, sd: 0.003176242
+#Random forest gave 0.7158592 accuracy, f1 score 0.5632, sd: 0.004287599
 
-#Full Binomial has sd of 
+#Without rugosity
+#Selected Binomial model gave 0.6447377 accuracy (w/o rugosity), f1 score 0.20237, sd:0.001997279
+#Naive Bayes gave 0.6278599 accuracy, f1 score 0.32603, sd:0.002424676
+#KNN gave 0.6689606 accuracy, f1 score 0.4841, sd:0.005267227
+#Support Vector Machine gave 0.6600222 accuracy, f1 score 0.27592, sd:0.003717103
+#Random forest gave 0.70576 accuracy, f1 score 0.5515, sd:0.00580881
 ```
 
 #Time all the algorithm
@@ -489,7 +711,7 @@ set.seed(3888)
 
 #reef without "bleached" and other useless attributes
 reef_ungroup = reef_final %>% ungroup()
-X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity"))
+X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","num_rugosity","rugosity"))
 
 y = reef_ungroup %>% select(bleached) %>% pull()
 
@@ -525,7 +747,7 @@ set.seed(3888)
 
 #reef without "bleached" and other useless attributes
 reef_ungroup = reef_final %>% ungroup()
-X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","num_rugosity"))
+X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","num_rugosity","rugosity"))
 
 y = reef_ungroup %>% select(bleached) %>% pull()
 
@@ -540,7 +762,7 @@ while (i < 1000) {
   X_test = head(X,i)
   y_test = head(y,i)
   X_train = X_train %>% mutate(bleached = y_train)
-  nB = e1071::naiveBayes(formula = bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity + rugosity, data = X_train)
+  nB = e1071::naiveBayes(formula = bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity, data = X_train)
   predicted_outcomes = predict(nB, X_test)
   i = i + 10 
   end_time = Sys.time()
@@ -559,7 +781,7 @@ set.seed(3888)
 
 #reef without "bleached" and other useless attributes
 reef_ungroup = reef_final %>% ungroup()
-X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity")) %>% scale()
+X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity","num_rugosity")) %>% scale()
 
 y = reef_ungroup %>% select(bleached) %>% pull()
 
@@ -626,7 +848,7 @@ set.seed(3888)
 
 #reef without "bleached" and other useless attributes
 reef_ungroup = reef_final %>% ungroup()
-X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity")) %>% scale()
+X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity","num_rugosity")) %>% scale()
 
 y = reef_ungroup %>% select(bleached) %>% pull()
 
