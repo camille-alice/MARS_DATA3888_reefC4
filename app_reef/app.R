@@ -16,13 +16,21 @@ library(tidyverse)
 library(car)
 library(cvTools)
 library(randomForest)
+library(leaflet) #DELETE IF NOT USING LEAFLET!
 
 # Assumes that the current working directory is just /MARS_DATA3888_reefC4/app_reef
 # Set wd to app_reef if not otherwise
 
 # R code to read and set up the data
 # Only run once at the start of the program
-# Code taken from Pat and Camille
+# Code authors: 
+# Camille - app design and explanations, 
+# Nathan - plots and base app, 
+# Patrick - modeling and evaluation
+
+# hex colour palette 
+#015d6f, #1c858b, #2ebaae, #82d8ac, #c5ffb6, #c37c0b, #bf4402
+
 world_map = map_data("world2")
 
 # cleaned file to use for app - no warnings and less computationally expensive
@@ -72,7 +80,10 @@ plot_map = function(var, start_date, end_date) {
 
 ## Function to plot the map, with variations based on the variables selected
 #plot_map_inter = function(var, start_date, end_date) {
-#  
+#  mapStates = map("state", fill = TRUE, plot = FALSE)
+#  leaflet(data = mapStates) %>% addTiles() %>%
+#    addPolygons(fillColor = topo.colors(10, alpha = NULL), stroke = FALSE)
+#}
 #  reef_temp = reef_final %>%
 #    filter(Date >= start_date) %>%
 #    filter(Date <= end_date) %>% 
@@ -165,8 +176,7 @@ plot_rugosity = function(var, start_date, end_date) {
                         theme(legend.position="none") 
   
 }
-# hex colour palette 
-#015d6f, #1c858b, #2ebaae, #82d8ac, #c5ffb6, #c37c0b, #bf4402
+
 # Function to plot f1 results of the models
 plot_f1 = function() {
   
@@ -413,7 +423,7 @@ ui = htmlTemplate("www/index.html",
                   diversity_slider = sliderInput("diversity_slider", "", min = 0, max = 600, value = 0, sep = ""),
                   map_title = verbatimTextOutput("map_title"),
                   map = plotOutput("map"),
-                  #map_inter = plotlyOutput("map_inter"),
+                 #map_inter = leafletOutput("map_inter", width = "100%", height = "100%"),
                   rugosity_plot = plotOutput("rugosity_plot"),
                   regression = plotOutput("regression"),
                   qq_1 = plotOutput("qq_1"),
@@ -436,8 +446,8 @@ server = function(input, output) {
   })
   
 #  # Interactive map
-#  output$map_inter = renderPlotly({
-#    plot_map_inter(input$map_var, input$map_year[1], input$map_year[2])
+#  output$map_inter = renderLeaflet({
+#    plot_map_inter() #input$map_var, input$map_year[1], input$map_year[2])
 #  })
 
   # Regression plots
@@ -458,11 +468,6 @@ server = function(input, output) {
   # Rugosity plots
   output$rugosity_plot = renderPlot({
     plot_rugosity(input$rug_var, input$rug_year[1], input$rug_year[2])
-  })
-  
-  # Map titles
-  output$map_title = renderPrint({ 
-    input$map_var 
   })
   
   # F1 results
