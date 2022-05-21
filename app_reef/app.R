@@ -14,6 +14,8 @@ library(dplyr)
 library(sf)
 library(tidyverse)
 library(car)
+library(cvTools)
+library(randomForest)
 
 # Assumes that the current working directory is just /MARS_DATA3888_reefC4/app_reef
 # Set wd to app_reef if not otherwise
@@ -285,6 +287,35 @@ plot_time = function() {
     
 }
 
+predict_rf = function(SSTA_Frequency_Standard_Deviation, Depth, Diversity, num_rugosity) {
+  
+  set.seed(3888)
+  
+  cvSets = cvTools::cvFolds(nrow(save_X), 10)
+  test_id = cvSets$subset[cvSets$which == sample.int(10, 1)]
+  X_test = save_X[test_id, ] %>% scale()
+  X_train = save_X[-test_id, ] %>% scale()
+  y_test = save_y[test_id]
+  y_train = save_y[-test_id]
+  
+  rf_res = randomForest::randomForest(x = X_train, y = as.factor(y_train))
+  
+  num_rugosity = as.numeric(num_rugosity)
+  data = matrix(c(SSTA_Frequency_Standard_Deviation, Depth, Diversity, num_rugosity), nrow = 1, ncol = 4)
+  colnames(data) = c("SSTA_Frequency_Standard_Deviation", "Depth", "Diversity", "num_rugosity")
+  data = rbind(data, save_X[test_id,]) %>% scale()
+  data = rbind(data[1,], X_test)
+  
+  fit = predict(rf_res, data)
+  
+  if (fit[[1]] == 0) {
+    print("not bleached")
+  } else {
+    print("bleached")
+  }
+  
+}
+
 reg_words = function(reg_x, reg_y) {
   
   clean_x = str_replace_all(reg_x, "_", " ")
@@ -377,6 +408,9 @@ ui = htmlTemplate("www/index.html",
                   map_slider = sliderInput("map_year", "", min = 1998, max = 2017, value = c(1998, 2017), sep = ""),
                   reg_slider = sliderInput("reg_year", "", min = 1998, max = 2017, value = c(1998, 2017), sep = ""),
                   rug_slider = sliderInput("rug_year", "", min = 1998, max = 2017, value = c(1998, 2017), sep = ""),
+                  ssta_slider = sliderInput("ssta_slider", "", min = 0, max = 12, value = 0, sep = ""),
+                  depth_slider = sliderInput("depth_slider", "", min = 0, max = 15, value = 0, sep = ""),
+                  diversity_slider = sliderInput("diversity_slider", "", min = 0, max = 600, value = 0, sep = ""),
                   map_title = verbatimTextOutput("map_title"),
                   map = plotOutput("map"),
                   #map_inter = plotlyOutput("map_inter"),
@@ -389,6 +423,7 @@ ui = htmlTemplate("www/index.html",
                   model_mean = plotOutput("model_mean"),
                   model_sd = plotOutput("model_sd"),
                   model_time = plotOutput("model_time"),
+                  predict_results = textOutput("predict_results"),
                   regres_words = textOutput("regres_words")
 
 )
@@ -453,6 +488,11 @@ server = function(input, output) {
   # Model time results
   output$model_time = renderPlot({
     plot_time()
+  })
+  
+  # Prediction results
+  output$predict_results = renderText({
+    predict_rf(input$ssta_slider, input$depth_slider, input$diversity_slider, input$rugosity_val)
   })
   
   # Regression words 

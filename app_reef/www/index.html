@@ -28,6 +28,7 @@
 								<li><a href="#rugosity">Rugosity</a></li>
 								<li><a href="#plots">Plots</a></li>
 								<li><a href="#models">Models</a></li>
+								<li><a href="#predict">Predict</a></li>
 							</ul>
 					</header>
 
@@ -269,6 +270,42 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 									<div class="row">
 									  {{ model_time }}
 									</div>
+								</section>
+							</article>
+
+						<!-- Post PREEDICT -->
+							<article class="post">
+								<header>
+									<div class="title">
+										<h2><a id="predict">Make a prediction!</a></h2>
+										<p>Select some data and see whether our model predicts a bleached or non-bleached reef!</p>
+									</div>
+								</header>
+								<div class="row">
+									<div class="col-3">
+										<h4>SSTA Frequency Standard Deviation:</h4>
+										<a id="slider">{{ ssta_slider }}</a>
+									</div>
+									<div class="col-3">
+										<h4>Depth:</h4>
+										<a id="slider">{{ depth_slider }}</a>
+									</div>
+									<div class="col-3">
+										<h4>Diversity:</h4>
+										<a id="slider">{{ diversity_slider }}</a>
+									</div>
+									<div class="col-3">
+										<h4>Rugosity:</h4>
+										<select name="rugosity_val" id="rugosity_val">
+											<option value="1">Low</option>
+											<option value="2">Medium</option>
+											<option value="3">High</option>
+										</select>
+									</div>
+								</div>
+								<div class="row">
+									<p>{{ predict_results }}</p>
+								</div>
 								</section>
 							</article>
 
