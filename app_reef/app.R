@@ -5,9 +5,7 @@
 ##########################################################
 
 library(shiny)
-library(shinyWidgets)
 library(ggplot2)
-library(plotly)
 library(viridis)
 library(maps)
 library(dplyr)
@@ -16,7 +14,11 @@ library(tidyverse)
 library(car)
 library(cvTools)
 library(randomForest)
-library(leaflet) #DELETE IF NOT USING LEAFLET!
+library(leaflet)
+library(leaflet.extras)
+library(shinyWidgets)
+library("scales")
+library(leaflegend)
 
 # Assumes that the current working directory is just /MARS_DATA3888_reefC4/app_reef
 # Set wd to app_reef if not otherwise
@@ -79,41 +81,49 @@ plot_map = function(var, start_date, end_date) {
 }
 
 ## Function to plot the map, with variations based on the variables selected
-#plot_map_inter = function(var, start_date, end_date) {
-#  mapStates = map("state", fill = TRUE, plot = FALSE)
-#  leaflet(data = mapStates) %>% addTiles() %>%
-#    addPolygons(fillColor = topo.colors(10, alpha = NULL), stroke = FALSE)
-#}
-#  reef_temp = reef_final %>%
-#    filter(Date >= start_date) %>%
-#    filter(Date <= end_date) %>% 
-#    arrange(Average_bleaching) #re ordering so data appears on map with most bleached on top as ggplot plots from row=1
-#  
-#  #cleaning var name for titles 
-#  clean_var = str_replace_all(var, "_", " ")
-#  title_string = paste(clean_var, "of Coral Reefs from", start_date, "to", end_date)
-#  
-#  base_map = ggplot() + 
-#    geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "grey", alpha = 0.3) +
-#    geom_point(data = reef_temp, alpha = 0.7, aes(y = Latitude.Degrees, x = wrapLongitute, 
-#                                                  size = unlist(reef_temp[var]), 
-#                                                  color = unlist(reef_temp[var]),
-#                                                  text = paste('Reef Name: ', reef_temp$Reef.Name, 
-#                                                    '<br>Country: ', reef_temp$Country, 
-#                                                    paste(sprintf('<br> %s: ', unlist(reef_temp$reef_temp[var]))), unlist(reef_temp$reef_temp[var])))) + 
-#    labs(title = title_string, x = "", y = "", colour = var, size = var) +
-#    scale_colour_viridis(option="magma") + 
-#    theme_minimal() + 
-#    theme(legend.position="bottom") +
-#    guides(color= guide_legend(title = clean_var),
-#           size=guide_legend(title = clean_var))
-#  
-#  #interactive map
-#  plotly(base_map, tooltip = "text") %>% 
-#    layout(base_map, legend=list(orientation = "h"))
-#  
-#}
-
+plot_map_leaf = function(var, start_date, end_date) {
+  
+  reef_temp = reef_final %>%
+    filter(Date >= start_date) %>%
+    filter(Date <= end_date) %>% 
+    arrange(Average_bleaching) #re ordering so data appears on map with most bleached on top as ggplot plots from row=1
+  
+  #cleaning var name for titles 
+  clean_var = str_replace_all(var, "_", " ")
+  title_string = paste(clean_var, "of Coral Reefs from", start_date, "to", end_date)
+  pal = colorNumeric(c("#023e7d", "#0892c3", "#e79f52", "#e0812d", "#bf4402"), domain = reef_temp$var)
+  circle_size = unname(rescale(unlist(reef_temp[var]), to = c(3, 10)))
+  labels = sprintf("Reef Name: %s <br/> Country: %s <br/> %s: %.2f",
+                   reef_temp$Reef.Name, reef_temp$Country, clean_var, unlist(reef_temp[var])) %>% 
+    lapply(htmltools::HTML)
+  
+  # create leaflet map
+  leaf_map = leaflet(reef_temp) %>%
+    addProviderTiles(providers$CartoDB.PositronNoLabels, group = "Grey Map") %>% #grey
+    addProviderTiles(providers$GeoportailFrance.orthos, group = "Terrain Map") %>% #coloured map
+    addProviderTiles(providers$CartoDB.VoyagerOnlyLabels, group = "Map Labels") %>% #Stamen.TonerLabels
+    addCircleMarkers(
+      data = reef_temp,
+      color = ~pal(unlist(reef_temp[var])),
+      radius = ~circle_size,
+      lng = ~wrapLongitute,
+      lat = ~Latitude.Degrees,
+      label = labels, 
+      weight = 1) %>%
+    addLegendNumeric(pal = pal,
+                     values = unlist(reef_temp[var]),
+                     title = clean_var,
+                     orientation = 'horizontal',
+                     width = 200,
+                     height = 10,
+                     position = 'bottomright') %>%
+    addLayersControl(baseGroups = c("Grey Map", "Terrain Map"),
+      overlayGroups = c("Map Labels"),
+      options = layersControlOptions(collapsed = FALSE)) 
+  
+  leaf_map
+  
+}
 
 # Function to plot linear regression, with variations based on the variables selected
 plot_regression = function(x, y, start_date, end_date) {
@@ -173,7 +183,7 @@ plot_rugosity = function(var, start_date, end_date) {
                  show.legend = F) +
     labs(title = title_string, x = "Rugosity", y = clean_var) +
     scale_fill_manual(values = c("#0892c3", "#2ebaae", "#e0812d")) + theme_minimal() +
-                        theme(legend.position="none") 
+    theme(legend.position="none") 
   
 }
 
@@ -204,12 +214,12 @@ plot_model_results = function() {
                cv_acc50_NB, cv_acc50_knn, cv_acc50_rf) %>%
     as.data.frame() %>%
     rename("Initial Binomial Regression" = cv_50acc5_bin,
-            "Final Binomial Regression" = cv_50acc5_sel,
-            "Binomial Regression with random effect" = cv_50acc_rnd,
-            "Support Vector Machine" = cv_acc50_svm,
-            "Naive Bayes" = cv_acc50_NB,
-            "K-Nearest Neighbours" = cv_acc50_knn,
-            "Random Forest" = cv_acc50_rf) %>%
+           "Final Binomial Regression" = cv_50acc5_sel,
+           "Binomial Regression with random effect" = cv_50acc_rnd,
+           "Support Vector Machine" = cv_acc50_svm,
+           "Naive Bayes" = cv_acc50_NB,
+           "K-Nearest Neighbours" = cv_acc50_knn,
+           "Random Forest" = cv_acc50_rf) %>%
     gather()
   
   data %>%
@@ -294,7 +304,7 @@ plot_time = function() {
     labs(title = "Time Performance", x = "Size of test data", y = "Time (ms)", colour = "Models") +
     theme_minimal() + 
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
-    
+  
 }
 
 predict_rf = function(SSTA_Frequency_Standard_Deviation, Depth, Diversity, num_rugosity) {
@@ -403,7 +413,7 @@ Try swapping a variable for bleaching and see the results!")
     print("While it is interesting to see the spread of depth and diversity, our studies focus is on bleaching. 
 Try swapping a variable for bleaching and see the results!")
   }
-
+  
 }
 
 ##########################################################
@@ -423,7 +433,7 @@ ui = htmlTemplate("www/index.html",
                   diversity_slider = sliderInput("diversity_slider", "", min = 0, max = 600, value = 0, sep = ""),
                   map_title = verbatimTextOutput("map_title"),
                   map = plotOutput("map"),
-                 #map_inter = leafletOutput("map_inter", width = "100%", height = "100%"),
+                  map_leaf = leafletOutput("map_leaf"),
                   rugosity_plot = plotOutput("rugosity_plot"),
                   regression = plotOutput("regression"),
                   qq_1 = plotOutput("qq_1"),
@@ -435,7 +445,7 @@ ui = htmlTemplate("www/index.html",
                   model_time = plotOutput("model_time"),
                   predict_results = textOutput("predict_results"),
                   regres_words = textOutput("regres_words")
-
+                  
 )
 
 server = function(input, output) {
@@ -445,11 +455,11 @@ server = function(input, output) {
     plot_map(input$map_var, input$map_year[1], input$map_year[2])
   })
   
-#  # Interactive map
-#  output$map_inter = renderLeaflet({
-#    plot_map_inter() #input$map_var, input$map_year[1], input$map_year[2])
-#  })
-
+  # Interactive map
+  output$map_leaf = renderLeaflet({
+    plot_map_leaf(input$map_var, input$map_year[1], input$map_year[2]) 
+  })
+  
   # Regression plots
   output$regression = renderPlot({
     plot_regression(input$reg_x, input$reg_y, input$reg_year[1], input$reg_year[2])
