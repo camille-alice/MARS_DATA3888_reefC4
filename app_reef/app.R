@@ -99,9 +99,8 @@ plot_map_leaf = function(var, start_date, end_date) {
   
   # create leaflet map
   leaf_map = leaflet(reef_temp) %>%
-    addProviderTiles(providers$CartoDB.PositronNoLabels, group = "Grey Map") %>% #grey
-    addProviderTiles(providers$GeoportailFrance.orthos, group = "Terrain Map") %>% #coloured map
-    addProviderTiles(providers$CartoDB.VoyagerOnlyLabels, group = "Map Labels") %>% #Stamen.TonerLabels
+    addProviderTiles(providers$Esri.WorldGrayCanvas, group = "Grey Map") %>% #grey
+    #addProviderTiles(providers$GeoportailFrance.orthos, group = "Terrain Map") %>% #coloured map
     addCircleMarkers(
       data = reef_temp,
       color = ~pal(unlist(reef_temp[var])),
@@ -115,11 +114,10 @@ plot_map_leaf = function(var, start_date, end_date) {
                      title = clean_var,
                      orientation = 'horizontal',
                      width = 200,
-                     height = 10,
-                     position = 'bottomright') %>%
-    addLayersControl(baseGroups = c("Grey Map", "Terrain Map"),
-      overlayGroups = c("Map Labels"),
-      options = layersControlOptions(collapsed = FALSE)) 
+                     height = 5,
+                     position = 'bottomleft') 
+  #%>%addLayersControl(overlayGroups = c("Map Labels"),
+  #    options = layersControlOptions(collapsed = TRUE)) 
   
   leaf_map
   
