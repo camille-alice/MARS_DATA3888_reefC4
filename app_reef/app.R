@@ -322,14 +322,14 @@ predict_rf = function(SSTA_Frequency_Standard_Deviation, Depth, Diversity, num_r
   data = matrix(c(SSTA_Frequency_Standard_Deviation, Depth, Diversity, num_rugosity), nrow = 1, ncol = 4)
   colnames(data) = c("SSTA_Frequency_Standard_Deviation", "Depth", "Diversity", "num_rugosity")
   data = rbind(data, save_X[test_id,]) %>% scale()
-  data = rbind(data[1,], X_test)
+  # data = rbind(data[1,], X_test)
   
   fit = predict(rf_res, data)
   
   if (fit[[1]] == 0) {
-    print("not bleached")
+    print("<h3><b>Not Bleached!</b></h3>")
   } else {
-    print("bleached")
+    print("<h3><b>Bleached!</b></h3>")
   }
   
 }
@@ -441,7 +441,7 @@ ui = htmlTemplate("www/index.html",
                   model_mean = plotOutput("model_mean"),
                   model_sd = plotOutput("model_sd"),
                   model_time = plotOutput("model_time"),
-                  predict_results = textOutput("predict_results"),
+                  predict_results = htmlOutput("predict_results"),
                   regres_words = textOutput("regres_words")
                   
 )
