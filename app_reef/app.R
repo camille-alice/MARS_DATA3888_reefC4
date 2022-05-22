@@ -327,9 +327,9 @@ predict_rf = function(SSTA_Frequency_Standard_Deviation, Depth, Diversity, num_r
   fit = predict(rf_res, data)
   
   if (fit[[1]] == 0) {
-    print("<h3><b>Not Bleached!</b></h3>")
+    print('<a class="image featured"><img src="images/non_bleached.jpg" alt=""/></a>')
   } else {
-    print("<h3><b>Bleached!</b></h3>")
+    print('<a class="image featured"><img src="images/bleached.jpg" alt=""/></a>')
   }
   
 }
