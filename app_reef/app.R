@@ -299,7 +299,7 @@ plot_time = function() {
     ggplot(aes(x = time, y = value, group = key)) +
     geom_line(aes(colour = reorder(key,value,na.rm = TRUE)), size=1) +
     scale_colour_manual(values=c("#023e7d", "#0892c3", "#4dcde4", "#80cdc4", "#e79f52")) +
-    labs(title = "Time Performance", x = "Size of test data", y = "Time (ms)", colour = "Models") +
+    labs(title = "Time Performance", x = "Size of test data", y = "Time (s)", colour = "Models") +
     theme_minimal() + 
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
   
