@@ -36,7 +36,7 @@ library(leaflegend)
 world_map = map_data("world2")
 
 # cleaned file to use for app - no warnings and less computationally expensive
-reef_geomorphic = st_read("../Data/reef_final.gpkg")
+reef_geomorphic = st_read("Data/reef_final.gpkg")
 reef_final = reef_geomorphic %>% 
   as.data.frame()
 
@@ -46,7 +46,7 @@ reef_final = reef_final %>%
   mutate(rugosity = factor(rugosity, levels = c("Low", "Medium", "High")))
 
 # File with all the results from model testing (so we don't have to run the models here)
-model_results = load("../Data/model_results.rds")
+model_results = load("Data/model_results.rds")
 
 
 ##########################################################
