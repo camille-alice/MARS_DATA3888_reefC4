@@ -1,7 +1,7 @@
 ---
-title: "group_report"
-author: "Reef C4"
-date: '2022-05-08'
+title: "Reef C4"
+author: "SIDs: 450125625,"
+date: '2022-06-01'
 output: 
   html_document:
     code_folding: hide
@@ -9,6 +9,9 @@ output:
     number_sections: true
     toc_float: true
     theme: cosmo
+bibliography: references.bib
+csl: apa.csl
+link-citations: true
 ---
 
 ```{r setup, include=FALSE}
@@ -20,24 +23,40 @@ library(ggplot2)
 library(maps)
 library(viridis)
 library(dplyr)
-
-
 ```
 
 
 # Aim and Background 
 
-**A clear description of the problem, articulating the aim of this project. Provides appropriate multidisciplinary context and motivational background explained well in an appropriate language.**
+**background (including data)- A clear description of the problem, articulating the aim of this project. Provides appropriate multidisciplinary context and motivational background explained well in an appropriate language.**
+
+Corals are an extremely important part of the reef ecosystem, not only providing essential habitat and nutrients to the sea-life that inhabit reefs [@Cole_2008], but also providing protection for coastlines [@Harris_2018], and contributing to a multi-billion dollar industry that over half a billion people rely on [@NOAA_2019]. However, coral bleaching events are occurring more frequently, at stronger intensities, and are having significant ramifications for the mortality of coral reefs [@Williams_1990; @Hoegh_Guldberg_2007]. Climate change is leading to more profound changes in the physical ocean environment which, in turn, leads to these mass bleaching events [@Douglas_2003]. Coral bleaching refers to when corals expel their symbiotic algae, called zooxanthellae, leading to the coral turning white. Corals expel their algae when they become stressed (most commonly due to thermal stress) causing the zooxanthellae to release oxygen free radicals that damage coral tissue. Since the corals rely on the zooxanthellae for energy and nutrients, when the zooxanthellae is lost the corals turn white and are referred to as ‘bleached’. If stress conditions such as temperature do not return to normal conditions, zooxanthellae will not return and coral will transition from bleached to dead coral [@Douglas_2003]. 
+
+A known factor contributing to coral bleaching is sea surface temperature anomalies (SSTA) [@Sully_2019]. The greenhouse effect has increased ocean temperature [@Hughes_2018], as well as intensity and frequency of heat waves [@Kayanne_2017], leading to large-scale thermal stress and numerous corals expelling their zooxanthellae resulting in mass bleaching. Therefore, we expected to find a correlation between bleaching and sea surface temperature anomalies. 
+
+The impact that diversity has on bleaching is less explored. Diversity and coral bleaching have a complex feedback relationship where coral bleaching impacts diversity of reefs, and the diversity of coral reefs impacts the chances of a reef to bleach. In the long term, bleaching results in lower genetic diversity of coral reefs. This is because some species of coral are more affected than others and species that have already been bleached do not have enhanced resistance to future bleaching events [@Loya_2001]. However, we expect more diverse reefs to experience less bleaching since higher genetic diversity leads to higher general resilience against not only increases in sea surface temperature, but also other causes of bleaching such as: pollution, disease, sedimentation, freshwater flooding and changes in light [@West_2003]. 
+
+Another complex factor potentially contributing to coral bleaching is coral rugosity. The structural complexity of coral reefs can be quantified using rugosity which is measured through laying a chain over the surface of coral reefs and measuring the amount of chain needed to cover the distance between two points [@Dustan_2013]. Studies across the Great Barrier Reef (GBR) found that a higher percentage of more rugose branching corals were bleached compared to large plate (less rugose) corals [@Loya_2001]. This suggests that more structurally complex reefs could be more vulnerable to bleaching. Further research, by @Ferrari_2016, involved reconstructing 3D coral reefs and testing the effect of thermal stress. Ferrari et al. found that with more bleaching the structural complexity of the reef instead increased. Ferrari et al. and Loya et al. therefore suggest opposing relationships between rugosity and bleaching. The relationship between rugosity and bleaching has not been deeply explored in scientific literature and scientists are still unsure of the complex relationship. However, current research indicated that more rugosity would be best able to mitigate the effects of bleaching [@Magel_2019; @Ferrari_2016]. 
+
+In order to prioritise which reefs we need to allocate conservation resources to, it is crucial to gain a deeper understanding as to what factors contribute significantly to coral bleaching. Therefore, we aimed to use data extracted from the [Allen Coral Atlas](https://allencoralatlas.org/atlas/) combined with the dataset from the paper ["A global analysis of coral bleaching over the past twodecades"](https://doi.org/10.1038/s41467-019-09238-2) by @Sully_2019 to develop a model which predicts coral bleaching using coral reef sea surface temperature frequency standard deviation (SSTA_freq_sd), diversity, and rugosity. We aimed to deploy this model via Shiny intended to help scientists visualise the model and the areas of bleaching to focus on. 
+
 
 # Method
 
 **Part A: Clear description of the approach in data collection, developed model, the evaluation strategies from a data-science perspective. Here we refer to all types of evaluation metrics including graphical, qualitative and quantitative metric.**
-
-The reef data containing the bleaching, diversity, sea-surface-temperature anomaly (SSTA), and depth metrics comes from a public dataset taken from the paper ["A global analysis of coral bleaching over the past twodecades"](https://doi.org/10.1038/s41467-019-09238-2) by Sully et al. (2019). The paper contains coral bleaching events at 3351 sites in 81 countries from 1998 to 2017. The raw data can be found at the [Reef Check website](https://www.reefcheck.org/) or on the [GitHub repository for the Institute for Global Ecology](https://github.com/InstituteForGlobalEcology/Coral-bleaching-a-global-analysis-of-the-past-two-decades).
-
-We also used data gathered from [Allen Coral Atlas](https://allencoralatlas.org/atlas/) to build our rugosity dataset. Full extraction method can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/camille_ida.Rmd). The full dataset was downloaded locally to be processed as the zipped archive was over 13GB. The files extracted contained the Geomorphic Map data that was in the shape files geomorphic.gpkg or .geojson. From investigation of the data sets on the map, it looked like the reef dataset is not as precise as the Allen Coral dataset - hence points not touching some polygons. As such, we decided to keep only the points from the Reef dataset that fell within the polygons of Allen Coral Atlas to limit uncertainty. 
-
 **Part B: Reef project - Clear description of the approach in data collection to address appropriate research questions, developed model, the evaluation strategies from a marine science perspective**
+
+## Data Extraction
+
+As we wanted to explore all the reefs globally, we extracted reef data containing the bleaching, diversity, SSTA_Frequency_STD, and other metrics from the public dataset taken from the paper ["A global analysis of coral bleaching over the past twodecades"](https://doi.org/10.1038/s41467-019-09238-2) by @Sully_2019. The paper contains coral bleaching events at 3351 sites in 81 countries from 1998 to 2017. The raw data can be found at the [Reef Check website](https://www.reefcheck.org/) or on the GitHub repository for the [Institute for Global Ecology](https://github.com/InstituteForGlobalEcology/Coral-bleaching-a-global-analysis-of-the-past-two-decades).
+
+As there is no current worldwide database for coral rugosity, we used data gathered from [Allen Coral Atlas](https://allencoralatlas.org/atlas/) to build our rugosity dataset. The full dataset was downloaded locally to be processed as the zipped archive was over 13GB. The files extracted contained the geomorphic map data that was in the shape files geomorphic.gpkg or .geojson. From investigation of the data sets on the map, it looked like the Reef Check dataset (containing a single point of data for each reef) was not as precise as the Allen Coral dataset (containing extensive polygon data for each reef) - hence points not touching some polygons. As such, we decided to keep only the points from the Reef Check dataset that fell within the polygons of Allen Coral Atlas to limit uncertainty. We were interested in the geomorphic data as we found that the rugosity of a reef is associated with its geomorphic type [@Sheppard_1980; @Thornborough_2011; @Kennedy_2021]. On the basis of this association, we created our own rugosity measure (Low[1], Medium[2], High[3]) and generated a value for each reef, using the rugosity estimates to investigate whether rugosity might have an impact on our bleaching model. Full extraction method can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/camille_ida.Rmd). 
+
+## Model Development 
+
+As the Reef Check dataset contained other metrics, we decided to see if any other variables were significant to bleaching. We found that depth and latitude could also potentially be significant so we kept them in our final dataset which can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/app_reef/Data/reef_final.gpkg). We decided to choose a range of models to compare as we had multiple features to choose from and a relatively large dataset. We started with Binomial Regression as that’s what was used by @Sully_2019, but also decided to test out K-nearest neighbour (KNN), Random Forest, Support Vector Machine (SVM), and Naive Bayes. For each model we used cross-validation (CV) setting the number of folds to 10 and then repeating 50 times. By using the repeated CV technique, we can obtain a more accurate mean estimate. We also compared model stability by using the models mean standard deviation, as well as scalability, comparing model running times. 
+
+
 
 # Results 
 
@@ -47,24 +66,26 @@ We also used data gathered from [Allen Coral Atlas](https://allencoralatlas.org/
 
 # Discusssion
 
-**Discussion of potential shortcomings or issues associated with the development process or the product with reference to both disciplines. Identification of future work or improvement in both disciplines. Conclusion adequately summarises the project and identification of future work.**
+**Discussion of potential shortcomings or issues associated with the development process or the product with reference to both disciplines. Identification of future work or improvement in both disciplines.**
 
 
 # Conclusion
 
+**Conclusion adequately summarises the project and identification of future work.**
+
+# Student Contributions
+
+**Important: As this is a joint project, the nature of each student’s individual contribution must be made clear at the end of the report, in a section titled Student contributions (to place it directly prior to the Reference section). This section should clearly describe who was responsible for generating the data, tuning the machine, performing the processing, writing the code, making observations, deploying the final product and writing/editing the report.  This should take the form of one paragraph of approximately 50 words (and no more than 200 words) summarising the student's contribution. All group members should agree and acknowledge this component as an accurate reflection of each other's individual contributions. This component doesn't contribute to the overall word limit of your report.** 
+
 # References 
 
-Sully, S., Burkepile, D.E., Donovan, M.K. et al. A global analysis of coral bleaching over the past two decades. Nat Commun 10, 1264 (2019). https://doi.org/10.1038/s41467-019-09238-2
+<div id="refs"></div>
+
+# Appendix
+
 
 ### Side notes: 
 
-Presentation
-
-Part A: Report formatting and structure including the appropriate use of Appendix and adherence to the page and words limit.
-
-Part B: All figures and tables should be captioned and cited in the report. Label the axes and headings for all figures. Use legends if applicable. Use of language / Spelling and grammar.
-
-Part C: Data communication: effective use of figures and tables.
 
 Reproducibility & readability
 
