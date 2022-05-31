@@ -23,13 +23,16 @@ library(ggplot2)
 library(maps)
 library(viridis)
 library(dplyr)
+
+library(gt)
 library(kableExtra)
 ```
 
+# Executive summary
+
+This study aimed to investigate the factors that contribute to coral bleaching and present them in an interactive app that was aimed at high-school leavers to educate them on the complexity of predicting coral bleaching. We aimed to test different models that could potentially help predict bleaching, testing classifiers as well as linear models. We focused on rugosity, as it has yet to be extensively researched, to determine if it was a significant factor for coral bleaching. We found that with our current estimate of rugosity, it was not significant. Our final model used a cross validated KNN classifier that was able to predict bleaching with an accuracy of 66%. While we acknowledge this is not a strong model, we hope our Shiny app provides a solid background for understanding coral bleaching and what rugosity is, and our suggestions for future studies are taken on. 
 
 # Aim and Background 
-
-**background (including data)- A clear description of the problem, articulating the aim of this project. Provides appropriate multidisciplinary context and motivational background explained well in an appropriate language.**
 
 Corals are an extremely important part of the reef ecosystem, not only providing essential habitat and nutrients to the sea-life that inhabit reefs [@Cole_2008], but also providing protection for coastlines [@Harris_2018], and contributing to a multi-billion dollar industry that over half a billion people rely on [@NOAA_2019]. However, coral bleaching events are occurring more frequently, at stronger intensities, and are having significant ramifications for the mortality of coral reefs [@Williams_1990; @Hoegh_Guldberg_2007]. Climate change is leading to more profound changes in the physical ocean environment which, in turn, leads to these mass bleaching events [@Douglas_2003]. Coral bleaching refers to when corals expel their symbiotic algae, called zooxanthellae, leading to the coral turning white. Corals expel their algae when they become stressed (most commonly due to thermal stress) causing the zooxanthellae to release oxygen free radicals that damage coral tissue. Since the corals rely on the zooxanthellae for energy and nutrients, when the zooxanthellae is lost the corals turn white and are referred to as ‘bleached’. If stress conditions such as temperature do not return to normal conditions, zooxanthellae will not return and coral will transition from bleached to dead coral [@Douglas_2003]. 
 
@@ -44,11 +47,7 @@ In order to prioritise which reefs we need to allocate conservation resources to
 
 # Method
 
-**Part A: Clear description of the approach in data collection, developed model, the evaluation strategies from a data-science perspective. Here we refer to all types of evaluation metrics including graphical, qualitative and quantitative metric.**
-**Part B: Reef project - Clear description of the approach in data collection to address appropriate research questions, developed model, the evaluation strategies from a marine science perspective**
-
-FIG 1 - Overall method 
-FIG 2 - CV method 
+![Figure 1. Method of study including data extraction, data analysis, and data communication](Data/reefC4_fig1.png)
 
 ## Data Extraction
 
@@ -58,7 +57,7 @@ As there is no current worldwide database for coral rugosity, we used data gathe
 
 ## Model Development 
 
-As the Reef Check dataset contained other metrics, we decided to see if any other variables were significant to bleaching. We found that depth and latitude could also potentially be significant so we kept them in our final dataset which can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/app_reef/Data/reef_final.gpkg). We decided to choose a range of models to compare as we had multiple features to choose from and a relatively large dataset. We started with Binomial Regression as that’s what was used by @Sully_2019, but also decided to test out K-nearest neighbour (KNN), Random Forest, Support Vector Machine (SVM), and Naive Bayes. As such, we first conducted variable testing to ensure our data met the assumptions for each model, performing a variance inflation factor (VIF) test for each variable, as well as testing for normality and independence. 
+As the Reef Check dataset contained other metrics, we decided to see if any other variables were significant to bleaching. We found that depth and latitude could also potentially be significant so we kept them in our final dataset which can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/app_reef/Data/reef_final.gpkg). We decided to choose a range of models to compare as we had multiple features to choose from and a relatively large dataset. We started with Binomial Regression as that’s what was used by @Sully_2019, but also decided to test out K-nearest neighbour (KNN), Random Forest, Support Vector Machine (SVM), and Naive Bayes. As such, we first conducted variable testing to ensure our data met the assumptions for each model, performing a variance inflation factor (VIF) test for each variable, as well as testing for normality and independence, as shown in Fig.1. 
 
 **Binomial regression** is very similar to linear regression however, instead of predicting numeric output it predicts categorical output by weighting differently every independent variable. 
 
@@ -72,22 +71,9 @@ As the Reef Check dataset contained other metrics, we decided to see if any othe
 
 For each model we used cross-validation (CV) setting the number of folds to 10 and then repeating 50 times. By using the repeated CV technique, we can obtain a more accurate mean estimate as we are using every part of the data as test and training data. We also compared sensitivity (true positive rate) and specificity (true negative rate), model stability by using the models mean standard deviation (sd), as well as scalability, comparing model running times. We then repeated this process with all the variables except rugosity, to measure if our rugosity measurement was significant. Once our model was selected, we then went on to hyperparameter tuning to ensure the best results could be achieved.  
 
+Our Shiny app was built using the RShiny [htmlTemplate](https://shiny.rstudio.com/articles/templates.html) package and deployed via [shinyapp](https://www.shinyapps.io/). The front-end design used the Bootstrap framework for better usability and modularity across a wide range of devices. The app is available [here](https://camille-alice.shinyapps.io/app_reef/). Our main priorities in designing the app were communicability to our target audience, and interactivity. Our target audience were recent high-school leavers who may have an interest in marine science, specifically, coral bleaching. As such, the vocabulary used was targeted at a high-school level and key concepts such as bleaching and rugosity were thoroughly explained. 
+
 # Results 
-
-**Part A: A clear justification of the final approach based on the proposed evaluation strategies. Ensuring multiple evaluation strategies are used.**
-
-**Part B: A clear description of the deployment process. An engaging and clear illustration of the product (games, shiny app, learning device etc) with a discussion of concepts from multiple disciplines.**
-
-FIG 3- VIOLIN PLOTS of accuracy 
-FIG 4 - TABLE of other methods of validation 
-FIG 5 - Hyper parameter tuning graph 
-
-## Variable Testing of Model Assumptions 
-
-Each variable had a VIF score less than 5, indicating multicollinearity would be unproblematic for the models. We also used a test of independence, with the null hypothesis of rugosity having no association with bleaching and alternative hypothesis of rugosity having association with bleaching. Checking the independent test assumption, every variable needed to have a value greater than 5, hence the assumption was met. A chi-square independent test gave us a p-value of 0.067 which is slightly over 0.05, so we decided to retain the null hypothesis.
-
-As seen below, our Random Forest model had the best accuracy when compared to other models. However, the specificity (how well our model is able to predict a true negative bleaching) was not the best, and the sensitivity (true positive) was also quite low. Coupled with the scalability being extremely poor, we decided to use KNN as our final classifier as it had the second highest accuracy and f1-score, and the best run time. 
-
 ```{r Reading in Data, message=FALSE, results=FALSE}
 # cleaned file to use for app - no warnings and less computationally expensive
 reef_geomorphic = st_read("Data/reef_final.gpkg")
@@ -103,7 +89,11 @@ reef_final = reef_final %>%
 # Full model code can be found in the appendix
 model_results = load("Data/model_results.rds")
 ```
-```{r Violin plot}
+## Variable Testing of Model Assumptions 
+
+Each variable had a VIF score less than 5, indicating multicollinearity would be unproblematic for the models. We also used a test of independence, with the null hypothesis of rugosity having no association with bleaching and alternative hypothesis of rugosity having association with bleaching. Checking the independent test assumption, every variable needed to have a value greater than 5, hence the assumption was met. A chi-square independent test gave us a p-value of 0.067 which is slightly over 0.05, so we decided to retain the null hypothesis.
+```{r fig2, fig.width=12,fig.height=6,fig.cap="Figure 2. Violin-Boxplot of Model accuracies"}
+# Fig.2: Violin plot
 # Extracting model accuracy from model_results
 v_data = cbind(cv_50acc5_bin, cv_50acc5_sel, cv_acc50_svm, 
              cv_acc50_NB, cv_acc50_knn, cv_acc50_rf) %>%
@@ -129,8 +119,15 @@ v_data %>%
   theme_minimal() + 
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
 ```
-```{r Results w Rugosity}
-# Data extraction: confusion matrix results with rugosity
+
+As seen above in Fig.2, our Random Forest model had the best accuracy when compared to other models. However, as seen below in Fig.3, the specificity (how well our model is able to predict a true negative bleaching) was not the best, and the sensitivity (true positive) was also quite low. Coupled with the scalability being extremely poor, we decided to use KNN as our final classifier as it had the second highest accuracy and f1-score, and the best run time. 
+
+```{r Model Results Table, message=FALSE}
+# Fig.3: Model Results Table
+# Data extraction: preparing confusion matrix results with in data frame 
+model_names = c("Binomial", "K-Nearest Neighbours", "Naive Bayes","Random Forest", "Support Vector Machine")
+
+# With rugosity 
 mean_accuracy = c(bin_mean, knn_mean, nb_mean, rf_mean, svm_mean)
 sensitivity = c(bin_cf$byClass[1], knn_cf$byClass[1], nb_cf$byClass[1],rf_cf$byClass[1], svm_cf$byClass[1])
 specificity = c(bin_cf$byClass[2], knn_cf$byClass[2], nb_cf$byClass[2],rf_cf$byClass[2], svm_cf$byClass[2])
@@ -138,29 +135,12 @@ f1_score = c(bin_cf$byClass[7], knn_cf$byClass[7], nb_cf$byClass[7],rf_cf$byClas
 time = c(bin_cv_time, knn_cv_time, nb_cv_time, rf_cv_time, svm_cv_time)
 cf_data = cbind('Accuracy' = mean_accuracy, 'Sensitivity' = sensitivity, 'Specificity' = specificity, 
                 'F1' = f1_score, 'Scalability' = time) %>%
-  as.data.frame(row.names = c("Binomial", "K-Nearest Neighbours", "Naive Bayes","Random Forest", "Support Vector Machine")) %>% 
+  as.data.frame(row.names = c(1:5)) %>% 
   mutate_if(is.numeric, round, digits=2) %>%
+  cbind('Type' = rep("With Rugosity", 5), 'Model' = model_names) %>%
   arrange(Accuracy, desc(Scalability))
-```
-```{r Results Table w Rugosity}
-# Creating table with rugosity
-#scale_fill_manual(name = "Models", values=c("#023e7d", "#0892c3", "#4dcde4", "#80cdc4", "#e79f52", "#e0812d", "#bf4402")) 
-my_col = scale_colour_gradientn(colours=c("#023e7d", "#0892c3", "#e79f52", "#e0812d", "#bf4402"))
-cf_data %>% kbl() %>% 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
-  column_spec(2, color = "white", 
-              background = spec_color(cf_data$'Accuracy', option = 'A', end = 0.7)) %>%
-  column_spec(3, color = "white",
-              background = spec_color(cf_data$'Sensitivity', option = "A", end = 0.7)) %>%
-  column_spec(4, color = "white",
-              background = spec_color(cf_data$'Specificity', option = "A", end = 0.7)) %>% 
-  column_spec(5, color = "white",
-              background = spec_color(cf_data$'F1', option = "A", end = 0.7)) %>%
-  column_spec(6, color = "white",
-              background = spec_color(cf_data$'Scalability', option = "A", end = 0.7, direction = -1))
-```
-```{r Results wo Rugosity}
-# Data extraction: confusion matrix results without rugosity
+
+# Without rugosity
 mean_accuracy_WO = c(sel_mean, knn_mean_WO, nb_mean_WO, rf_mean_WO, svm_mean_WO)
 sensitivity_WO = c(bin_sel_cf$byClass[1], knn_cf_WO$byClass[1], nb_cf_WO$byClass[1],
                 rf_cf_WO$byClass[1], svm_cf_WO$byClass[1])
@@ -171,54 +151,58 @@ f1_score_WO = c(bin_sel_cf$byClass[7], knn_cf_WO$byClass[7], nb_cf_WO$byClass[7]
 time_WO = c(sel_cv_time, knn_cv_time_wo, nb_cv_time_wo, rf_cv_time_wo, svm_cv_time_wo)
 cf_data_WO = cbind('Accuracy' = mean_accuracy_WO, 'Sensitivity' = sensitivity_WO, 'Specificity' = specificity_WO, 
                 'F1' = f1_score_WO, 'Scalability' = time_WO) %>%
-  as.data.frame(row.names = c("Binomial", "K-Nearest Neighbours", "Naive Bayes","Random Forest", "Support Vector Machine"))  %>% 
+  as.data.frame(row.names = c(1:5)) %>% 
   mutate_if(is.numeric, round, digits=2) %>%
+  cbind('Type' = rep("Without Rugosity", 5), 'Model' = model_names) %>%
   arrange(Accuracy, desc(Scalability))
+cf_data_all = rbind(cf_data, cf_data_WO)
 
+# Table visualisation
+cf_metrics= c('Accuracy', 'Sensitivity', 'Specificity', 'F1')
+cf_colours = scales::col_numeric(palette = c("#023e7d", "#0892c3", "#4dcde4", "#80cdc4", "#e79f52", "#e0812d", "#bf4402"), 
+                                 as.character(), domain = NULL)
+cf_colour_r = scales::col_numeric(palette = c("#bf4402", "#e0812d", "#e79f52", "#80cdc4", "#4dcde4", "#0892c3", "#023e7d"), 
+                                 as.character(), domain = NULL)
+cf_data_all %>%
+  group_by(Model, Type) %>%
+  gt(rowname_col = "Type",
+    groupname_col = "Model") %>%
+   tab_header(title = md("**Model Results**"),
+              subtitle = md("Best performing in **orange** - worst in **dark blue**")) %>%
+  data_color(columns = cf_metrics,
+             alpha = 0.7,
+             colors = cf_colours,
+             autocolor_text = FALSE) %>%
+  data_color(columns = 'Scalability',
+             alpha = 0.7,
+             colors = cf_colour_r, 
+             autocolor_text = FALSE) %>% 
+  tab_source_note(source_note = md("Figure 3. Table of Model Results comparing Rugosity"))
 ```
-```{r Results Table wo Rugosity}
-# Creating table without rugosity
 
-cf_data_WO %>% kbl() %>% 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
-  column_spec(2, color = "white",
-              background = spec_color(cf_data_WO$'Accuracy', option = "A", end = 0.7)) %>%
-  column_spec(3, color = "white",
-              background = spec_color(cf_data_WO$'Sensitivity', option = "A", end = 0.7)) %>%
-  column_spec(4, color = "white",
-              background = spec_color(cf_data_WO$'Specificity', option = "A", end = 0.7)) %>% 
-  column_spec(5, color = "white",
-              background = spec_color(cf_data_WO$'F1', option = "A", end = 0.7)) %>%
-  column_spec(6, color = "white",
-              background = spec_color(cf_data_WO$'Scalability', option = "A", end = 0.7, direction = -1))
-```
-```{r KNN Hyperparameter Tuning}
+We also tuned our k-value for our KNN model by running our model with different k-values and seeing which had the best accuracy. As shown below in Fig.4, our best k-value was k=9 as per indicated by the orange line. 
+
+```{r KNN Hyperparameter Tuning, fig.cap="Figure 4. Plot of Hyper-parameter testing for KNN, with orange line indicating best k-value"}
 ggplot(knn_fit) + 
   labs(title = "KNN Hyper-parameter tuning", x = "K Value", y = "Accuracy") +
   geom_point(color="#2ebaae", alpha = 1) +
+  geom_vline(xintercept = 9, color = 'orange') + 
   theme_minimal()
 ```
 
-
 ## Shiny
 
-Our Shiny app was built using the RShiny [htmlTemplate](https://shiny.rstudio.com/articles/templates.html) package and deployed via [shinyapp](https://www.shinyapps.io/). The front-end design used the Bootstrap framework for better usability and modularity across a wide range of devices. The app is available [here](https://camille-alice.shinyapps.io/app_reef/). Our main priorities in designing the app were communicability to our target audience, and interactivity. Our target audience were recent high-school leavers who may have an interest in marine science, specifically, coral bleaching. As such, the vocabulary used was targeted at a high-school level and key concepts such as bleaching and rugosity were thoroughly explained. 
-
-The app included an interactive map that displayed the value of the variables Bleaching, SSTA Frequency Standard Deviation, Diversity, Depth. We also included the correlation between these variables as well as normality assumptions for transparency. Furthermore, a correlation between those variables and Rugosity was added in the form of boxplots. These plots and variables were chosen as they were utilised in our models, so we wanted to allow our audience an opportunity to explore the data themselves. Moreover, we included the results from our model testing for transparency and to explain why we decided to select the KNN model. Finally, we added an interface where the user could select the value of variables in order to make a prediction based on our model.
+The app included an interactive map that displayed the value of the variables Bleaching, SSTA Frequency Standard Deviation, Diversity, Depth. We also included the correlation between these variables as well as normality assumptions for transparency. Furthermore, a correlation between those variables and Rugosity was added in the form of violin-boxplots. These plots and variables were chosen as they were utilised in our models, so we wanted to allow our audience an opportunity to explore the data themselves. Moreover, we included the results from our model testing for transparency and to explain why we decided to select the KNN model. Finally, we added an interface where the user could select the value of variables in order to make a prediction based on our model. Each section was accompanied with a thorough explanation based on the variables the user selected to ensure our target audience was reached. 
 
 # Discusssion
 
-**Discussion of potential shortcomings or issues associated with the development process or the product with reference to both disciplines. Identification of future work or improvement in both disciplines.**
+KNN is fastest due to computing the distance for neighbouring groups, and clustering based on distance, rather than training the model as Naive Bayes and Binomial models need to do. Random Forest and Support Vector Machine are the slowest due to having multiple prediction vectors having to be calculated, and then used to train the model. We believe our best KNN model used a lower k-value (K=9) as the higher the K value, the more prone to overfitting the model is. 
 
-KNN is fastest due to computing the distance for neighbouring groups, and clustering based on distance, rather than training the model as Naive Bayes and Binomial models need to do. Random Forest and Support Vector Machine are the slowest due to having multiple prediction vectors having to be calculated, and then used to train the model. We believe our best KNN model used a lower k-value (K=9) as the higher the K value, the more prone to underfitting the model is. 
-
-While the deployment of the Shiny app was successful, our best model was still only able to predict coral bleaching with only 70% accuracy. We believe this is due to the multiple factors contributing to coral bleaching, making it extremely difficult to predict. While our rugosity measurement was not significant in our model, we attribute this to our measure being rudimentary. Another concern about the Shiny app is future scalability. Our app currently does not utilise any caching and instead relies on reading and running some data at start-up. The interactive plots and prediction also require rerunning each time a change is made, so scalability is a significant concern in the future. For the purposes of this project, there were no issues as our data was relatively small. Due to our usage of the Bootstrap framework in designing the front-end, our app is well-modularised and new features can be easily added in the future. For example, if new research or new data is discovered, or user feedback suggests that a particular experience can be improved, then our app can be easily updated to include these features. 
+While the deployment of the Shiny app was successful, our best model was still only able to predict coral bleaching with only 67% accuracy. We believe this is due to the multiple factors contributing to coral bleaching, making it extremely difficult to predict. As shown in our model results in Fig.4, our models were only able to predict bleaching with a maximum of 72% accuracy. This was marginally better than our KNN accuracy, however with a significantly higher run time. This is indicative of how difficult it is to predict coral bleaching with a high accuracy with our dataset. While our rugosity measurement was not significant in our model, we attribute this to our measure being rudimentary. Another concern about the Shiny app is future scalability. Our app currently does not utilise any caching and instead relies on reading and running some data at start-up. The interactive plots and prediction also require rerunning each time a change is made, so scalability is a significant concern in the future. For the purposes of this project, there were no issues as our data was relatively small. Due to our usage of the Bootstrap framework in designing the front-end, our app is well-modulated and new features can be easily added in the future. For example, if new research or new data is discovered, or user feedback suggests that a particular experience can be improved, then our app can be easily updated to include these features. 
 
 # Conclusion
 
-**Conclusion adequately summarises the project and identification of future work.**
-
-We were able to successfully deploy a Shiny app that educated high-school leavers about coral bleaching and its potential predictive factors. We were able to develop a model that could be used as a basis for future work. However, for future work, a more robust measure of rugosity is needed for measurement. We would also like to highlight the need for a standardised rugosity measurement. While a KNN model could potentially be used in future studies to predict bleaching, we believe more attributes may need to be added to improve on accuracy of classifying.
+We were able to successfully deploy a Shiny app that educated high-school leavers about coral bleaching and its potential predictive factors. We were able to develop a model that could be used as a baseline for predicting coral bleaching. However, for future work, a more robust measure of rugosity is needed for measurement. We would also like to highlight the need for a standardised rugosity measurement, as currently the chain method is extremely time consuming and ineffective on a large scale. While a KNN model could potentially be used in future studies to predict bleaching, we believe more attributes may need to be added to improve on accuracy of classifying. Another area of future improvement could be runtime as we only worked with a relatively small dataset, as more data is collected and added, this will impact on the runtime. 
 
 # Student Contributions
 
@@ -228,13 +212,13 @@ We were able to successfully deploy a Shiny app that educated high-school leaver
 
 <div id="refs"></div>
 
+**Packages Used:**
+
+```{r Libraries Used}
+(.packages())
+```
+
 # Appendix
 
-
-### Side notes: 
-
-
-Reproducibility & readability
-
-How well the report can be reproduced.
+? add model code here maybe?
 

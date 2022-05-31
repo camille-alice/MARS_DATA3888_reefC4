@@ -55,31 +55,6 @@ model_results = load("Data/model_results.rds")
 
 ##########################################################
 
-# Function to plot the map, with variations based on the variables selected
-plot_map = function(var, start_date, end_date) {
-  
-  reef_temp = reef_final %>%
-    filter(Date >= start_date) %>%
-    filter(Date <= end_date) %>% 
-    arrange(Average_bleaching) #re ordering so data appears on map with most bleached on top as ggplot plots from row=1
-  
-  #cleaning var name for titles 
-  clean_var = str_replace_all(var, "_", " ")
-  title_string = paste(clean_var, "of Coral Reefs from", start_date, "to", end_date)
-  
-  ggplot() + 
-    geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "grey", alpha = 0.3) +
-    geom_point(data = reef_temp, alpha = 0.7, aes(y = Latitude.Degrees, x = wrapLongitute, size = unlist(reef_temp[var]), color = unlist(reef_temp[var]))) + 
-    labs(title = title_string, x = "", y = "", colour = var, size = var) +
-    #scale_colour_viridis(option="magma") + 
-    scale_colour_gradientn(colours=c("#023e7d", "#0892c3", "#e79f52", "#e0812d", "#bf4402")) + 
-    theme_minimal() + 
-    theme(legend.position="bottom") +
-    guides(color= guide_legend(title = clean_var),
-           size=guide_legend(title = clean_var))
-  
-}
-
 ## Function to plot the map, with variations based on the variables selected
 plot_map_leaf = function(var, start_date, end_date) {
   
@@ -115,10 +90,8 @@ plot_map_leaf = function(var, start_date, end_date) {
                      orientation = 'horizontal',
                      width = 200,
                      height = 5,
-                     position = 'bottomleft') 
-  #%>%addLayersControl(overlayGroups = c("Map Labels"),
-  #    options = layersControlOptions(collapsed = TRUE)) 
-  
+                     position = 'bottomleft')
+
   leaf_map
   
 }
@@ -426,8 +399,6 @@ ui = htmlTemplate("www/index.html",
                   ssta_slider = sliderInput("ssta_slider", "", min = 0, max = 12, value = 0, sep = ""),
                   depth_slider = sliderInput("depth_slider", "", min = 0, max = 15, value = 0, sep = ""),
                   diversity_slider = sliderInput("diversity_slider", "", min = 0, max = 600, value = 0, sep = ""),
-                  map_title = verbatimTextOutput("map_title"),
-                  map = plotOutput("map"),
                   map_leaf = leafletOutput("map_leaf"),
                   rugosity_plot = plotOutput("rugosity_plot"),
                   regression = plotOutput("regression"),
@@ -444,11 +415,6 @@ ui = htmlTemplate("www/index.html",
 )
 
 server = function(input, output) {
-  
-  # Initial map
-  output$map = renderPlot({
-    plot_map(input$map_var, input$map_year[1], input$map_year[2])
-  })
   
   # Interactive map
   output$map_leaf = renderLeaflet({

@@ -95,33 +95,6 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 								</section>
 							</article>
 
-            <!-- Interactive Map vis
-
-								<section>
-								  <div class="row">
-									  <div class="col-3">
-									    <p>
-									      Use the slider to change the year, and the drop down menu to change variable.
-									    </p>
-									    <h4>Variable:</h4>
-									    <select name="map_var" id="map_var">
-									    	<option value="Average_bleaching">Bleaching</option>
-									    	<option value="SSTA_Frequency_Standard_Deviation">SSTA Frequency Standard Deviation</option>
-									    	<option value="Diversity">Diversity</option>
-									    	<option value="Depth">Depth</option>
-									    </select>
-											<br>
-											<h4>Year Range:</h4>
-									    <a id="slider">{{ map_slider }}</a>
-									  </div>
-									  <div class="col-9">
-
-									  </div>
-									</div>
-								</section>
-							</article>
-							-->
-
 						<!-- Post RUGOSITY -->
 							<article class="post">
 								<header>
@@ -256,7 +229,7 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 										<p>See how our models performed</p>
 									</div>
 								</header>
-								<p>Below are our results for the models we tested. As you can see with the QQ plots above, the data was not normally distributed. They were either skewed or had a thin or heavy tails. As such, the best model ended up being the K-Nearest Neighbours model with the best accuracy and F1 result. However, the time result (i.e., the saleability of the data) was the worst. While this is something to consider for the future as the data may get more complex, for our study it was not an issue.</p>
+								<p>Below are our results for the models we tested. As you can see with the QQ plots above, the data was not normally distributed. They were either skewed or had a thin or heavy tails. While RandomForest had the best accuracy and F1 result, the time result (i.e., the saleability of the data) was the worst. As such, the best model ended up being the K-Nearest Neighbours model with the best time result, and second best accuracy and F1 result. This study is just a taste of how difficult it is to predict coral bleaching due to multiple confounding factors. Have a peruse below and see the various model testing.</p>
 									<div class="row">
 									  {{ model_results }}
 									</div>
@@ -281,7 +254,7 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 								<header>
 									<div class="title">
 										<h2><a id="predict">Make a prediction!</a></h2>
-										<p>Select some data and see whether our K-Nearest Neighbours model predicts a bleached or non-bleached reef!</p>
+										<p>While it is important to remember our final model was only able to predict bleaching with an accuracy of 66%, you can still try select some data and see whether our K-Nearest Neighbours model predicts a bleached or non-bleached reef!</p>
 									</div>
 								</header>
 								<div class="row">
