@@ -1,0 +1,4 @@
+load("/Users/camillekarski/Documents/Uni/DATA3888/DATA3888_GitHub/MARS_DATA3888_reefC4/Data/model_results.rds")
+model_results
+model_results = load("/Users/camillekarski/Documents/Uni/DATA3888/DATA3888_GitHub/MARS_DATA3888_reefC4/Data/model_results.rds")
+model_results

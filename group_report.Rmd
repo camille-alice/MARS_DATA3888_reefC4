@@ -23,6 +23,7 @@ library(ggplot2)
 library(maps)
 library(viridis)
 library(dplyr)
+library(kableExtra)
 ```
 
 
@@ -46,17 +47,30 @@ In order to prioritise which reefs we need to allocate conservation resources to
 **Part A: Clear description of the approach in data collection, developed model, the evaluation strategies from a data-science perspective. Here we refer to all types of evaluation metrics including graphical, qualitative and quantitative metric.**
 **Part B: Reef project - Clear description of the approach in data collection to address appropriate research questions, developed model, the evaluation strategies from a marine science perspective**
 
+FIG 1 - Overall method 
+FIG 2 - CV method 
+
 ## Data Extraction
 
 As we wanted to explore all the reefs globally, we extracted reef data containing the bleaching, diversity, SSTA_Frequency_STD, and other metrics from the public dataset taken from the paper ["A global analysis of coral bleaching over the past twodecades"](https://doi.org/10.1038/s41467-019-09238-2) by @Sully_2019. The paper contains coral bleaching events at 3351 sites in 81 countries from 1998 to 2017. The raw data can be found at the [Reef Check website](https://www.reefcheck.org/) or on the GitHub repository for the [Institute for Global Ecology](https://github.com/InstituteForGlobalEcology/Coral-bleaching-a-global-analysis-of-the-past-two-decades).
 
-As there is no current worldwide database for coral rugosity, we used data gathered from [Allen Coral Atlas](https://allencoralatlas.org/atlas/) to build our rugosity dataset. The full dataset was downloaded locally to be processed as the zipped archive was over 13GB. The files extracted contained the geomorphic map data that was in the shape files geomorphic.gpkg or .geojson. From investigation of the data sets on the map, it looked like the Reef Check dataset (containing a single point of data for each reef) was not as precise as the Allen Coral dataset (containing extensive polygon data for each reef) - hence points not touching some polygons. As such, we decided to keep only the points from the Reef Check dataset that fell within the polygons of Allen Coral Atlas to limit uncertainty. We were interested in the geomorphic data as we found that the rugosity of a reef is associated with its geomorphic type [@Sheppard_1980; @Thornborough_2011; @Kennedy_2021]. On the basis of this association, we created our own rugosity measure (Low[1], Medium[2], High[3]) and generated a value for each reef, using the rugosity estimates to investigate whether rugosity might have an impact on our bleaching model. Full extraction method can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/camille_ida.Rmd). 
+As there is no current worldwide database for coral rugosity, we used data gathered from [Allen Coral Atlas](https://allencoralatlas.org/atlas/) to build our rugosity dataset. The full dataset was downloaded locally to be processed as the zipped archive was over 13GB. The files extracted contained the geomorphic map data that was in the shape files `geomorphic.gpkg` or `.geojson`. From investigation of the data sets on the map, it looked like the Reef Check dataset (containing a single point of data for each reef) was not as precise as the Allen Coral dataset (containing extensive polygon data for each reef) - hence points not touching some polygons. As such, we decided to keep only the points from the Reef Check dataset that fell within the polygons of Allen Coral Atlas to limit uncertainty. We were interested in the geomorphic data as we found that the rugosity of a reef is associated with its geomorphic type [@Sheppard_1980; @Thornborough_2011; @Kennedy_2021]. On the basis of this association, we created our own rugosity measure (`Low[1]`, `Medium[2]`, `High[3]`) and generated a value for each reef, using the rugosity estimates to investigate whether rugosity might have an impact on our bleaching model. Full extraction method can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/camille_ida.Rmd). 
 
 ## Model Development 
 
-As the Reef Check dataset contained other metrics, we decided to see if any other variables were significant to bleaching. We found that depth and latitude could also potentially be significant so we kept them in our final dataset which can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/app_reef/Data/reef_final.gpkg). We decided to choose a range of models to compare as we had multiple features to choose from and a relatively large dataset. We started with Binomial Regression as that’s what was used by @Sully_2019, but also decided to test out K-nearest neighbour (KNN), Random Forest, Support Vector Machine (SVM), and Naive Bayes. For each model we used cross-validation (CV) setting the number of folds to 10 and then repeating 50 times. By using the repeated CV technique, we can obtain a more accurate mean estimate. We also compared model stability by using the models mean standard deviation, as well as scalability, comparing model running times. 
+As the Reef Check dataset contained other metrics, we decided to see if any other variables were significant to bleaching. We found that depth and latitude could also potentially be significant so we kept them in our final dataset which can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/app_reef/Data/reef_final.gpkg). We decided to choose a range of models to compare as we had multiple features to choose from and a relatively large dataset. We started with Binomial Regression as that’s what was used by @Sully_2019, but also decided to test out K-nearest neighbour (KNN), Random Forest, Support Vector Machine (SVM), and Naive Bayes. As such, we first conducted variable testing to ensure our data met the assumptions for each model, performing a variance inflation factor (VIF) test for each variable, as well as testing for normality and independence. 
 
+**Binomial regression** is very similar to linear regression however, instead of predicting numeric output it predicts categorical output by weighting differently every independent variable. 
 
+**KNN** classifies points close together in a dataset that are typically similar. It classifies a point class by calculating the distance between a test point and all the training points and selects the K number of the closest neighbouring points and takes the majority vote from that group of K points. 
+
+**Naive Bayes** classifies a point based on Bayes theorem where it calculates the conditional probability, which measures the probability of an event occurring given that another event has occurred. 
+
+**Random Forest** classifies by creating multiple decision trees to create a forest and then chooses the outcome based on which outcome most trees land on.
+
+**SVM** classifies by dividing classes via an optimal hyper plane and using data points closest to the hyperplane as support vectors to measure the direction and orientation of the hyper plane. 
+
+For each model we used cross-validation (CV) setting the number of folds to 10 and then repeating 50 times. By using the repeated CV technique, we can obtain a more accurate mean estimate as we are using every part of the data as test and training data. We also compared sensitivity (true positive rate) and specificity (true negative rate), model stability by using the models mean standard deviation (sd), as well as scalability, comparing model running times. We then repeated this process with all the variables except rugosity, to measure if our rugosity measurement was significant. Once our model was selected, we then went on to hyperparameter tuning to ensure the best results could be achieved.  
 
 # Results 
 
@@ -64,14 +78,147 @@ As the Reef Check dataset contained other metrics, we decided to see if any othe
 
 **Part B: A clear description of the deployment process. An engaging and clear illustration of the product (games, shiny app, learning device etc) with a discussion of concepts from multiple disciplines.**
 
+FIG 3- VIOLIN PLOTS of accuracy 
+FIG 4 - TABLE of other methods of validation 
+FIG 5 - Hyper parameter tuning graph 
+
+## Variable Testing of Model Assumptions 
+
+Each variable had a VIF score less than 5, indicating multicollinearity would be unproblematic for the models. We also used a test of independence, with the null hypothesis of rugosity having no association with bleaching and alternative hypothesis of rugosity having association with bleaching. Checking the independent test assumption, every variable needed to have a value greater than 5, hence the assumption was met. A chi-square independent test gave us a p-value of 0.067 which is slightly over 0.05, so we decided to retain the null hypothesis.
+
+As seen below, our Random Forest model had the best accuracy when compared to other models. However, the specificity (how well our model is able to predict a true negative bleaching) was not the best, and the sensitivity (true positive) was also quite low. Coupled with the scalability being extremely poor, we decided to use KNN as our final classifier as it had the second highest accuracy and f1-score, and the best run time. 
+
+```{r Reading in Data, message=FALSE, results=FALSE}
+# cleaned file to use for app - no warnings and less computationally expensive
+reef_geomorphic = st_read("Data/reef_final.gpkg")
+reef_final = reef_geomorphic %>% 
+  as.data.frame()
+
+reef_final = reef_final %>% 
+  drop_na() %>% 
+  mutate(class = as.factor(class)) %>%
+  mutate(rugosity = factor(rugosity, levels = c("Low", "Medium", "High")))
+
+# File with all the results from model testing (so we don't have to run the models here)
+# Full model code can be found in the appendix
+model_results = load("Data/model_results.rds")
+```
+```{r Violin plot}
+# Extracting model accuracy from model_results
+v_data = cbind(cv_50acc5_bin, cv_50acc5_sel, cv_acc50_svm, 
+             cv_acc50_NB, cv_acc50_knn, cv_acc50_rf) %>%
+  as.data.frame() %>%
+  rename("Initial Binomial Regression" = cv_50acc5_bin,
+         "Final Binomial Regression" = cv_50acc5_sel,
+         "Support Vector Machine" = cv_acc50_svm,
+         "Naive Bayes" = cv_acc50_NB,
+         "K-Nearest Neighbours" = cv_acc50_knn,
+         "Random Forest" = cv_acc50_rf) %>%
+  gather()
+
+v_data %>%
+  ggplot(aes(x=reorder(key,value,na.rm = TRUE), y=value, fill=reorder(key,value,na.rm = TRUE))) + 
+  geom_violin(alpha=0.6,trim=FALSE, position = position_dodge(width = 0.75),size=1,color=NA) +
+  geom_boxplot(width=0.4, color="black", alpha=0.5,
+               outlier.colour="red",
+               outlier.fill="red",
+               outlier.size=3, 
+               show.legend = F) +
+  scale_fill_manual(name = "Models", values=c("#023e7d", "#0892c3", "#4dcde4", "#e79f52", "#e0812d", "#bf4402")) +
+  labs(title = "Model Accuracy", x = "Models", y = "Accuracy") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+```
+```{r Results w Rugosity}
+# Data extraction: confusion matrix results with rugosity
+mean_accuracy = c(bin_mean, knn_mean, nb_mean, rf_mean, svm_mean)
+sensitivity = c(bin_cf$byClass[1], knn_cf$byClass[1], nb_cf$byClass[1],rf_cf$byClass[1], svm_cf$byClass[1])
+specificity = c(bin_cf$byClass[2], knn_cf$byClass[2], nb_cf$byClass[2],rf_cf$byClass[2], svm_cf$byClass[2])
+f1_score = c(bin_cf$byClass[7], knn_cf$byClass[7], nb_cf$byClass[7],rf_cf$byClass[7], svm_cf$byClass[7])
+time = c(bin_cv_time, knn_cv_time, nb_cv_time, rf_cv_time, svm_cv_time)
+cf_data = cbind('Accuracy' = mean_accuracy, 'Sensitivity' = sensitivity, 'Specificity' = specificity, 
+                'F1' = f1_score, 'Scalability' = time) %>%
+  as.data.frame(row.names = c("Binomial", "K-Nearest Neighbours", "Naive Bayes","Random Forest", "Support Vector Machine")) %>% 
+  mutate_if(is.numeric, round, digits=2) %>%
+  arrange(Accuracy, desc(Scalability))
+```
+```{r Results Table w Rugosity}
+# Creating table with rugosity
+#scale_fill_manual(name = "Models", values=c("#023e7d", "#0892c3", "#4dcde4", "#80cdc4", "#e79f52", "#e0812d", "#bf4402")) 
+my_col = scale_colour_gradientn(colours=c("#023e7d", "#0892c3", "#e79f52", "#e0812d", "#bf4402"))
+cf_data %>% kbl() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
+  column_spec(2, color = "white", 
+              background = spec_color(cf_data$'Accuracy', option = 'A', end = 0.7)) %>%
+  column_spec(3, color = "white",
+              background = spec_color(cf_data$'Sensitivity', option = "A", end = 0.7)) %>%
+  column_spec(4, color = "white",
+              background = spec_color(cf_data$'Specificity', option = "A", end = 0.7)) %>% 
+  column_spec(5, color = "white",
+              background = spec_color(cf_data$'F1', option = "A", end = 0.7)) %>%
+  column_spec(6, color = "white",
+              background = spec_color(cf_data$'Scalability', option = "A", end = 0.7, direction = -1))
+```
+```{r Results wo Rugosity}
+# Data extraction: confusion matrix results without rugosity
+mean_accuracy_WO = c(sel_mean, knn_mean_WO, nb_mean_WO, rf_mean_WO, svm_mean_WO)
+sensitivity_WO = c(bin_sel_cf$byClass[1], knn_cf_WO$byClass[1], nb_cf_WO$byClass[1],
+                rf_cf_WO$byClass[1], svm_cf_WO$byClass[1])
+specificity_WO = c(bin_sel_cf$byClass[2], knn_cf_WO$byClass[2], nb_cf_WO$byClass[2],
+                rf_cf_WO$byClass[2], svm_cf_WO$byClass[2])
+f1_score_WO = c(bin_sel_cf$byClass[7], knn_cf_WO$byClass[7], nb_cf_WO$byClass[7],
+             rf_cf_WO$byClass[7], svm_cf_WO$byClass[7])
+time_WO = c(sel_cv_time, knn_cv_time_wo, nb_cv_time_wo, rf_cv_time_wo, svm_cv_time_wo)
+cf_data_WO = cbind('Accuracy' = mean_accuracy_WO, 'Sensitivity' = sensitivity_WO, 'Specificity' = specificity_WO, 
+                'F1' = f1_score_WO, 'Scalability' = time_WO) %>%
+  as.data.frame(row.names = c("Binomial", "K-Nearest Neighbours", "Naive Bayes","Random Forest", "Support Vector Machine"))  %>% 
+  mutate_if(is.numeric, round, digits=2) %>%
+  arrange(Accuracy, desc(Scalability))
+
+```
+```{r Results Table wo Rugosity}
+# Creating table without rugosity
+
+cf_data_WO %>% kbl() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
+  column_spec(2, color = "white",
+              background = spec_color(cf_data_WO$'Accuracy', option = "A", end = 0.7)) %>%
+  column_spec(3, color = "white",
+              background = spec_color(cf_data_WO$'Sensitivity', option = "A", end = 0.7)) %>%
+  column_spec(4, color = "white",
+              background = spec_color(cf_data_WO$'Specificity', option = "A", end = 0.7)) %>% 
+  column_spec(5, color = "white",
+              background = spec_color(cf_data_WO$'F1', option = "A", end = 0.7)) %>%
+  column_spec(6, color = "white",
+              background = spec_color(cf_data_WO$'Scalability', option = "A", end = 0.7, direction = -1))
+```
+```{r KNN Hyperparameter Tuning}
+ggplot(knn_fit) + 
+  labs(title = "KNN Hyper-parameter tuning", x = "K Value", y = "Accuracy") +
+  geom_point(color="#2ebaae", alpha = 1) +
+  theme_minimal()
+```
+
+
+## Shiny
+
+Our Shiny app was built using the RShiny [htmlTemplate](https://shiny.rstudio.com/articles/templates.html) package and deployed via [shinyapp](https://www.shinyapps.io/). The front-end design used the Bootstrap framework for better usability and modularity across a wide range of devices. The app is available [here](https://camille-alice.shinyapps.io/app_reef/). Our main priorities in designing the app were communicability to our target audience, and interactivity. Our target audience were recent high-school leavers who may have an interest in marine science, specifically, coral bleaching. As such, the vocabulary used was targeted at a high-school level and key concepts such as bleaching and rugosity were thoroughly explained. 
+
+The app included an interactive map that displayed the value of the variables Bleaching, SSTA Frequency Standard Deviation, Diversity, Depth. We also included the correlation between these variables as well as normality assumptions for transparency. Furthermore, a correlation between those variables and Rugosity was added in the form of boxplots. These plots and variables were chosen as they were utilised in our models, so we wanted to allow our audience an opportunity to explore the data themselves. Moreover, we included the results from our model testing for transparency and to explain why we decided to select the KNN model. Finally, we added an interface where the user could select the value of variables in order to make a prediction based on our model.
+
 # Discusssion
 
 **Discussion of potential shortcomings or issues associated with the development process or the product with reference to both disciplines. Identification of future work or improvement in both disciplines.**
 
+KNN is fastest due to computing the distance for neighbouring groups, and clustering based on distance, rather than training the model as Naive Bayes and Binomial models need to do. Random Forest and Support Vector Machine are the slowest due to having multiple prediction vectors having to be calculated, and then used to train the model. We believe our best KNN model used a lower k-value (K=9) as the higher the K value, the more prone to underfitting the model is. 
+
+While the deployment of the Shiny app was successful, our best model was still only able to predict coral bleaching with only 70% accuracy. We believe this is due to the multiple factors contributing to coral bleaching, making it extremely difficult to predict. While our rugosity measurement was not significant in our model, we attribute this to our measure being rudimentary. Another concern about the Shiny app is future scalability. Our app currently does not utilise any caching and instead relies on reading and running some data at start-up. The interactive plots and prediction also require rerunning each time a change is made, so scalability is a significant concern in the future. For the purposes of this project, there were no issues as our data was relatively small. Due to our usage of the Bootstrap framework in designing the front-end, our app is well-modularised and new features can be easily added in the future. For example, if new research or new data is discovered, or user feedback suggests that a particular experience can be improved, then our app can be easily updated to include these features. 
 
 # Conclusion
 
 **Conclusion adequately summarises the project and identification of future work.**
+
+We were able to successfully deploy a Shiny app that educated high-school leavers about coral bleaching and its potential predictive factors. We were able to develop a model that could be used as a basis for future work. However, for future work, a more robust measure of rugosity is needed for measurement. We would also like to highlight the need for a standardised rugosity measurement. While a KNN model could potentially be used in future studies to predict bleaching, we believe more attributes may need to be added to improve on accuracy of classifying.
 
 # Student Contributions
 

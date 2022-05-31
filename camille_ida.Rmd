@@ -8,7 +8,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-#knitr::opts_knit$set(root.dir = '/Users/camillekarski/Documents/Uni/DATA3888/')
+#knitr::opts_knit$set(root.dir = '/Users/*replace with your root directory*/')
 
 library(plyr)
 library(tidyverse)
@@ -42,15 +42,20 @@ The data was downloaded from [Allen Coral Atlas](https://allencoralatlas.org/res
   -stats
     -statistics.csv
 
-We need to extract all the benthic, boundary, and geomorphic data for each area and create respective shape files. 
+We need to extract all the geomorphic data for each area and create respective shape files. 
 
 ```{r Data extraction function}
 #function for extracting features from zipped archives 
-reef_f_extract = function(file_path,zip_name,feature_path,out_dir, reef_df){
-  file_ls = as.character(unzip(paste0(file_path,zip_name), list = TRUE)$Name)
+#file_path = file path to zipped file containing all the data
+#zip_name = name of target zip file
+#feature_path = target file name for extraction 
+#out_dir = new temporary directory for where data will go 
+#reef_df = target data frame to join geomorphic data to using st_join
+reef_f_extract = function(file_path, zip_name, feature_path, out_dir, reef_df){
+  file_ls = as.character(unzip(paste0(file_path, zip_name), list = TRUE)$Name)
   feature_filename = str_subset(file_ls, feature_path)
   if (length(feature_filename) != 0){
-    unzip(paste0(file_path,zip_name), files=feature_filename, exdir = out_dir)
+    unzip(paste0(file_path, zip_name), files=feature_filename, exdir = out_dir)
     rugosity_df = st_read(paste0(out_dir, feature_filename))
     sf_use_s2(FALSE)
     reef_join_df = st_join(reef_df, rugosity_df)
@@ -75,7 +80,7 @@ st_crs(reef_df_og) = 4326
 file_path = "./DATA3888_data/Global-Dataset-20211006223100.nosync/"
 #setting new directory for where data will go 
 outDir = "./DATA3888_data/geomorphic_all/"
-#target file name for extraction 
+#setting file path to extract just the geomorphic data
 geom_filepath = "^Geomorphic-Map/geomorphic"
 reef_join_df = reef_df_og
 test_error = "Northern-Caribbean--Florida----Bahamas-20201125220500.zip"
@@ -94,9 +99,9 @@ outDir = "./DATA3888_data/geomorphic_all/"
 geom_filepath = "^Geomorphic-Map/geomorphic"
 reef_join_df = reef_df_og
 
-#stopped as error ocurred when trying to open 'Northern Caribbean, Florida, & Bahamas' as file over 5Gb
+#stopped as error occurred when trying to open 'Northern Caribbean, Florida, & Bahamas' as file over 5Gb
 #removed file and continued with extraction
-second_files = files[17:31]
+#second_files = files[17:31]
 #commented out so as not to run again 
 #for (i in second_files) {
   #reef_join_df = reef_f_extract(file_path,i,geom_filepath,outDir,reef_join_df)
@@ -104,11 +109,11 @@ second_files = files[17:31]
 ```
 
 ```{r Combinded classes and writing to file}
-#there is an easier way to do this I am just tired rn
+#as each loop created new column, using coalesce to merge columns into 1
 reef_join_c = reef_join_df %>% mutate(class = coalesce(class.x, class.y, class.x.1, class.y.1, class.x.2, class.y.2, class.x.3, class.y.3, class.x.4, class.y.4, class.x.5, class.y.5, class.x.6, class.y.6, class.x.7, class.y.7)) %>%
          select(-class.x, -class.y, -class.x.1, -class.y.1, -class.x.2, -class.y.2, -class.x.3, -class.y.3, -class.x.4, -class.y.4, -class.x.5, -class.y.5, -class.x.6, -class.y.6, -class.x.7, -class.y.7)
 
-#write to gpkg
+#saving to .gpkg (shape) file
 #st_write(reef_join_c, 'reef_geomorphic_joined.gpkg')
 ```
 
@@ -134,7 +139,7 @@ for (i in files){
 ```
 
 ```{r Combinded classes and writing to file}
-#there is an easier way to do this I am just tired rn
+#as each loop created new column, using coalesce to merge columns into 1
 reef_join_all = all_reef_df %>% mutate(class = coalesce(class.x, class.y, class.x.1, class.y.1, class.x.2, class.y.2, class.x.3, class.y.3)) %>%
          select(-class.x, -class.y, -class.x.1, -class.y.1, -class.x.2, -class.y.2, -class.x.3, -class.y.3)
 
@@ -168,7 +173,7 @@ length(only_nas$class) #4658
 #ggplotly(geo_class_vis)
 ```
 
-From investigation of the data sets on the map, it looks like the reef dataset is not as precise as the Allen Coral dataset - hence points not touching some polygons. As such, to class as many reef points as possible, we will create a 200m buffer (as looking at geomorphic mapping on Allen, 200m is the smallest size that will include most datapoints). This may effect the data integrity, hence I will create a new `.gpgk` file `reef_geomorphic_joined_all_KNN.gpkg`. When modeling, we can then use both files to and calculate the difference in accuracy. 
+From investigation of the data sets on the map, it looks like the reef dataset is not as precise as the Allen Coral dataset - hence points not touching some polygons. As such, to class as many reef points as possible, we will create a 200m buffer (as looking at geomorphic mapping on Allen, 200m is the smallest size that will include most datapoints). This may effect the data integrity, hence I will create a new `.gpgk` file `reef_geomorphic_joined_nas.gpkg`. When modeling, we can then use both files to and calculate the difference in accuracy. 
 
 ```{r Creating buffer for NA points}
 # change to Irish grid, which uses meters
@@ -214,7 +219,6 @@ for (i in files){
 ```
 
 ```{r Joining class columns}
-#there is an easier way to do this I am just tired rn
 all_reef_df_na = all_reef_df_na %>% mutate(class_na = coalesce(class.x, class.y, class.x.1, class.y.1, class.x.2, class.y.2, class)) %>%
          select(-class.x, -class.y, -class.x.1, -class.y.1, -class.x.2, -class.y.2, -class)
 #Simple feature collection with 10290 features and 56 fields
@@ -238,41 +242,56 @@ length(only_nas$class) #2160
 
 As there were too many double ups of classes for the same points, we decided to use only the data we had an exact match to, as an incorrect geomorphic type could change the rugosity estimate. 
 
-## Figures 
-```{r Reading in data}
-reef_geomorphic = st_read("./DATA3888_Github/MARS_DATA3888_reefC4/Data/reef_geomorphic_joined_all.gpkg")
+```{r Saving final reef file for app}
+#adding to column with new long co-ords for world2 map
+wrapfunction = function(x){ifelse(x > 0, x, 360+x)}
+reef_geomorphic$wrapLongitute = sapply(reef_geomorphic$Longitude.Degrees, wrapfunction)
+
 reef_geomorphic = reef_geomorphic %>% 
+  #as.data.frame() %>%
   mutate(Date = as.Date(Date, "%d-%b-%y")) %>%
+  mutate(Date = as.numeric(format(Date, "%Y"))) %>%
   mutate(Depth = as.numeric(Depth)) %>%
   filter(Depth <= 15) # as per Allen Coral Atlas specs
 
 reef_recent = reef_geomorphic %>%
-  select(Reef.ID, Reef.Name, Country, Date, SSTA_Frequency_Standard_Deviation, rate_of_SST_change, Depth, Diversity, class,Average_bleaching, geom) %>% 
+  select(Reef.ID, Reef.Name, Country, Date, SSTA_Frequency_Standard_Deviation, Depth, Diversity, class, Average_bleaching, Latitude.Degrees, wrapLongitute) %>% 
   mutate(SSTA_Frequency_Standard_Deviation = as.numeric(SSTA_Frequency_Standard_Deviation),
-         rate_of_SST_change = as.numeric(rate_of_SST_change),
          Average_bleaching = as.numeric(Average_bleaching),
          Depth = as.numeric(Depth), 
          Diversity = as.numeric(Diversity)) %>%
-  group_by(Reef.ID) %>% filter(Date == max(Date))
+  group_by(Reef.ID)
 
-#bleached or not bleached
-reef_recent["bleached"] = ifelse(reef_recent$Average_bleaching > 0, 1,0)
-
-#Rugosity
 reef_recent["rugosity"] = ifelse(reef_recent$class == "Reef Slope" | reef_recent$class == "Outer Reef Flat","High", ifelse(reef_recent$class == "Sheltered Reef Slope" | reef_recent$class == "Reef Crest" | reef_recent$class == "Back Reef Slope","Medium","Low"))
-
-#Rugosity
 reef_recent["rugosity_num"] = ifelse(reef_recent$class == "Reef Slope" | reef_recent$class == "Outer Reef Flat",3, ifelse(reef_recent$class == "Sheltered Reef Slope" | reef_recent$class == "Reef Crest" | reef_recent$class == "Back Reef Slope",2,1))
-#Remove NA
-reef_final = reef_recent %>% drop_na()
 
-#st_write(reef_final, 'reef_rugosity_cleaned.gpkg')
+reef_recent["bleached"] = ifelse(reef_recent$Average_bleaching > 0,1,0)
+
+reef_final = reef_recent %>% 
+  drop_na() %>% 
+  mutate(class = as.factor(class)) %>%
+  mutate(rugosity = factor(rugosity, levels = c("Low", "Medium", "High")))
+#st_write(reef_final, 'reef_final.gpkg')
+```
+
+## Figures 
+```{r Reading in data}
+# cleaned file to use for app - no warnings and less computationally expensive
+reef_geomorphic = st_read("Data/reef_final.gpkg")
+reef_final = reef_geomorphic %>% 
+  as.data.frame()
+
+reef_final = reef_final %>% 
+  drop_na() %>% 
+  mutate(class = as.factor(class)) %>%
+  mutate(rugosity = factor(rugosity, levels = c("Low", "Medium", "High")))
+
 ```
 
 Correlation plot - can use rugosity, diversity, SSTA_std, and average bleaching. 
 
 ```{r Correlation plot df}
-reef_joined_corri = reef_final %>% select(Reef.ID, Average_bleaching, SSTA_Frequency_Standard_Deviation, Diversity, rate_of_SST_change, rugosity_num, class)
+reef_joined_corri = reef_final %>% select(Reef.ID, Average_bleaching, SSTA_Frequency_Standard_Deviation, Diversity, Depth, wrapLongitute, Latitude.Degrees, rugosity_num, class)
 reef_joined_corri = data.frame(reef_joined_corri)
 ```
 
@@ -301,18 +320,18 @@ my_custom_cor_color <- function(data, mapping, color = I("black"), sizeRange = c
   p <- ggally_text(
    label = tt, 
    mapping = aes(),
-   xP = 0.5, yP = 0.5, 
+   xP = 0.5, yP = 0.45, 
    size = 4,
    color=color,
    ...
   ) + 
     # add the sig stars #x and y are position of stars
-    geom_text(aes_string(x = 0.7, y = 0.75),
+    geom_text(aes_string(x = 0.75, y = 0.75),
       label = sig, 
       color = color,
       ...
     ) +   #x and y are position or text Corr: 
-    geom_text(aes_string(x = 0.5, y = 0.8),
+    geom_text(aes_string(x = 0.47, y = 0.8),
               size = 3,
               label = "Corr: ",
               color = color
@@ -357,58 +376,24 @@ my_custom_smooth <- function(data, mapping, ...) {
 ```
 
 ```{r Correlation plot, fig.cap= "Fig 3.3: Variable Correlation Visualisation", message=FALSE, warning=FALSE}
-reef_corri = ggpairs(reef_joined_corri, columns=2:7,
-        title = "Correlation of Bleaching and chosen variables",
-        columnLabels = c("Averageb Bleaching","SSTA Frequency STD",
-                         "Diversity", "Rate of SST change", "Rugosity", "Class"),
+reef_corri = ggpairs(reef_joined_corri, columns=2:8,
+        title = "Correlation of Bleaching and variables",
+        columnLabels = c("Average Bleaching","SSTA Frequency STD",
+                         "Diversity", "Depth", "Longitute", "Latitude", "Rugosity"),
         upper=list(continuous=my_custom_cor_color),
         cardinality_threshold=NULL,
         lower=list(continuous=my_custom_smooth), 
-                   combo = "dot", color=Class)         
+                   combo = "dot")         
 reef_corri
 ```
 
-```{r Saving final reef file for app}
-reef_geomorphic = st_read("/Users/camillekarski/Documents/Uni/DATA3888/DATA3888_GitHub/MARS_DATA3888_reefC4/Data/reef_geomorphic_joined_all.gpkg")
 
-#adding to column with new long co-ords for world2 map
-wrapfunction = function(x){ifelse(x > 0, x, 360+x)}
-reef_geomorphic$wrapLongitute = sapply(reef_geomorphic$Longitude.Degrees, wrapfunction)
-
-reef_geomorphic = reef_geomorphic %>% 
-  #as.data.frame() %>%
-  mutate(Date = as.Date(Date, "%d-%b-%y")) %>%
-  mutate(Date = as.numeric(format(Date, "%Y"))) %>%
-  mutate(Depth = as.numeric(Depth)) %>%
-  filter(Depth <= 15) # as per Allen Coral Atlas specs
-
-reef_recent = reef_geomorphic %>%
-  select(Reef.ID, Reef.Name, Country, Date, SSTA_Frequency_Standard_Deviation, Depth, Diversity, class, Average_bleaching, Latitude.Degrees, wrapLongitute) %>% 
-  mutate(SSTA_Frequency_Standard_Deviation = as.numeric(SSTA_Frequency_Standard_Deviation),
-         Average_bleaching = as.numeric(Average_bleaching),
-         Depth = as.numeric(Depth), 
-         Diversity = as.numeric(Diversity)) %>%
-  group_by(Reef.ID)
-
-reef_recent["rugosity"] = ifelse(reef_recent$class == "Reef Slope" | reef_recent$class == "Outer Reef Flat","High", ifelse(reef_recent$class == "Sheltered Reef Slope" | reef_recent$class == "Reef Crest" | reef_recent$class == "Back Reef Slope","Medium","Low"))
-reef_recent["rugosity_num"] = ifelse(reef_recent$class == "Reef Slope" | reef_recent$class == "Outer Reef Flat",3, ifelse(reef_recent$class == "Sheltered Reef Slope" | reef_recent$class == "Reef Crest" | reef_recent$class == "Back Reef Slope",2,1))
-
-reef_recent["bleached"] = ifelse(reef_recent$Average_bleaching > 0,1,0)
-
-reef_final = reef_recent %>% 
-  drop_na() %>% 
-  mutate(class = as.factor(class)) %>%
-  mutate(rugosity = factor(rugosity, levels = c("Low", "Medium", "High")))
-#st_write(reef_final, 'reef_final.gpkg')
-```
-
-# Code for normaliation (regression?)
 ```{r}
-normalized_bleaching = c(reef_final$Average_bleaching-min(reef_final$Average_bleaching))/(max(reef_final$Average_bleaching)-min(reef_final$Average_bleaching))
-reef_final$Average_bleaching_logit = logit(normalized_bleaching, 
-                                           percents=max(normalized_bleaching, na.rm = TRUE) > 1, adjust=0.25)
-```
+# Change point shapes and colors
+ggplot(reef_final, aes(x=Average_bleaching, y=Depth, color=rugosity)) +
+  geom_point()
 
+```
 
 
 
