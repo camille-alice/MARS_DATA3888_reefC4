@@ -162,6 +162,7 @@ n_sim = 50
 fitres_sel = factor()
 y_sel = c()
 
+start_time = Sys.time()
 for (i in 1:n_sim){
   cvSets = cvTools::cvFolds(nrow(X), cvK)  # permute all the data, into 5 folds
   cv_acc_sel = c()
@@ -190,6 +191,10 @@ for (i in 1:n_sim){
   cv_50acc5_sel = append(cv_50acc5_sel, mean(cv_acc_sel))
   
 }
+end_time = Sys.time()
+sel_cv_time = end_time-start_time
+
+sel_cv_time
 
 sel_mean = mean(cv_50acc5_sel)
 sel_sd = sd(cv_50acc5_sel)
@@ -290,6 +295,7 @@ K = 10
 fitres_NB_WO = factor()
 y_NB_WO = c()
 
+start_time = Sys.time()
 for (i in 1:50){
     
     cvSets = cvTools::cvFolds(nrow(X), K) 
@@ -315,6 +321,10 @@ for (i in 1:50){
     
     cv_acc50_NB_WO <- append(cv_acc50_NB_WO, mean(cv_acc_NB_WO))
 }
+end_time = Sys.time()
+nb_cv_time_wo = end_time-start_time
+
+nb_cv_time_wo
 
 nb_mean_WO = mean(cv_acc50_NB_WO)
 nb_sd_WO = sd(cv_acc50_NB_WO)
@@ -414,6 +424,7 @@ cv_acc50_knn_WO = c()  # initialise results vector
 cv_acc_knn_WO = c()
 K = 10
 
+start_time = Sys.time()
 for (i in 1:50){
     
     cvSets = cvTools::cvFolds(nrow(X), K) 
@@ -432,6 +443,10 @@ for (i in 1:50){
     
     cv_acc50_knn_WO <- append(cv_acc50_knn_WO, mean(cv_acc_knn_WO))
 }
+end_time = Sys.time()
+knn_cv_time_wo = end_time-start_time
+
+knn_cv_time_wo
 
 knn_mean_WO = mean(cv_acc50_knn_WO)
 knn_sd_WO = sd(cv_acc50_knn_WO)
@@ -527,6 +542,7 @@ K = 10
 fitres_rf_WO = factor()
 y_rf_WO = c()
 
+start_time = Sys.time()
 for (i in 1:50){
     
     cvSets = cvTools::cvFolds(nrow(X), K) 
@@ -546,6 +562,10 @@ for (i in 1:50){
     
     cv_acc50_rf_WO <- append(cv_acc50_rf_WO, mean(cv_acc_rf_WO))
 }
+end_time = Sys.time()
+rf_cv_time_wo = end_time-start_time
+
+rf_cv_time_wo
 
 rf_mean_WO = mean(cv_acc50_rf_WO)
 rf_sd_WO = sd(cv_acc50_rf_WO)
@@ -642,6 +662,7 @@ K = 10
 fitres_svm_WO = factor()
 y_svm_WO = c()
 
+start_time = Sys.time()
 for (i in 1:50){
     
     cvSets = cvTools::cvFolds(nrow(X), K) 
@@ -662,6 +683,10 @@ for (i in 1:50){
     
     cv_acc50_svm_WO <- append(cv_acc50_svm_WO, mean(cv_acc_svm_WO))
 }
+end_time = Sys.time()
+svm_cv_time_wo = end_time-start_time
+
+svm_cv_time_wo
 
 svm_mean_WO = mean(cv_acc50_svm_WO)
 svm_sd_WO = sd(cv_acc50_svm_WO)
@@ -724,7 +749,7 @@ X_train = X_train %>% mutate(bleached = y_train)
 start_time = Sys.time()
 slm = glm(formula = bleached ~ Longitude.Degrees + Latitude.Degrees + SSTA_Frequency_Standard_Deviation + Depth + Diversity, data = X_train,family = binomial)
 end_time = Sys.time()
-diff_time = end_time - start_time
+train_diff = end_time - start_time
 
 time_bin = c()
 i = 100
@@ -1017,7 +1042,9 @@ for (ntree in c(500,1000, 1500, 2000, 2500)) {
 }
 # compare results
 results <- resamples(modellist)
-summary(results)
+rf_fit <- summary(results)
+
+rf_fit
 ```
 
 
@@ -1032,7 +1059,10 @@ save(cv_50acc5_bin, cv_acc50_NB, cv_acc50_knn, cv_acc50_rf, cv_acc50_svm,
      sel_mean, nb_mean_WO, knn_mean_WO, rf_mean_WO, svm_mean_WO,
      bin_sd, nb_sd, knn_sd, rf_sd, svm_sd,
      sel_sd, nb_sd_WO, knn_sd_WO, rf_sd_WO, svm_sd_WO,
-     time_bin, time_nb, time_knn, time_rf, time_svm,
+     bin_cv_time, nb_cv_time, knn_cv_time, rf_cv_time, svm_cv_time,
+     sel_cv_time,nb_cv_time_wo,knn_cv_time_wo,rf_cv_time_wo, svm_cv_time_wo,
+     vif_result,p_value,
+     knn_fit, rf_fit,
      save_X, save_y,
      file = "model_results.rds")
 ```
