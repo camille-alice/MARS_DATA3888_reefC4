@@ -256,7 +256,7 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 										<p>See how our models performed</p>
 									</div>
 								</header>
-								<p>Below are our results for the models we tested. As you can see with the QQ plots above, the data was not normally distributed. They were either skewed or had a thin or heavy tails. As such, the best model ended up being the Random Forest model with the best accuracy and F1 result. However, the time result (i.e., the saleability of the data) was the worst. While this is something to consider for the future as the data may get more complex, for our study it was not an issue.</p>
+								<p>Below are our results for the models we tested. As you can see with the QQ plots above, the data was not normally distributed. They were either skewed or had a thin or heavy tails. As such, the best model ended up being the K-Nearest Neighbours model with the best accuracy and F1 result. However, the time result (i.e., the saleability of the data) was the worst. While this is something to consider for the future as the data may get more complex, for our study it was not an issue.</p>
 									<div class="row">
 									  {{ model_results }}
 									</div>
@@ -281,7 +281,7 @@ We also used data gathered from <a href="https://allencoralatlas.org/atlas/">All
 								<header>
 									<div class="title">
 										<h2><a id="predict">Make a prediction!</a></h2>
-										<p>Select some data and see whether our Random Forest model predicts a bleached or non-bleached reef!</p>
+										<p>Select some data and see whether our K-Nearest Neighbours model predicts a bleached or non-bleached reef!</p>
 									</div>
 								</header>
 								<div class="row">

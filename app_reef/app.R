@@ -13,7 +13,7 @@ library(sf)
 library(tidyverse)
 library(car)
 library(cvTools)
-library(randomForest)
+library(class)
 library(leaflet)
 library(leaflet.extras)
 library(shinyWidgets)
@@ -305,28 +305,25 @@ plot_time = function() {
   
 }
 
-predict_rf = function(SSTA_Frequency_Standard_Deviation, Depth, Diversity, num_rugosity) {
+predict_knn = function(SSTA_Frequency_Standard_Deviation, Depth, Diversity, num_rugosity) {
   
   set.seed(3888)
   
   cvSets = cvTools::cvFolds(nrow(save_X), 10)
   test_id = cvSets$subset[cvSets$which == sample.int(10, 1)]
-  X_test = save_X[test_id, ] %>% scale()
-  X_train = save_X[-test_id, ] %>% scale()
-  y_test = save_y[test_id]
-  y_train = save_y[-test_id]
-  
-  rf_res = randomForest::randomForest(x = X_train, y = as.factor(y_train))
   
   num_rugosity = as.numeric(num_rugosity)
   data = matrix(c(SSTA_Frequency_Standard_Deviation, Depth, Diversity, num_rugosity), nrow = 1, ncol = 4)
   colnames(data) = c("SSTA_Frequency_Standard_Deviation", "Depth", "Diversity", "num_rugosity")
   data = rbind(data, save_X[test_id,]) %>% scale()
-  # data = rbind(data[1,], X_test)
   
-  fit = predict(rf_res, data)
+  X_train = save_X[-test_id, ] %>% scale()
+  y_test = save_y[test_id]
+  y_train = save_y[-test_id]
   
-  if (fit[[1]] == 0) {
+  knn_res = class::knn(train = X_train, test = data, cl = y_train, k = 9)
+
+  if (knn_res[[1]] == 0) {
     print('<a class="image featured"><img src="images/non_bleached.jpg" alt=""/></a>')
   } else {
     print('<a class="image featured"><img src="images/bleached.jpg" alt=""/></a>')
@@ -505,7 +502,7 @@ server = function(input, output) {
   
   # Prediction results
   output$predict_results = renderText({
-    predict_rf(input$ssta_slider, input$depth_slider, input$diversity_slider, input$rugosity_val)
+    predict_knn(input$ssta_slider, input$depth_slider, input$diversity_slider, input$rugosity_val)
   })
   
   # Regression words 
