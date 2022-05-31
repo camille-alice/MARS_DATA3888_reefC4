@@ -19,7 +19,7 @@ library(Metrics)
 library(caret)
 library(lme4)
 
-reef_geomorphic = st_read("Data/reef_geomorphic_joined_all.gpkg")
+reef_geomorphic = st_read("C:/Users/patri/OneDrive/Desktop/DATA3888/MARS_DATA3888_reefC4/Data/reef_geomorphic_joined_all.gpkg")
 reef_geomorphic = reef_geomorphic %>% 
   as.data.frame() %>%
   mutate(Date = as.Date(Date, "%d-%b-%y")) %>%
@@ -27,8 +27,7 @@ reef_geomorphic = reef_geomorphic %>%
   filter(Depth <= 15) # as per Allen Coral Atlas specs
 ```
 
-
-##Binomial regression
+#Data Cleaning
 ```{r}
 #Most recent entry
 
@@ -65,11 +64,11 @@ reef_model <- glm(formula = bleached ~ Longitude.Degrees + Latitude.Degrees + SS
 
 summary(reef_model)
 
-#Do VIF 
-vif_result <- vif(reef_model)
-vif_result
-#Based on the VIF test, it suggest that there is no severe multicollinearity problem between variables that we chose
+```
 
+
+##Binomial regression
+```{r}
 
 #Cross-validation using binomial
 set.seed(3888)
@@ -88,6 +87,7 @@ n_sim = 50
 fitres_bin = factor()
 y_bin = c()
 
+start_time = Sys.time()
 for (i in 1:n_sim){
   cvSets = cvTools::cvFolds(nrow(X), cvK)  # permute all the data, into 5 folds
   cv_acc_bin = c()
@@ -115,9 +115,15 @@ for (i in 1:n_sim){
   cv_50acc5_bin = append(cv_50acc5_bin, mean(cv_acc_bin))
   
 }
+end_time = Sys.time()
+bin_cv_time = end_time-start_time
+bin_cv_time
 
 bin_mean = mean(cv_50acc5_bin)
 bin_sd = sd(cv_50acc5_bin)
+
+bin_mean
+bin_sd
 
 #F1-score for full binomial
 bin_cf = confusionMatrix(as.factor(fitres_bin), y_bin,
@@ -142,6 +148,7 @@ summary(step_model_reef)
 set.seed(3888)
 
 #reef without "bleached" and other useless attributes
+#Add class to the variable/attributes
 reef_ungroup = reef_final %>% ungroup()
 X = reef_ungroup %>% select(-c("Average_bleaching","Reef.ID","Date","class","bleached","num_rugosity","rugosity"))
 
@@ -187,6 +194,9 @@ for (i in 1:n_sim){
 sel_mean = mean(cv_50acc5_sel)
 sel_sd = sd(cv_50acc5_sel)
 
+sel_mean
+sel_sd
+
 #F1-Score for selected binomial
 bin_sel_cf = confusionMatrix(as.factor(fitres_sel), y_sel,
                 mode = "everything",
@@ -197,61 +207,6 @@ bin_sel_cf
 boxplot(cv_50acc5_sel, ylab = 'CV Accuracy' ,xlab = 'Selected Binomial Regression' , main = 'Accuracy of Selected Binomial Regression Without Rugosity in CV')
 ```
 
-#Adding random effect to the binomial model without rugosity variable
-
-```{r}
-set.seed(3888)
-reef_ungroup = reef_final %>% ungroup()
-X = reef_ungroup %>% select(-c("Average_bleaching","Date","class","bleached","num_rugosity","rugosity"))
-
-y = reef_ungroup %>% select(bleached) %>% pull()
-
-cvK = 10 # number of CV folds
-cv_50acc_rnd = c()
-cv_acc_rnd = c()
-n_sim = 50
-
-fitres_rnd = factor()
-y_rnd = c()
-
-for (i in 1:n_sim){
-  cvSets = cvTools::cvFolds(nrow(X), cvK)  # permute all the data, into 5 folds
-  cv_acc_rnd = c()
-  
-  for (j in 1:cvK) {
-    test_id = cvSets$subsets[cvSets$which == j]
-    X_test = X[test_id, ]
-    X_train = X[-test_id, ]
-    y_test = y[test_id]
-    y_train = y[-test_id]
-    
-    X_train = X_train %>% mutate(bleached = y_train)
-    
-    rnd = glmer(bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity + (1 |Reef.ID),data = X_train,family = binomial)
-    predicted_outcomes <- predict(rnd,newdata=X_test,allow.new.levels = TRUE,type = "response")
-    predicted_outcomes = ifelse(predicted_outcomes > 0.5, 1, 0)
-    
-    fitres_rnd = append(fitres_rnd, predicted_outcomes)
-    y_rnd = append(y_rnd, y_test)
-    
-    cv_acc_rnd[j] = mean(predicted_outcomes == y_test)
-    
-  }
-  cv_50acc_rnd = append(cv_50acc_rnd, mean(cv_acc_rnd))
-  
-}
-
-rnd_mean = mean(cv_50acc_rnd)
-rnd_sd = sd(cv_50acc_rnd)
-
-#F1-score for random effect
-rnd_cf = confusionMatrix(as.factor(fitres_rnd), y_rnd,
-                mode = "everything",
-                positive="1")
-
-#Boxplot for full binomial model accuracy
-boxplot(cv_50acc_rnd, ylab = 'CV Accuracy' ,xlab = 'Binomial Regression with Random Effect' , main = 'Accuracy of Binomial Regression with Random effect in CV')
-```
 
 #Naive Bayes
 
@@ -271,6 +226,7 @@ K = 10
 fitres_NB = factor()
 y_NB = c()
 
+start_time = Sys.time()
 for (i in 1:50){
     
     cvSets = cvTools::cvFolds(nrow(X), K) 
@@ -296,9 +252,16 @@ for (i in 1:50){
     
     cv_acc50_NB <- append(cv_acc50_NB, mean(cv_acc_NB))
 }
+end_time = Sys.time()
+nb_cv_time = end_time-start_time
+
+nb_cv_time
 
 nb_mean = mean(cv_acc50_NB)
 nb_sd = sd(cv_acc50_NB)
+
+nb_mean
+nb_sd
 
 #F1-score for Naive Bayes
 nb_cf = confusionMatrix(fitres_NB, y_NB,
@@ -353,8 +316,11 @@ for (i in 1:50){
     cv_acc50_NB_WO <- append(cv_acc50_NB_WO, mean(cv_acc_NB_WO))
 }
 
-mean(cv_acc50_NB_WO)
-sd(cv_acc50_NB_WO)
+nb_mean_WO = mean(cv_acc50_NB_WO)
+nb_sd_WO = sd(cv_acc50_NB_WO)
+
+nb_mean_WO
+nb_sd_WO
 
 #F1-score for Naive Bayes
 nb_cf_WO = confusionMatrix(fitres_NB_WO, y_NB_WO,
@@ -389,6 +355,7 @@ cv_acc50_knn = c()  # initialise results vector
 cv_acc_knn = c()
 K = 10
 
+start_time = Sys.time()
 for (i in 1:50){
     
     cvSets = cvTools::cvFolds(nrow(X), K) 
@@ -407,9 +374,16 @@ for (i in 1:50){
     
     cv_acc50_knn <- append(cv_acc50_knn, mean(cv_acc_knn))
 }
+end_time = Sys.time()
+knn_cv_time = end_time-start_time
+
+knn_cv_time
 
 knn_mean = mean(cv_acc50_knn)
 knn_sd = sd(cv_acc50_knn)
+
+knn_mean
+knn_sd
 
 #F1-score for knn
 knn_cf = confusionMatrix(as.factor(fitres_knn), y_knn,
@@ -459,8 +433,11 @@ for (i in 1:50){
     cv_acc50_knn_WO <- append(cv_acc50_knn_WO, mean(cv_acc_knn_WO))
 }
 
-mean(cv_acc50_knn_WO)
-sd(cv_acc50_knn_WO)
+knn_mean_WO = mean(cv_acc50_knn_WO)
+knn_sd_WO = sd(cv_acc50_knn_WO)
+
+knn_mean_WO
+knn_sd_WO
 
 #F1-score for knn
 knn_cf_WO = confusionMatrix(as.factor(fitres_knn_WO), y_knn_WO,
@@ -491,6 +468,7 @@ K = 10
 fitres_rf = factor()
 y_rf = c()
 
+start_time = Sys.time()
 for (i in 1:50){
     
     cvSets = cvTools::cvFolds(nrow(X), K) 
@@ -510,9 +488,16 @@ for (i in 1:50){
     
     cv_acc50_rf <- append(cv_acc50_rf, mean(cv_acc_rf))
 }
+end_time = Sys.time()
+rf_cv_time = end_time-start_time
+
+rf_cv_time
 
 rf_mean = mean(cv_acc50_rf)
 rf_sd = sd(cv_acc50_rf)
+
+rf_mean
+rf_sd
 
 #F1-score for rf
 rf_cf = confusionMatrix(as.factor(fitres_rf), y_rf,
@@ -562,8 +547,12 @@ for (i in 1:50){
     cv_acc50_rf_WO <- append(cv_acc50_rf_WO, mean(cv_acc_rf_WO))
 }
 
-mean(cv_acc50_rf_WO)
-sd(cv_acc50_rf_WO)
+rf_mean_WO = mean(cv_acc50_rf_WO)
+rf_sd_WO = sd(cv_acc50_rf_WO)
+
+rf_mean_WO
+rf_sd_WO
+
 #F1-score for rf
 rf_cf_WO = confusionMatrix(as.factor(fitres_rf_WO), y_rf_WO,
                 mode = "everything",
@@ -594,6 +583,7 @@ K = 10
 fitres_svm = factor()
 y_svm = c()
 
+start_time = Sys.time()
 for (i in 1:50){
     
     cvSets = cvTools::cvFolds(nrow(X), K) 
@@ -614,9 +604,16 @@ for (i in 1:50){
     
     cv_acc50_svm <- append(cv_acc50_svm, mean(cv_acc_svm))
 }
+end_time = Sys.time()
+svm_cv_time = end_time-start_time
+
+svm_cv_time
 
 svm_mean = mean(cv_acc50_svm)
 svm_sd = sd(cv_acc50_svm)
+
+svm_mean
+svm_sd
 
 #F1-score for svm
 svm_cf = confusionMatrix(as.factor(fitres_svm), y_svm,
@@ -666,8 +663,11 @@ for (i in 1:50){
     cv_acc50_svm_WO <- append(cv_acc50_svm_WO, mean(cv_acc_svm_WO))
 }
 
-mean(cv_acc50_svm_WO)
-sd(cv_acc50_svm_WO)
+svm_mean_WO = mean(cv_acc50_svm_WO)
+svm_sd_WO = sd(cv_acc50_svm_WO)
+
+svm_mean_WO
+svm_sd_WO
 
 #F1-score for svm
 svm_cf_WO = confusionMatrix(as.factor(fitres_svm_WO), y_svm_WO,
@@ -675,6 +675,7 @@ svm_cf_WO = confusionMatrix(as.factor(fitres_svm_WO), y_svm_WO,
                 positive="1")
 
 svm_cf_WO
+
 #Boxplot for SVM  model
 boxplot(cv_acc50_svm_WO, ylab = 'CV Accuracy' ,xlab = 'Support Vector Machine' , main = 'Accuracy of Support Vector Machine without Rugosity in CV')
 ```
@@ -715,27 +716,41 @@ X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","
 
 y = reef_ungroup %>% select(bleached) %>% pull()
 
+#take last 1000 data as our train data
+X_train = tail(X,1000)
+y_train = tail(y,1000)
+X_train = X_train %>% mutate(bleached = y_train)
+
+start_time = Sys.time()
+slm = glm(formula = bleached ~ Longitude.Degrees + Latitude.Degrees + SSTA_Frequency_Standard_Deviation + Depth + Diversity, data = X_train,family = binomial)
+end_time = Sys.time()
+diff_time = end_time - start_time
+
 time_bin = c()
-i = 10
+i = 100
 while (i < 1000) {
-  start_time = Sys.time()
-  #take last 1000 data as our train data
-  X_train = tail(X,1000)
-  y_train = tail(y,1000)
+  Sys.sleep(1)
   #take first i data as our test data
   X_test = head(X,i)
   y_test = head(y,i)
-  X_train = X_train %>% mutate(bleached = y_train)
-  slm = glm(formula = bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity, data = X_train,family = binomial)
+  start_time = Sys.time()
   predicted_outcomes = predict.glm(slm, X_test, type = "response")
   predicted_outcomes = ifelse(predicted_outcomes > 0.5, 1, 0)
-  i = i + 10 
+  end_time = Sys.time()
+  i = i + 100 
   end_time = Sys.time()
   diff_time = end_time-start_time
   time_bin = append(time_bin,diff_time)
 }
 
-time_bin
+
+final_time_bin = c()
+for (time in time_bin){
+  time_add = time + train_diff
+  final_time_bin = append(final_time_bin,time_add)
+}
+
+final_time_bin
 ```
 
 
@@ -751,27 +766,42 @@ X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","
 
 y = reef_ungroup %>% select(bleached) %>% pull()
 
+#train the model
+#take last 1000 data as our train data
+X_train = tail(X,1000)
+y_train = tail(y,1000)
+X_train = X_train %>% mutate(bleached = y_train)
+
+start_time = Sys.time()
+nB = e1071::naiveBayes(formula = bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity, data = X_train)
+end_time = Sys.time()
+
+train_diff = end_time - start_time
+
 time_nb = c()
-i = 10
+i = 100
 while (i < 1000) {
-  start_time = Sys.time()
-  #take last 1000 data as our train data
-  X_train = tail(X,1000)
-  y_train = tail(y,1000)
+  Sys.sleep(1)
   #take first i data as our test data
   X_test = head(X,i)
   y_test = head(y,i)
-  X_train = X_train %>% mutate(bleached = y_train)
-  nB = e1071::naiveBayes(formula = bleached ~ SSTA_Frequency_Standard_Deviation + Depth + Diversity, data = X_train)
+  start_time = Sys.time()
   predicted_outcomes = predict(nB, X_test)
-  i = i + 10 
   end_time = Sys.time()
+  i = i + 100
   diff_time = end_time-start_time
   time_nb = append(time_nb,diff_time)
 }
 
-time_nb
+final_time_nb = c()
+for (time in time_nb){
+  time_add = time + train_diff
+  final_time_nb = append(final_time_nb,time_add)
+}
+
+final_time_nb
 ```
+
 
 ```{r}
 #Time KNN model
@@ -781,23 +811,25 @@ set.seed(3888)
 
 #reef without "bleached" and other useless attributes
 reef_ungroup = reef_final %>% ungroup()
-X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity","num_rugosity")) %>% scale()
+X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity")) %>% scale()
 
 y = reef_ungroup %>% select(bleached) %>% pull()
 
 time_knn = c()
-i = 10
+
+i = 100
 while (i < 1000) {
-  start_time = Sys.time()
+  Sys.sleep(1)
   #take last 1000 data as our train data
   X_train = tail(X,1000)
   y_train = tail(y,1000)
   #take first i data as our test data
   X_test = head(X,i)
   y_test = head(y,i)
+  start_time = Sys.time()
   fit = class::knn(train = X_train, test = X_test, cl = y_train, k = 5)
-  i = i + 10 
   end_time = Sys.time()
+  i = i + 100
   diff_time = end_time-start_time
   time_knn = append(time_knn,diff_time)
 }
@@ -814,29 +846,41 @@ set.seed(3888)
 
 #reef without "bleached" and other useless attributes
 reef_ungroup = reef_final %>% ungroup()
-X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity")) %>% scale()
+X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","class","rugosity","num_rugosity")) %>% scale()
 
 y = reef_ungroup %>% select(bleached) %>% pull()
 
 time_rf = c()
-i = 10
+i = 100
+#time the training the model
+start_time = Sys.time()
+#take last 1000 data as our train data
+X_train = tail(X,1000)
+y_train = tail(y,1000)
+rf_res <- randomForest::randomForest(x = X_train, y = as.factor(y_train))
+end_time = Sys.time()
+train_diff = end_time - start_time
+
 while (i < 1000) {
-  start_time = Sys.time()
-  #take last 1000 data as our train data
-  X_train = tail(X,1000)
-  y_train = tail(y,1000)
+  Sys.sleep(1)
   #take first i data as our test data
   X_test = head(X,i)
   y_test = head(y,i)
-  rf_res <- randomForest::randomForest(x = X_train, y = as.factor(y_train))
+  start_time = Sys.time()
   fit <- predict(rf_res, X_test)
-  i = i + 10 
   end_time = Sys.time()
+  i = i + 100
   diff_time = end_time-start_time
   time_rf = append(time_rf,diff_time)
 }
 
-time_rf
+final_time_rf = c()
+for (time in time_rf){
+  time_add = time + train_diff
+  final_time_rf = append(final_time_rf,time_add)
+}
+
+final_time_rf
 ```
 
 
@@ -853,51 +897,141 @@ X = reef_ungroup %>% select(-c("Average_bleaching","bleached","Reef.ID","Date","
 y = reef_ungroup %>% select(bleached) %>% pull()
 
 time_svm = c()
-i = 10
+i = 100
+
+#take last 1000 data as our train data
+X_train = tail(X,1000)
+y_train = tail(y,1000)
+#time the training the model
+start_time = Sys.time()
+svm_res <- e1071::svm(x = X_train, y = as.factor(y_train))
+end_time = Sys.time()
+
+train_diff = end_time-start_time
+
 while (i < 1000) {
-  start_time = Sys.time()
-  #take last 1000 data as our train data
-  X_train = tail(X,1000)
-  y_train = tail(y,1000)
+  Sys.sleep(1)
   #take first i data as our test data
   X_test = head(X,i)
   y_test = head(y,i)
-  svm_res <- e1071::svm(x = X_train, y = as.factor(y_train))
+  start_time = Sys.time()
   fit <- predict(svm_res, X_test)
-  i = i + 10 
   end_time = Sys.time()
+  i = i + 100
   diff_time = end_time-start_time
   time_svm = append(time_svm,diff_time)
 }
 
-time_svm
+final_time_svm = c()
+for (time in time_svm){
+  time_add = time + train_diff
+  final_time_svm = append(final_time_svm,time_add)
+}
+
+final_time_svm
 ```
 
 ```{r}
 #lineplot
-i = 10
+i = 100
 num_record = c()
 while (i < 1000){
   num_record = append(num_record,i)
-  i = i + 10
+  i = i + 100
 }
-plot(num_record,time_bin, type="l", col="green", lwd=5, pch=15, xlab="number of test data", ylab="time",ylim=range(time_bin,time_knn,time_nb,time_rf,time_svm))
+plot(num_record,final_time_bin, type="l", col="green", lwd=5, pch=15, xlab="number of test data", ylab="time",ylim=range(final_time_bin,time_knn,final_time_nb,final_time_rf,final_time_svm))
 lines(num_record, time_knn, type="l", col="red", lwd=2, pch=19)
-lines(num_record, time_rf, type="l", col="blue", lwd=2, pch=19)
-lines(num_record, time_nb, type="l", col="yellow", lwd=2, pch=19)
-lines(num_record, time_svm, type="l", col="pink", lwd=2, pch=19)
+lines(num_record, final_time_rf, type="l", col="blue", lwd=2, pch=19)
+lines(num_record, final_time_nb, type="l", col="yellow", lwd=2, pch=19)
+lines(num_record, final_time_svm, type="l", col="pink", lwd=2, pch=19)
 title("Time of all models")
-legend(x = "topright", legend = c("Binary","KNN","RF","NB","SVM"),lty = c(1, 1,1,1,1), col=c("green","red","blue","yellow","pink"))
+legend(x = "topright", legend = c("Binomial","KNN","RF","NB","SVM"),lty = c(1, 1,1,1,1), col=c("green","red","blue","yellow","pink"))
+```
+
+# Testing multicollinearity and independent test
+
+```{r}
+#Binomial regression
+reef_model <- glm(formula = bleached ~ Longitude.Degrees + Latitude.Degrees + SSTA_Frequency_Standard_Deviation + Depth + Diversity + rugosity, data = reef_final, family = binomial)
+
+#Do VIF 
+vif_result <- vif(reef_model)
+vif_result
+#Based on the VIF test, it suggest that there is no severe multicollinearity problem between variables that we chose
+
+c_mat = table(reef_final$bleached,reef_final$rugosity)
+# Expected contingency table
+eij = data.frame(chisq.test(c_mat, correct = FALSE)$expected %>%
+  round(2)) %>% tibble()
+
+# There is no expected cell <= 5, we going to use chi-square test
+p_value = chisq.test(c_mat, correct = FALSE)$p.value
+p_value
+
+#the null hypothesis: there is no association between bleaching and rugosity
+#the alternate hypothesis: there is association between bleaching and rugosity
+
+#Since our p-value more than 0.05 we retain null hypothesis and conclude that there is no association between bleaching and rugosity but our p-value is slightly above 0.05 (0.061645), so the evidence of retaining the null hypotheis are quite weak.
+```
+
+#Fine tuning for Knn
+
+```{r}
+#Do KNN using the selected variable 
+set.seed(3888)
+
+#reef without "bleached" and other useless attributes
+reef_ungroup = reef_final %>% ungroup()
+
+dataset = reef_ungroup %>% select(-c("Average_bleaching","Reef.ID","Date","class","rugosity","num_rugosity"))
+
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10)
+set.seed(3333)
+knn_fit <- train(bleached ~., data = dataset, method = "knn",
+  trControl=trctrl,
+  metric = "Accuracy",
+  tuneGrid = data.frame(k = seq(1,100,by = 1)))
+
+knn_fit
+```
+
+# Fine tuning for random forest
+```{r}
+#Do RF using the selected variable 
+set.seed(3888)
+
+#reef without "bleached" and other useless attributes
+reef_ungroup = reef_final %>% ungroup()
+
+dataset = reef_ungroup %>% select(-c("Average_bleaching","Reef.ID","Date","class","rugosity","num_rugosity"))
+
+# Ntree Search
+control <- trainControl(method="repeatedcv", number=10, repeats=10, search="grid")
+tunegrid <- expand.grid(.mtry=c(5))
+modellist <- list()
+for (ntree in c(500,1000, 1500, 2000, 2500)) {
+	set.seed(3888)
+	fit <- train(bleached~., data=dataset, method="rf", metric="Accuracy", tuneGrid=tunegrid, trControl=control, ntree=ntree)
+	key <- toString(ntree)
+	modellist[[key]] <- fit
+}
+# compare results
+results <- resamples(modellist)
+summary(results)
 ```
 
 
 # Saving results to file
 
 ```{r}
-save(cv_50acc5_bin, cv_50acc5_sel, cv_50acc_rnd, cv_acc50_NB, cv_acc50_knn, cv_acc50_rf, cv_acc50_svm, 
-     bin_cf, bin_sel_cf, rnd_cf, nb_cf, knn_cf, rf_cf, svm_cf, 
-     bin_mean, sel_mean, rnd_mean, nb_mean, knn_mean, rf_mean, svm_mean,
-     bin_sd, sel_sd, rnd_sd, nb_sd, knn_sd, rf_sd, svm_sd,
+save(cv_50acc5_bin, cv_acc50_NB, cv_acc50_knn, cv_acc50_rf, cv_acc50_svm,
+     cv_50acc5_sel, cv_acc50_NB_WO, cv_acc50_knn_WO, cv_acc50_rf, cv_acc50_svm_WO,
+     bin_cf, nb_cf, knn_cf, rf_cf, svm_cf,
+     bin_sel_cf, nb_cf_WO, knn_cf_WO, rf_cf_WO, svm_cf_WO,
+     bin_mean, nb_mean, knn_mean, rf_mean, svm_mean,
+     sel_mean, nb_mean_WO, knn_mean_WO, rf_mean_WO, svm_mean_WO,
+     bin_sd, nb_sd, knn_sd, rf_sd, svm_sd,
+     sel_sd, nb_sd_WO, knn_sd_WO, rf_sd_WO, svm_sd_WO,
      time_bin, time_nb, time_knn, time_rf, time_svm,
      save_X, save_y,
      file = "model_results.rds")
