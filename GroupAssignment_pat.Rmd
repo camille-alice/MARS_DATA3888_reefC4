@@ -790,7 +790,7 @@ save(cv_50acc5_bin, cv_acc50_NB, cv_acc50_knn, cv_acc50_rf, cv_acc50_svm,
      bin_cv_time, nb_cv_time, knn_cv_time, rf_cv_time, svm_cv_time,
      sel_cv_time,nb_cv_time_wo,knn_cv_time_wo,rf_cv_time_wo, svm_cv_time_wo,
      vif_result,p_value,
-     knn_fit, rf_fit,
+     knn_fit,
      save_X, save_y,
      file = "model_results.rds")
 ```
