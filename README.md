@@ -14,10 +14,11 @@ Repository for MARS/DATA3888 Reef Project for group C4.
 - [Raw Data](#raw-data)
 - [Key Files](#key-files)
 - [Project Deliverables](#project-deliverables)
-    - [Presentation](#presentation)
     - [Report](#report)
+    - [Shiny](#shiny)
+    - [Model](#model)
 - [Variables](#variables)
-- [Group members and contacts](#group-members-and-contacts)
+- [Group contact](#group-contact)
 - [References](#references)
 - [License](#license)
 
@@ -33,7 +34,7 @@ Purpose: We are researching Coral Bleaching for DATA/MARS3888 at the University 
 
 Study aim:
 
-- Investigating rugosity of coral and the effect on bleaching severity and frequency. 
+- Investigating rugosity of coral and the effect on bleaching. 
 
 - Predicting which Reef is likely to be suspectable to bleaching
 
@@ -61,21 +62,26 @@ The rugosity of reefs are associated with their geomorphic class. Hence, we are 
 # Key Files
 
 * Processed Reef Bleaching file: [Reef_Check_with_cortad_variables_with_annual_rate_of_SST_change.csv](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/Data/Reef_Check_with_cortad_variables_with_annual_rate_of_SST_change.csv)
-* Joined Geomorphic Reef file (with NA's): reef_geomorphic_joined_all.gpkg
-* Joined Geomorphic Reef file (with multiple classes): reef_geomorphic_joined_nas.gpkg
-* Cleaned Rugosity Reef file (without NA's): reef_rugosity_cleaned.gpkg 
+* Cleaned Rugosity Reef file (without NA's): [reef_rugosity_cleaned.gpkg](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/Data/reef_rugosity_cleaned.gpkg)
+* Final Reef file: [reef_final.gpkg](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/Data/reef_final.gpkg)
+* Model results file: [model_results.rds](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/Data/model_results.rds)
 
 &nbsp;
 
 # Project Deliverables
 
-### Presentation
-
-- The slides for our presentation can be found here
-
 ### Report
 
-- Report can be found here 
+- Report can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/group_report.html)
+
+### Shiny
+
+- Shiny app can be found [here](https://camille-alice.shinyapps.io/app_reef/)
+- Shiny code can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/app_reef/app.R)
+
+### Model
+
+- Model code can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/GroupAssignment_pat.Rmd)
 
 &nbsp;
 
@@ -138,7 +144,7 @@ communication by original authors)</td>
 
 &nbsp;
 
-# Group Members and Contacts
+# Contact
 
  <table>
        <tr>
@@ -148,30 +154,6 @@ communication by original authors)</td>
         <tr>
             <td> Camille Karski </td>
             <td> c.a.karski@gmail.com </td>
-        </tr>
-        <tr>
-            <td> Kathryn Avieson </td>
-            <td> EMAIL </td>
-        </tr>
-        <tr>
-            <td> Joshua Borgnolo </td>
-            <td> borgnolojosh@gmail.com </td>
-        </tr>
-        <tr>
-            <td> Alex Burton </td>
-            <td> EMAIL </td>
-        </tr>
-        <tr>
-            <td> Nathan Cheung </td>
-            <td> EMAIL </td>
-        </tr>
-        <tr>
-            <td> Patrick Chang </td>
-            <td> EMAIL </td>
-        </tr>
-        <tr>
-            <td> Daniel Wright </td>
-            <td> EMAIL </td>
         </tr>
  </table>
  
