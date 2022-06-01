@@ -23,18 +23,16 @@ library(ggplot2)
 library(maps)
 library(viridis)
 library(dplyr)
-
 library(gt)
-library(kableExtra)
 ```
 
 # Executive summary
 
-This study aimed to investigate the factors that contribute to coral bleaching and present them in an interactive app that was aimed at high-school leavers to educate them on the complexity of predicting coral bleaching. We aimed to test different models that could potentially help predict bleaching, testing classifiers as well as linear models. We focused on rugosity, as it has yet to be extensively researched, to determine if it was a significant factor for coral bleaching. We found that with our current estimate of rugosity, it was not significant. Our final model used a cross validated KNN classifier that was able to predict bleaching with an accuracy of 66%. While we acknowledge this is not a strong model, we hope our Shiny app provides a solid background for understanding coral bleaching and what rugosity is, and our suggestions for future studies are taken on. 
+Corals are an extremely important part of the reef ecosystem, not only providing essential habitat and nutrients to the sea-life that inhabit reefs [@Cole_2008], but also providing protection for coastlines [@Harris_2018], and contributing to a multi-billion dollar industry that over half a billion people rely on [@NOAA_2019]. However, coral bleaching events are occurring more frequently, at stronger intensities, and are having significant ramifications for the mortality of coral reefs [@Williams_1990; @Hoegh_Guldberg_2007]. Climate change is leading to more profound changes in the physical ocean environment which, in turn, leads to these mass bleaching events [@Douglas_2003]. This study aimed to investigate the factors that contribute to coral bleaching and present them in an interactive app that was aimed at high-school leavers to educate them on the complexity of predicting coral bleaching, as well as visualize the areas that are most susceptible to coral bleaching. We aimed to test different models that could potentially help predict bleaching, testing classifiers as well as linear models. We used a repeated cross validation technique, as well as multiple model metrics to determine our final model. We focused on rugosity as a variable, as it has yet to be extensively researched, to determine if it was a significant factor for coral bleaching. We were able to construct a rugosity measure based on geomorphic zones and coral types. We found that with our current estimate of rugosity, it was not significant. Our final model used a KNN classifier that was able to predict bleaching with an accuracy of 66%. While we acknowledge this is not a high accuracy, we hope our Shiny app provides a solid background for understanding coral bleaching and what rugosity is, and our suggestions for future studies are taken on. 
 
 # Aim and Background 
 
-Corals are an extremely important part of the reef ecosystem, not only providing essential habitat and nutrients to the sea-life that inhabit reefs [@Cole_2008], but also providing protection for coastlines [@Harris_2018], and contributing to a multi-billion dollar industry that over half a billion people rely on [@NOAA_2019]. However, coral bleaching events are occurring more frequently, at stronger intensities, and are having significant ramifications for the mortality of coral reefs [@Williams_1990; @Hoegh_Guldberg_2007]. Climate change is leading to more profound changes in the physical ocean environment which, in turn, leads to these mass bleaching events [@Douglas_2003]. Coral bleaching refers to when corals expel their symbiotic algae, called zooxanthellae, leading to the coral turning white. Corals expel their algae when they become stressed (most commonly due to thermal stress) causing the zooxanthellae to release oxygen free radicals that damage coral tissue. Since the corals rely on the zooxanthellae for energy and nutrients, when the zooxanthellae is lost the corals turn white and are referred to as ‘bleached’. If stress conditions such as temperature do not return to normal conditions, zooxanthellae will not return and coral will transition from bleached to dead coral [@Douglas_2003]. 
+Coral bleaching refers to when corals expel their symbiotic algae, called zooxanthellae, leading to the coral turning white. Corals expel their algae when they become stressed (most commonly due to thermal stress) causing the zooxanthellae to release oxygen free radicals that damage coral tissue. Since the corals rely on the zooxanthellae for energy and nutrients, when the zooxanthellae is lost the corals turn white and are referred to as ‘bleached’. If stress conditions such as temperature do not return to normal conditions, zooxanthellae will not return and coral will transition from bleached to dead coral [@Douglas_2003].
 
 A known factor contributing to coral bleaching is sea surface temperature anomalies (SSTA) [@Sully_2019]. The greenhouse effect has increased ocean temperature [@Hughes_2018], as well as intensity and frequency of heat waves [@Kayanne_2017], leading to large-scale thermal stress and numerous corals expelling their zooxanthellae resulting in mass bleaching. Therefore, we expected to find a correlation between bleaching and sea surface temperature anomalies. 
 
@@ -53,7 +51,7 @@ In order to prioritise which reefs we need to allocate conservation resources to
 
 As we wanted to explore all the reefs globally, we extracted reef data containing the bleaching, diversity, SSTA_Frequency_STD, and other metrics from the public dataset taken from the paper ["A global analysis of coral bleaching over the past twodecades"](https://doi.org/10.1038/s41467-019-09238-2) by @Sully_2019. The paper contains coral bleaching events at 3351 sites in 81 countries from 1998 to 2017. The raw data can be found at the [Reef Check website](https://www.reefcheck.org/) or on the GitHub repository for the [Institute for Global Ecology](https://github.com/InstituteForGlobalEcology/Coral-bleaching-a-global-analysis-of-the-past-two-decades).
 
-As there is no current worldwide database for coral rugosity, we used data gathered from [Allen Coral Atlas](https://allencoralatlas.org/atlas/) to build our rugosity dataset. The full dataset was downloaded locally to be processed as the zipped archive was over 13GB. The files extracted contained the geomorphic map data that was in the shape files `geomorphic.gpkg` or `.geojson`. From investigation of the data sets on the map, it looked like the Reef Check dataset (containing a single point of data for each reef) was not as precise as the Allen Coral dataset (containing extensive polygon data for each reef) - hence points not touching some polygons. As such, we decided to keep only the points from the Reef Check dataset that fell within the polygons of Allen Coral Atlas to limit uncertainty. We were interested in the geomorphic data as we found that the rugosity of a reef is associated with its geomorphic type [@Sheppard_1980; @Thornborough_2011; @Kennedy_2021]. On the basis of this association, we created our own rugosity measure (`Low[1]`, `Medium[2]`, `High[3]`) and generated a value for each reef, using the rugosity estimates to investigate whether rugosity might have an impact on our bleaching model. Full extraction method can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/camille_ida.Rmd). 
+As there is no current worldwide database for coral rugosity, we used data gathered from [Allen Coral Atlas](https://allencoralatlas.org/atlas/) to build our rugosity dataset. The full dataset was downloaded locally to be processed as the zipped archive was over 13GB. The files extracted contained the geomorphic map data that was in the shape files `geomorphic.gpkg` or `.geojson`. From investigation of the data sets on the map, it looked like the Reef Check dataset (containing a single point of data for each reef) was not as precise as the Allen Coral dataset (containing extensive polygon data for each reef) - hence points not touching some polygons (see Fig.2). As such, we decided to keep only the points from the Reef Check dataset that fell within the polygons of Allen Coral Atlas to limit uncertainty. We were interested in the geomorphic data as we found that the rugosity of a reef is associated with its geomorphic type [@Sheppard_1980; @Thornborough_2011; @Kennedy_2021]. On the basis of this association, we created our own rugosity measure (`Low[1]`, `Medium[2]`, `High[3]`) and generated a value for each reef, using the rugosity estimates to investigate whether rugosity might have an impact on our bleaching model. Full extraction method can be found [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/camille_ida.Rmd). 
 
 ## Model Development 
 
@@ -67,9 +65,11 @@ As the Reef Check dataset contained other metrics, we decided to see if any othe
 
 **Random Forest** classifies by creating multiple decision trees to create a forest and then chooses the outcome based on which outcome most trees land on.
 
-**SVM** classifies by dividing classes via an optimal hyper plane and using data points closest to the hyperplane as support vectors to measure the direction and orientation of the hyper plane. 
+**SVM** classifies by dividing classes via an optimal hyper plane and using data points closest to the hyper plane as support vectors to measure the direction and orientation of the hyper plane. 
 
-For each model we used cross-validation (CV) setting the number of folds to 10 and then repeating 50 times. By using the repeated CV technique, we can obtain a more accurate mean estimate as we are using every part of the data as test and training data. We also compared sensitivity (true positive rate) and specificity (true negative rate), model stability by using the models mean standard deviation (sd), as well as scalability, comparing model running times. We then repeated this process with all the variables except rugosity, to measure if our rugosity measurement was significant. Once our model was selected, we then went on to hyperparameter tuning to ensure the best results could be achieved.  
+For each model we used cross-validation (CV) setting the number of folds to 10 and then repeating 50 times. By using the repeated CV technique, we can obtain a more accurate mean estimate as we are using every part of the data as test and training data.Full method can be seen in Fig.2. We also compared sensitivity (true positive rate) and specificity (true negative rate), model stability by using the models mean standard deviation (sd), as well as scalability, comparing model running times. We then repeated this process with all the variables except rugosity, to measure if our rugosity measurement was significant. Once our model was selected, we then went on to hyperparameter tuning to ensure the best results could be achieved. Full model method can be found on our GitHub page [here](https://github.com/camille-alice/MARS_DATA3888_reefC4/blob/main/GroupAssignment_pat.Rmd).
+
+![Figure 2. Method of repeated cross validation, and rugoisty estimate](Data/reefC4_fig2.png)
 
 Our Shiny app was built using the RShiny [htmlTemplate](https://shiny.rstudio.com/articles/templates.html) package and deployed via [shinyapp](https://www.shinyapps.io/). The front-end design used the Bootstrap framework for better usability and modularity across a wide range of devices. The app is available [here](https://camille-alice.shinyapps.io/app_reef/). Our main priorities in designing the app were communicability to our target audience, and interactivity. Our target audience were recent high-school leavers who may have an interest in marine science, specifically, coral bleaching. As such, the vocabulary used was targeted at a high-school level and key concepts such as bleaching and rugosity were thoroughly explained. 
 
@@ -91,8 +91,9 @@ model_results = load("Data/model_results.rds")
 ```
 ## Variable Testing of Model Assumptions 
 
-Each variable had a VIF score less than 5, indicating multicollinearity would be unproblematic for the models. We also used a test of independence, with the null hypothesis of rugosity having no association with bleaching and alternative hypothesis of rugosity having association with bleaching. Checking the independent test assumption, every variable needed to have a value greater than 5, hence the assumption was met. A chi-square independent test gave us a p-value of 0.067 which is slightly over 0.05, so we decided to retain the null hypothesis.
-```{r fig2, fig.width=12,fig.height=6,fig.cap="Figure 2. Violin-Boxplot of Model accuracies"}
+Each variable had a VIF score less than 5, indicating multicollinearity would be unproblematic for the models. We also used a test of independence, with the null hypothesis of rugosity having no association with bleaching and alternative hypothesis of rugosity having association with bleaching. Checking the independent test assumption, every variable needed to have a value greater than 5, which all variables did, hence the assumption was met. A chi-square independent test gave us a p-value of 0.067 which is slightly over 0.05, so we decided to retain the null hypothesis.
+
+```{r fig2, fig.width=12,fig.height=6,fig.cap="Figure 3. Violin-Boxplot of Model accuracies"}
 # Fig.2: Violin plot
 # Extracting model accuracy from model_results
 v_data = cbind(cv_50acc5_bin, cv_50acc5_sel, cv_acc50_svm, 
@@ -120,7 +121,7 @@ v_data %>%
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
 ```
 
-As seen above in Fig.2, our Random Forest model had the best accuracy when compared to other models. However, as seen below in Fig.3, the specificity (how well our model is able to predict a true negative bleaching) was not the best, and the sensitivity (true positive) was also quite low. Coupled with the scalability being extremely poor, we decided to use KNN as our final classifier as it had the second highest accuracy and f1-score, and the best run time. 
+As seen above in Fig.3, our Random Forest model had the best accuracy when compared to other models. However, as seen below in Fig.4, the specificity (how well our model is able to predict a true negative bleaching) was not the best at 0.83, and the sensitivity (true positive) was also quite low at 0.52. Coupled with the scalability being extremely poor taking 298.42 seconds to run, we decided to use KNN as our final classifier as it had the second highest accuracy and f1-score, and the best run time. 
 
 ```{r Model Results Table, message=FALSE}
 # Fig.3: Model Results Table
@@ -168,7 +169,23 @@ cf_data_all %>%
   gt(rowname_col = "Type",
     groupname_col = "Model") %>%
    tab_header(title = md("**Model Results**"),
-              subtitle = md("Best performing in **orange** - worst in **dark blue**")) %>%
+              subtitle = md("*Best* performing in **orange** - *worst* in **dark blue**")) %>%
+  tab_style(locations = cells_column_labels(columns = everything()), 
+            style = list(cell_borders(sides = "bottom", weight = px(0.5)),
+                         cell_text(weight = "bold"))) %>% 
+    tab_style(locations = cells_row_groups(), 
+            style = list(cell_borders(sides = "bottom", weight = px(0.5)),
+                         cell_text(weight = "bold"))) %>% 
+  tab_options(column_labels.border.top.width = px(3),
+              column_labels.border.top.color = "transparent",
+              table.border.top.color = "transparent",
+              table.border.bottom.color = "transparent",
+              data_row.padding = px(3),
+              heading.align = "left") %>%
+  cols_width(cf_metrics ~ px(125),
+             c(Type) ~ px(150),
+              c(Scalability) ~ px(125)) %>% 
+  cols_label(Scalability = html("Scalability (secs)")) %>%
   data_color(columns = cf_metrics,
              alpha = 0.7,
              colors = cf_colours,
@@ -177,16 +194,18 @@ cf_data_all %>%
              alpha = 0.7,
              colors = cf_colour_r, 
              autocolor_text = FALSE) %>% 
-  tab_source_note(source_note = md("Figure 3. Table of Model Results comparing Rugosity"))
+  tab_source_note(source_note = md("Figure 4. Table of Model Results comparing Rugosity"))
 ```
 
-We also tuned our k-value for our KNN model by running our model with different k-values and seeing which had the best accuracy. As shown below in Fig.4, our best k-value was k=9 as per indicated by the orange line. 
 
-```{r KNN Hyperparameter Tuning, fig.cap="Figure 4. Plot of Hyper-parameter testing for KNN, with orange line indicating best k-value"}
+
+We also tuned our k-value for our KNN model by running our model with different k-values and seeing which had the best accuracy. As shown below in Fig.5, our best k-value was k=9 as per indicated by the orange line. 
+
+```{r KNN Hyperparameter Tuning, fig.width=12,fig.height=5, fig.cap="Figure 5. Plot of Hyper-parameter testing for KNN, with orange line indicating best k-value"}
 ggplot(knn_fit) + 
   labs(title = "KNN Hyper-parameter tuning", x = "K Value", y = "Accuracy") +
-  geom_point(color="#2ebaae", alpha = 1) +
-  geom_vline(xintercept = 9, color = 'orange') + 
+  geom_point(color="#80cdc4", alpha = 1) +
+  geom_vline(xintercept = 9, color = '#bf4402') + 
   theme_minimal()
 ```
 
@@ -206,11 +225,13 @@ We were able to successfully deploy a Shiny app that educated high-school leaver
 
 # Student Contributions
 
-**Important: As this is a joint project, the nature of each student’s individual contribution must be made clear at the end of the report, in a section titled Student contributions (to place it directly prior to the Reference section). This section should clearly describe who was responsible for generating the data, tuning the machine, performing the processing, writing the code, making observations, deploying the final product and writing/editing the report.  This should take the form of one paragraph of approximately 50 words (and no more than 200 words) summarising the student's contribution. All group members should agree and acknowledge this component as an accurate reflection of each other's individual contributions. This component doesn't contribute to the overall word limit of your report.** 
+As per our [GitHub page](https://github.com/camille-alice/MARS_DATA3888_reefC4) Patrick, Nathan, and Camille all did the initial data exploration and tried different methods of data extraction. Patrick then went on to do the code for the model, while Nathan did the base of Shiny app, and writing the report, and Camille doing the leaflet map, formatting Shiny, and writing the report. Alex, Kathryn, and Daniel all contributed to the literature review and rugosity measurement, as well as helping with observations in the data. 
 
 # References 
 
 <div id="refs"></div>
+
+
 
 **Packages Used:**
 
@@ -220,5 +241,5 @@ We were able to successfully deploy a Shiny app that educated high-school leaver
 
 # Appendix
 
-? add model code here maybe?
+
 
