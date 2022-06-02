@@ -9,7 +9,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="SIDs: 450125625, 490418846, 500354333, 500556144, 500498235" />
+<meta name="author" content="SIDs: 450125625, 490418846, 500354333, 500556144, 500498235, 500558159, 500496518" />
 
 <meta name="date" content="2022-06-01" />
 
@@ -1638,7 +1638,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Reef C4</h1>
 <h4 class="author">SIDs: 450125625, 490418846, 500354333, 500556144,
-500498235</h4>
+500498235, 500558159, 500496518</h4>
 <h4 class="date">2022-06-01</h4>
 
 </div>
@@ -1672,7 +1672,7 @@ significant factor for coral bleaching. We were able to construct a
 rugosity measure based on geomorphic zones and coral types. We found
 that with our current estimate of rugosity, it was not significant. Our
 final model used a KNN classifier that was able to predict bleaching
-with an accuracy of 66%. While we acknowledge this is not a high
+with an accuracy of 67%. While we acknowledge this is not a high
 accuracy, we hope our Shiny app provides a solid background for
 understanding coral bleaching and what rugosity is, and our suggestions
 for future studies are taken on.</p>
@@ -1794,9 +1794,8 @@ our data met the assumptions for each model, performing a variance
 inflation factor (VIF) test for each variable, as well as testing for
 normality and independence, as shown in Fig.1.</p>
 <p><strong>Binomial regression</strong> is very similar to linear
-regression however, instead of predicting numeric output it predicts
-categorical output by weighting differently every independent
-variable.</p>
+regression but predicts a binary output, instead of a numeric output, by
+weighting every independent variable differently.</p>
 <p><strong>KNN</strong> classifies points close together in a dataset
 that are typically similar. It classifies a point class by calculating
 the distance between a test point and all the training points and
@@ -1910,6 +1909,13 @@ was also quite low at 0.52. Coupled with the scalability being extremely
 poor taking 298.42 seconds to run, we decided to use KNN as our final
 classifier as it had the second highest accuracy and f1-score, and the
 best run time.</p>
+<p>The KNN model is the fastest because it computes the distance for
+neighbouring groups, and clusters based on distance, instead of training
+the model as the Naive Bayes and Binomial models need to do. Random
+Forest and Support Vector Machine are the slowest due to having multiple
+prediction vectors having to be calculated, and then used to train the
+model. We believe our best KNN model used a lower k-value (K=9) as the
+higher the K value, the more prone to overfitting the model is.</p>
 <pre class="r"><code># Fig.3: Model Results Table
 # Data extraction: preparing confusion matrix results with in data frame 
 model_names = c(&quot;Binomial&quot;, &quot;K-Nearest Neighbours&quot;, &quot;Naive Bayes&quot;,&quot;Random Forest&quot;, &quot;Support Vector Machine&quot;)
@@ -1981,12 +1987,12 @@ cf_data_all %&gt;%
              colors = cf_colour_r, 
              autocolor_text = FALSE) %&gt;% 
   tab_source_note(source_note = md(&quot;Figure 4. Table of Model Results comparing Rugosity&quot;))</code></pre>
-<div id="sbaaqxmpkb" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="wxnytckffe" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#sbaaqxmpkb .gt_table {
+#wxnytckffe .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -2011,7 +2017,7 @@ cf_data_all %&gt;%
   border-left-color: #D3D3D3;
 }
 
-#sbaaqxmpkb .gt_heading {
+#wxnytckffe .gt_heading {
   background-color: #FFFFFF;
   text-align: left;
   border-bottom-color: #FFFFFF;
@@ -2023,7 +2029,7 @@ cf_data_all %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#sbaaqxmpkb .gt_title {
+#wxnytckffe .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -2035,7 +2041,7 @@ cf_data_all %&gt;%
   border-bottom-width: 0;
 }
 
-#sbaaqxmpkb .gt_subtitle {
+#wxnytckffe .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -2047,13 +2053,13 @@ cf_data_all %&gt;%
   border-top-width: 0;
 }
 
-#sbaaqxmpkb .gt_bottom_border {
+#wxnytckffe .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#sbaaqxmpkb .gt_col_headings {
+#wxnytckffe .gt_col_headings {
   border-top-style: solid;
   border-top-width: 3px;
   border-top-color: rgba(255, 255, 255, 0);
@@ -2068,7 +2074,7 @@ cf_data_all %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#sbaaqxmpkb .gt_col_heading {
+#wxnytckffe .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2088,7 +2094,7 @@ cf_data_all %&gt;%
   overflow-x: hidden;
 }
 
-#sbaaqxmpkb .gt_column_spanner_outer {
+#wxnytckffe .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2100,15 +2106,15 @@ cf_data_all %&gt;%
   padding-right: 4px;
 }
 
-#sbaaqxmpkb .gt_column_spanner_outer:first-child {
+#wxnytckffe .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#sbaaqxmpkb .gt_column_spanner_outer:last-child {
+#wxnytckffe .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#sbaaqxmpkb .gt_column_spanner {
+#wxnytckffe .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -2120,7 +2126,7 @@ cf_data_all %&gt;%
   width: 100%;
 }
 
-#sbaaqxmpkb .gt_group_heading {
+#wxnytckffe .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2145,7 +2151,7 @@ cf_data_all %&gt;%
   vertical-align: middle;
 }
 
-#sbaaqxmpkb .gt_empty_group_heading {
+#wxnytckffe .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -2160,15 +2166,15 @@ cf_data_all %&gt;%
   vertical-align: middle;
 }
 
-#sbaaqxmpkb .gt_from_md > :first-child {
+#wxnytckffe .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#sbaaqxmpkb .gt_from_md > :last-child {
+#wxnytckffe .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#sbaaqxmpkb .gt_row {
+#wxnytckffe .gt_row {
   padding-top: 3px;
   padding-bottom: 3px;
   padding-left: 5px;
@@ -2187,7 +2193,7 @@ cf_data_all %&gt;%
   overflow-x: hidden;
 }
 
-#sbaaqxmpkb .gt_stub {
+#wxnytckffe .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2200,7 +2206,7 @@ cf_data_all %&gt;%
   padding-right: 5px;
 }
 
-#sbaaqxmpkb .gt_stub_row_group {
+#wxnytckffe .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2214,11 +2220,11 @@ cf_data_all %&gt;%
   vertical-align: top;
 }
 
-#sbaaqxmpkb .gt_row_group_first td {
+#wxnytckffe .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#sbaaqxmpkb .gt_summary_row {
+#wxnytckffe .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2228,16 +2234,16 @@ cf_data_all %&gt;%
   padding-right: 5px;
 }
 
-#sbaaqxmpkb .gt_first_summary_row {
+#wxnytckffe .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#sbaaqxmpkb .gt_first_summary_row.thick {
+#wxnytckffe .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#sbaaqxmpkb .gt_last_summary_row {
+#wxnytckffe .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2247,7 +2253,7 @@ cf_data_all %&gt;%
   border-bottom-color: #D3D3D3;
 }
 
-#sbaaqxmpkb .gt_grand_summary_row {
+#wxnytckffe .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2257,7 +2263,7 @@ cf_data_all %&gt;%
   padding-right: 5px;
 }
 
-#sbaaqxmpkb .gt_first_grand_summary_row {
+#wxnytckffe .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2267,11 +2273,11 @@ cf_data_all %&gt;%
   border-top-color: #D3D3D3;
 }
 
-#sbaaqxmpkb .gt_striped {
+#wxnytckffe .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#sbaaqxmpkb .gt_table_body {
+#wxnytckffe .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2280,7 +2286,7 @@ cf_data_all %&gt;%
   border-bottom-color: #D3D3D3;
 }
 
-#sbaaqxmpkb .gt_footnotes {
+#wxnytckffe .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2294,7 +2300,7 @@ cf_data_all %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#sbaaqxmpkb .gt_footnote {
+#wxnytckffe .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -2303,7 +2309,7 @@ cf_data_all %&gt;%
   padding-right: 5px;
 }
 
-#sbaaqxmpkb .gt_sourcenotes {
+#wxnytckffe .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2317,7 +2323,7 @@ cf_data_all %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#sbaaqxmpkb .gt_sourcenote {
+#wxnytckffe .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -2325,36 +2331,36 @@ cf_data_all %&gt;%
   padding-right: 5px;
 }
 
-#sbaaqxmpkb .gt_left {
+#wxnytckffe .gt_left {
   text-align: left;
 }
 
-#sbaaqxmpkb .gt_center {
+#wxnytckffe .gt_center {
   text-align: center;
 }
 
-#sbaaqxmpkb .gt_right {
+#wxnytckffe .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#sbaaqxmpkb .gt_font_normal {
+#wxnytckffe .gt_font_normal {
   font-weight: normal;
 }
 
-#sbaaqxmpkb .gt_font_bold {
+#wxnytckffe .gt_font_bold {
   font-weight: bold;
 }
 
-#sbaaqxmpkb .gt_font_italic {
+#wxnytckffe .gt_font_italic {
   font-style: italic;
 }
 
-#sbaaqxmpkb .gt_super {
+#wxnytckffe .gt_super {
   font-size: 65%;
 }
 
-#sbaaqxmpkb .gt_two_val_uncert {
+#wxnytckffe .gt_two_val_uncert {
   display: inline-block;
   line-height: 1em;
   text-align: right;
@@ -2363,31 +2369,31 @@ cf_data_all %&gt;%
   margin-left: 0.1em;
 }
 
-#sbaaqxmpkb .gt_footnote_marks {
+#wxnytckffe .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#sbaaqxmpkb .gt_asterisk {
+#wxnytckffe .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#sbaaqxmpkb .gt_slash_mark {
+#wxnytckffe .gt_slash_mark {
   font-size: 0.7em;
   line-height: 0.7em;
   vertical-align: 0.15em;
 }
 
-#sbaaqxmpkb .gt_fraction_numerator {
+#wxnytckffe .gt_fraction_numerator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: 0.45em;
 }
 
-#sbaaqxmpkb .gt_fraction_denominator {
+#wxnytckffe .gt_fraction_denominator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: -0.05em;
@@ -2528,48 +2534,58 @@ indicating best k-value
 variables Bleaching, SSTA Frequency Standard Deviation, Diversity,
 Depth. We also included the correlation between these variables as well
 as normality assumptions for transparency. Furthermore, a correlation
-between those variables and Rugosity was added in the form of
-violin-boxplots. These plots and variables were chosen as they were
-utilised in our models, so we wanted to allow our audience an
-opportunity to explore the data themselves. Moreover, we included the
-results from our model testing for transparency and to explain why we
-decided to select the KNN model. Finally, we added an interface where
-the user could select the value of variables in order to make a
-prediction based on our model. Each section was accompanied with a
-thorough explanation based on the variables the user selected to ensure
-our target audience was reached.</p>
+between those variables and Rugosity was added in the form of violin
+plots. These plots and variables were chosen as they were utilised in
+our models, so we wanted to allow our audience an opportunity to explore
+the data themselves. Moreover, we included the results from our model
+testing for transparency and to explain why we decided to select the KNN
+model. Finally, we added an interface where the user could select the
+value of variables in order to make a prediction based on our model.
+Each section was accompanied with a thorough explanation based on the
+variables the user selected to ensure our target audience was
+reached.</p>
 </div>
 </div>
 <div id="discussion" class="section level1" number="5">
 <h1><span class="header-section-number">5</span> Discussion</h1>
-<p>KNN is fastest due to computing the distance for neighbouring groups,
-and clustering based on distance, rather than training the model as
-Naive Bayes and Binomial models need to do. Random Forest and Support
-Vector Machine are the slowest due to having multiple prediction vectors
-having to be calculated, and then used to train the model. We believe
-our best KNN model used a lower k-value (K=9) as the higher the K value,
-the more prone to overfitting the model is.</p>
 <p>While the deployment of the Shiny app was successful, our best model
 was still only able to predict coral bleaching with only 67% accuracy.
-We believe this is due to the multiple factors contributing to coral
-bleaching, making it extremely difficult to predict. As shown in our
-model results in Fig.4, our models were only able to predict bleaching
-with a maximum of 72% accuracy. This was marginally better than our KNN
-accuracy, however with a significantly higher run time. This is
-indicative of how difficult it is to predict coral bleaching with a high
-accuracy with our dataset. While our rugosity measurement was not
-significant in our model, we attribute this to our measure being
-rudimentary. Another concern about the Shiny app is future scalability.
-Our app currently does not utilise any caching and instead relies on
-reading and running some data at start-up. The interactive plots and
-prediction also require rerunning each time a change is made, so
-scalability is a significant concern in the future. For the purposes of
-this project, there were no issues as our data was relatively small. Due
-to our usage of the Bootstrap framework in designing the front-end, our
-app is well-modulated and new features can be easily added in the
-future. For example, if new research or new data is discovered, or user
-feedback suggests that a particular experience can be improved, then our
-app can be easily updated to include these features.</p>
+This may be because bleaching is influenced by so many factors, but also
+because these factors influence coral bleaching in different reef
+systems in different ways <span class="citation">(<a href="#ref-Pernice_2019" role="doc-biblioref">Pernice &amp; Hughes,
+2019</a>; <a href="#ref-vanHooidonk_2009" role="doc-biblioref">Van
+Hooidonk &amp; Huber, 2009</a>)</span>, meaning that a more-fine
+grained, location-specific approach might be needed to model coral
+bleaching more accurately. As shown in our model results in Fig.4, our
+models were only able to predict bleaching with a maximum of 72%
+accuracy. This was marginally better than our KNN accuracy, however with
+a significantly higher run time. This is indicative of how difficult it
+is to predict coral bleaching with a high accuracy with our dataset.</p>
+<p>Although our rugosity measurement was not significant in our model,
+this does not necessarily mean that rugosity is not relevant in the
+prediction of coral bleaching. This is because we assigned each reef
+only one of three rugosity levels based on the reef’s geomorphic type.
+Although this approach using geomorphic type as a proxy for rugosity
+might yield a reasonable estimate of relative rugosity grounded in
+literature <span class="citation">(<a href="#ref-Kennedy_2021" role="doc-biblioref">Kennedy et al., 2021</a>; <a href="#ref-Sheppard_1980" role="doc-biblioref">Sheppard, 1980</a>; <a href="#ref-Thornborough_2011" role="doc-biblioref">Thornborough &amp;
+Davies, 2011</a>)</span>, it is still very crude. Universal rugosity
+data are needed to verify whether rugosity is not, in fact, a predictor
+of coral bleaching. However, research suggests that the other (Reef
+Check) data are reliable, having high accuracy and only minor observer-
+and deployment-related biases, the effect of which is diminished by the
+data’s repeated measures that strengthen confidence when assessing
+change over time <span class="citation">(<a href="#ref-Done_2017" role="doc-biblioref">Done et al., 2017</a>)</span>.</p>
+<p>Another concern about the Shiny app is future scalability. Our app
+currently does not utilise any caching and instead relies on reading and
+running some data at start-up. The interactive plots and prediction also
+require rerunning each time a change is made, so scalability is a
+significant concern in the future. For the purposes of this project,
+there were no issues as our data was relatively small. Due to our usage
+of the Bootstrap framework in designing the front-end, our app is
+well-modulated and new features can be easily added in the future. For
+example, if new research or new data is discovered, or user feedback
+suggests that a particular experience can be improved, then our app can
+be easily updated to include these features.</p>
 </div>
 <div id="conclusion" class="section level1" number="6">
 <h1><span class="header-section-number">6</span> Conclusion</h1>
@@ -2581,11 +2597,11 @@ more robust measure of rugosity is needed for measurement. We would also
 like to highlight the need for a standardised rugosity measurement, as
 currently the chain method is extremely time consuming and ineffective
 on a large scale. While a KNN model could potentially be used in future
-studies to predict bleaching, we believe more attributes may need to be
-added to improve on accuracy of classifying. Another area of future
-improvement could be runtime as we only worked with a relatively small
-dataset, as more data is collected and added, this will impact on the
-runtime.</p>
+studies to predict bleaching, we believe more attributes or a more
+location-specific approach may be needed to improve classification
+accuracy. Another area of future improvement could be runtime as we only
+worked with a relatively small dataset, as more data is collected and
+added, this will impact on the runtime.</p>
 </div>
 <div id="student-contributions" class="section level1" number="7">
 <h1><span class="header-section-number">7</span> Student
@@ -2594,10 +2610,11 @@ Contributions</h1>
 page</a> Patrick, Nathan, and Camille all did the initial data
 exploration and tried different methods of data extraction. Patrick then
 went on to do the code for the model, while Nathan did the base of Shiny
-app, and writing the report, and Camille doing the leaflet map,
-formatting Shiny, and writing the report. Alex, Kathryn, and Daniel all
-contributed to the literature review and rugosity measurement, as well
-as helping with observations in the data.</p>
+app, and writing the report, Camille did the leaflet map, formatting
+Shiny, and writing the report, and Josh helped writing the report the
+discussion. Alex, Kathryn, and Daniel all contributed to the literature
+review and rugosity measurement, as well as helping with observations in
+the data.</p>
 </div>
 <div id="references" class="section level1" number="8">
 <h1><span class="header-section-number">8</span> References</h1>
@@ -2606,6 +2623,13 @@ as helping with observations in the data.</p>
 Cole, A. J., Pratchett, M. S., &amp; Jones, G. P. (2008). Diversity and
 functional importance of coral-feeding fishes on tropical coral reefs.
 <em>Fish and Fisheries</em>, <em>9</em>(3), 286–307.
+</div>
+<div id="ref-Done_2017" class="csl-entry">
+Done, T., Roelfsema, C., Harvey, A., Schuller, L., Hill, J., Schläppy,
+M.-L., Lea, A., Bauer-Civiello, A., &amp; Loder, J. (2017). Reliability
+and utility of citizen science reef monitoring data collected by reef
+check australia, 2002–2015. <em>Marine Pollution Bulletin</em>,
+<em>117</em>(1-2), 148–155.
 </div>
 <div id="ref-Douglas_2003" class="csl-entry">
 Douglas, A. (2003). Coral bleaching—-how and why? <em>Marine Pollution
@@ -2669,6 +2693,10 @@ Reports</em>, <em>9</em>(1), 1–12.
 NOAA. (2019). Coral reef ecosystems. In <em>National Oceanic and
 Atmospheric Administration</em>. U.S. Department of Commerce. <a href="https://www.noaa.gov/education/resource-collections/marine-life/coral-reef-ecosystems#:~:text=Coral%20reefs%20protect%20coastlines%20from,food%2C%20income%2C%20and%20protection.">https://www.noaa.gov/education/resource-collections/marine-life/coral-reef-ecosystems#:~:text=Coral%20reefs%20protect%20coastlines%20from,food%2C%20income%2C%20and%20protection.</a>
 </div>
+<div id="ref-Pernice_2019" class="csl-entry">
+Pernice, M., &amp; Hughes, D. J. (2019). Forecasting global coral
+bleaching. <em>Nature Climate Change</em>, <em>9</em>(11), 803–804.
+</div>
 <div id="ref-Sheppard_1980" class="csl-entry">
 Sheppard, C. (1980). Coral cover, zonation and diversity on reef slopes
 of chagos atolls, and population structures of the major species.
@@ -2683,6 +2711,11 @@ decades. <em>Nature Communications</em>, <em>10</em>(1), 1–5.
 Thornborough, K. J., &amp; Davies, P. J. (2011). Reef flats. In D.
 Hopley (Ed.), <em>Encyclopedia of modern coral reefs: Structure, form
 and process</em> (pp. 869–876). Springer Netherlands. <a href="https://doi.org/10.1007/978-90-481-2639-2_135">https://doi.org/10.1007/978-90-481-2639-2_135</a>
+</div>
+<div id="ref-vanHooidonk_2009" class="csl-entry">
+Van Hooidonk, R., &amp; Huber, M. (2009). Quantifying the quality of
+coral bleaching predictions. <em>Coral Reefs</em>, <em>28</em>(3),
+579–587.
 </div>
 <div id="ref-West_2003" class="csl-entry">
 West, J. M., &amp; Salm, R. V. (2003). Resistance and resilience to
@@ -2702,9 +2735,61 @@ coral reef bleaching cycle and related sources of coral mortality.
 ## [11] &quot;tidyr&quot;       &quot;tibble&quot;      &quot;ggplot2&quot;     &quot;tidyverse&quot;   &quot;stats&quot;      
 ## [16] &quot;graphics&quot;    &quot;grDevices&quot;   &quot;utils&quot;       &quot;datasets&quot;    &quot;methods&quot;    
 ## [21] &quot;base&quot;</code></pre>
-</div>
-<div id="appendix" class="section level1" number="9">
-<h1><span class="header-section-number">9</span> Appendix</h1>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 4.1.2 (2021-11-01)
+## Platform: x86_64-apple-darwin17.0 (64-bit)
+## Running under: macOS Big Sur 10.16
+## 
+## Matrix products: default
+## BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
+## LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
+## 
+## locale:
+## [1] en_AU.UTF-8/en_AU.UTF-8/en_AU.UTF-8/C/en_AU.UTF-8/en_AU.UTF-8
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+##  [1] gt_0.6.0          viridis_0.6.2     viridisLite_0.4.0 maps_3.4.0       
+##  [5] sf_1.0-7          forcats_0.5.1     stringr_1.4.0     dplyr_1.0.8      
+##  [9] purrr_0.3.4       readr_2.1.2       tidyr_1.2.0       tibble_3.1.6     
+## [13] ggplot2_3.3.5     tidyverse_1.3.1  
+## 
+## loaded via a namespace (and not attached):
+##  [1] colorspace_2.0-3     ellipsis_0.3.2       class_7.3-20        
+##  [4] fs_1.5.2             rstudioapi_0.13      proxy_0.4-26        
+##  [7] listenv_0.8.0        farver_2.1.0         prodlim_2019.11.13  
+## [10] fansi_1.0.2          lubridate_1.8.0      xml2_1.3.3          
+## [13] codetools_0.2-18     splines_4.1.2        knitr_1.37          
+## [16] jsonlite_1.8.0       pROC_1.18.0          caret_6.0-92        
+## [19] broom_0.7.12         dbplyr_2.1.1         compiler_4.1.2      
+## [22] httr_1.4.2           backports_1.4.1      assertthat_0.2.1    
+## [25] Matrix_1.4-0         fastmap_1.1.0        cli_3.2.0           
+## [28] htmltools_0.5.2      tools_4.1.2          gtable_0.3.0        
+## [31] glue_1.6.2           reshape2_1.4.4       Rcpp_1.0.8          
+## [34] cellranger_1.1.0     jquerylib_0.1.4      vctrs_0.3.8         
+## [37] nlme_3.1-155         iterators_1.0.14     timeDate_3043.102   
+## [40] gower_1.0.0          xfun_0.30            globals_0.14.0      
+## [43] rvest_1.0.2          lifecycle_1.0.1      future_1.24.0       
+## [46] MASS_7.3-55          scales_1.2.0         ipred_0.9-12        
+## [49] hms_1.1.1            parallel_4.1.2       yaml_2.3.5          
+## [52] gridExtra_2.3        sass_0.4.0           rpart_4.1.16        
+## [55] stringi_1.7.6        highr_0.9            foreach_1.5.2       
+## [58] e1071_1.7-9          checkmate_2.1.0      hardhat_0.2.0       
+## [61] lava_1.6.10          commonmark_1.7       rlang_1.0.2         
+## [64] pkgconfig_2.0.3      evaluate_0.15        lattice_0.20-45     
+## [67] recipes_0.2.0        labeling_0.4.2       tidyselect_1.1.2    
+## [70] parallelly_1.30.0    plyr_1.8.6           magrittr_2.0.2      
+## [73] R6_2.5.1             generics_0.1.2       DBI_1.1.2           
+## [76] pillar_1.7.0         haven_2.4.3          withr_2.5.0         
+## [79] units_0.8-0          survival_3.3-1       nnet_7.3-17         
+## [82] future.apply_1.9.0   modelr_0.1.8         crayon_1.5.0        
+## [85] KernSmooth_2.23-20   utf8_1.2.2           tzdb_0.2.0          
+## [88] rmarkdown_2.12       grid_4.1.2           readxl_1.3.1        
+## [91] data.table_1.14.2    ModelMetrics_1.2.2.2 reprex_2.0.1        
+## [94] digest_0.6.29        classInt_0.4-3       stats4_4.1.2        
+## [97] munsell_0.5.0        bslib_0.3.1</code></pre>
 </div>
 
 

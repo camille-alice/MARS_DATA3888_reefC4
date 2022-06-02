@@ -1,6 +1,6 @@
 ---
 title: "Reef C4"
-author: "SIDs: 450125625, 490418846, 500354333, 500556144, 500498235, 500558159"
+author: "SIDs: 450125625, 490418846, 500354333, 500556144, 500498235, 500558159, 500496518"
 date: '2022-06-01'
 output: 
   html_document:
@@ -28,7 +28,7 @@ library(gt)
 
 # Executive summary
 
-Corals are an extremely important part of the reef ecosystem, not only providing essential habitat and nutrients to the sea-life that inhabit reefs [@Cole_2008], but also providing protection for coastlines [@Harris_2018], and contributing to a multi-billion dollar industry that over half a billion people rely on [@NOAA_2019]. However, coral bleaching events are occurring more frequently, at stronger intensities, and are having significant ramifications for the mortality of coral reefs [@Williams_1990; @Hoegh_Guldberg_2007]. Climate change is leading to more profound changes in the physical ocean environment which, in turn, leads to these mass bleaching events [@Douglas_2003]. This study aimed to investigate the factors that contribute to coral bleaching and present them in an interactive app that was aimed at high-school leavers to educate them on the complexity of predicting coral bleaching, as well as visualize the areas that are most susceptible to coral bleaching. We aimed to test different models that could potentially help predict bleaching, testing classifiers as well as linear models. We used a repeated cross validation technique, as well as multiple model metrics to determine our final model. We focused on rugosity as a variable, as it has yet to be extensively researched, to determine if it was a significant factor for coral bleaching. We were able to construct a rugosity measure based on geomorphic zones and coral types. We found that with our current estimate of rugosity, it was not significant. Our final model used a KNN classifier that was able to predict bleaching with an accuracy of 66%. While we acknowledge this is not a high accuracy, we hope our Shiny app provides a solid background for understanding coral bleaching and what rugosity is, and our suggestions for future studies are taken on. 
+Corals are an extremely important part of the reef ecosystem, not only providing essential habitat and nutrients to the sea-life that inhabit reefs [@Cole_2008], but also providing protection for coastlines [@Harris_2018], and contributing to a multi-billion dollar industry that over half a billion people rely on [@NOAA_2019]. However, coral bleaching events are occurring more frequently, at stronger intensities, and are having significant ramifications for the mortality of coral reefs [@Williams_1990; @Hoegh_Guldberg_2007]. Climate change is leading to more profound changes in the physical ocean environment which, in turn, leads to these mass bleaching events [@Douglas_2003]. This study aimed to investigate the factors that contribute to coral bleaching and present them in an interactive app that was aimed at high-school leavers to educate them on the complexity of predicting coral bleaching, as well as visualize the areas that are most susceptible to coral bleaching. We aimed to test different models that could potentially help predict bleaching, testing classifiers as well as linear models. We used a repeated cross validation technique, as well as multiple model metrics to determine our final model. We focused on rugosity as a variable, as it has yet to be extensively researched, to determine if it was a significant factor for coral bleaching. We were able to construct a rugosity measure based on geomorphic zones and coral types. We found that with our current estimate of rugosity, it was not significant. Our final model used a KNN classifier that was able to predict bleaching with an accuracy of 67%. While we acknowledge this is not a high accuracy, we hope our Shiny app provides a solid background for understanding coral bleaching and what rugosity is, and our suggestions for future studies are taken on. 
 
 # Aim and Background 
 
@@ -217,7 +217,7 @@ The app included an interactive map that displayed the value of the variables Bl
 
 # Discussion 
 
-While the deployment of the Shiny app was successful, our best model was still only able to predict coral bleaching with only 67% accuracy. This may be because bleaching is influenced by so many factors, but also because these factors influence coral bleaching in different reef systems in different ways [@Penice_2019; @vanHooidonk_2009], meaning that a more-fine grained, location-specific approach might be needed to model coral bleaching more accurately. As shown in our model results in Fig.4, our models were only able to predict bleaching with a maximum of 72% accuracy. This was marginally better than our KNN accuracy, however with a significantly higher run time. This is indicative of how difficult it is to predict coral bleaching with a high accuracy with our dataset. 
+While the deployment of the Shiny app was successful, our best model was still only able to predict coral bleaching with only 67% accuracy. This may be because bleaching is influenced by so many factors, but also because these factors influence coral bleaching in different reef systems in different ways [@Pernice_2019; @vanHooidonk_2009], meaning that a more-fine grained, location-specific approach might be needed to model coral bleaching more accurately. As shown in our model results in Fig.4, our models were only able to predict bleaching with a maximum of 72% accuracy. This was marginally better than our KNN accuracy, however with a significantly higher run time. This is indicative of how difficult it is to predict coral bleaching with a high accuracy with our dataset. 
 
 Although our rugosity measurement was not significant in our model, this does not necessarily mean that rugosity is not relevant in the prediction of coral bleaching. This is because we assigned each reef only one of three rugosity levels based on the reef's geomorphic type. Although this approach using geomorphic type as a proxy for rugosity might yield a reasonable estimate of relative rugosity grounded in literature [@Sheppard_1980; @Thornborough_2011; @Kennedy_2021], it is still very crude. Universal rugosity data are needed to verify whether rugosity is not, in fact, a predictor of coral bleaching. However, research suggests that the other (Reef Check) data are reliable, having high accuracy and only minor observer- and deployment-related biases, the effect of which is diminished by the data's repeated measures that strengthen confidence when assessing change over time [@Done_2017].
 
@@ -230,7 +230,7 @@ We were able to successfully deploy a Shiny app that educated high-school leaver
 
 # Student Contributions
 
-As per our [GitHub page](https://github.com/camille-alice/MARS_DATA3888_reefC4) Patrick, Nathan, and Camille all did the initial data exploration and tried different methods of data extraction. Patrick then went on to do the code for the model, while Nathan did the base of Shiny app, and writing the report, Camille did the leaflet map, formatting Shiny, and writing the report, and Josh assisted with modelling and writing the report. Alex, Kathryn, and Daniel all contributed to the literature review and rugosity measurement, as well as helping with observations in the data. 
+As per our [GitHub page](https://github.com/camille-alice/MARS_DATA3888_reefC4) Patrick, Nathan, and Camille all did the initial data exploration and tried different methods of data extraction. Patrick then went on to do the code for the model, while Nathan did the base of Shiny app, and writing the report, Camille did the leaflet map, formatting Shiny, and writing the report, and Josh helped writing the report the discussion. Alex, Kathryn, and Daniel all contributed to the literature review and rugosity measurement, as well as helping with observations in the data. 
 
 # References 
 
@@ -242,9 +242,9 @@ As per our [GitHub page](https://github.com/camille-alice/MARS_DATA3888_reefC4) 
 
 ```{r Libraries Used}
 (.packages())
+sessionInfo()
 ```
 
-# Appendix
 
 
 
